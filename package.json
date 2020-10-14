@@ -1,0 +1,9 @@
+{
+  "name": "smalluniverse",
+  "version": "0.0.1",
+  "description": "A web framework for small universal (client+server) apps",
+  "main": "index.js",
+  "repository": "https://github.com/jasononeil/smalluniverse",
+  "author": "Jason O'Neil",
+  "license": "MIT"
+}
