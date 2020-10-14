@@ -5,5 +5,8 @@
   "main": "index.js",
   "repository": "https://github.com/jasononeil/smalluniverse",
   "author": "Jason O'Neil",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "lix": "^15.9.1"
+  }
 }
