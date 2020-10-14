@@ -6,6 +6,9 @@
   "repository": "https://github.com/jasononeil/smalluniverse",
   "author": "Jason O'Neil",
   "license": "MIT",
+  "scripts": {
+    "build": "haxe build.hxml"
+  },
   "dependencies": {
     "lix": "^15.9.1"
   }
