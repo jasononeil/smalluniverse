@@ -1,0 +1,5 @@
+-cp src
+-cp example
+--macro nullSafety("smalluniverse", Strict)
+--macro nullSafety("mealplanner", Strict)
+--run mealplanner.App

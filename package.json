@@ -7,7 +7,8 @@
   "author": "Jason O'Neil",
   "license": "MIT",
   "scripts": {
-    "build": "haxe build.hxml"
+    "build": "haxe build.hxml",
+    "example:build": "haxe example.hxml"
   },
   "dependencies": {
     "lix": "^15.9.1"
