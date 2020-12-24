@@ -7,7 +7,7 @@
   "author": "Jason O'Neil",
   "license": "MIT",
   "scripts": {
-    "build": "haxe build.hxml",
+    "test": "haxe test.hxml && node build/test.js",
     "example:build": "haxe example.hxml"
   },
   "dependencies": {

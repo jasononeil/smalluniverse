@@ -1,0 +1,7 @@
+-cp src
+-cp test
+-js build/test.js
+-lib tink_unittest
+-lib hxnodejs
+--main Test
+--macro nullSafety("smalluniverse", Strict)
