@@ -41,10 +41,52 @@ interface Component<Props, State, InnerAction, OuterAction> {
 	function update(currentState:State, action:InnerAction):{newState:State, outerAction:Option<OuterAction>}
 }
 
-enum Html<Action> {
-	Element(tag:String, attrs:Array<HtmlAttribute<Action>>, children:Array<Html<Action>>);
+abstract Html<Action>(HtmlType<Action>) from HtmlType<Action> to HtmlType<Action> {
+	@:from public static function fromString<T>(str:String):Html<T> {
+		return Text(str);
+	}
+
+	@:from public static function fromArray<T>(nodes:Array<Html<T>>):Html<T> {
+		return Fragment(nodes);
+	}
+
+	public var length(get, never):Int;
+	public var type(get, never):HtmlType<Action>;
+
+	public function iterator():Iterator<Html<Action>> {
+		return switch this {
+			case Fragment(nodes):
+				return nodes.iterator();
+			case Text(""):
+				// Treat an empty string as void
+				return [].iterator();
+			default:
+				return [this].iterator();
+		}
+	}
+
+	function get_length():Int {
+		return switch this {
+			case Fragment(nodes):
+				return nodes.length;
+			case Text(""):
+				// Treat an empty string as void
+				return 0;
+			default:
+				return 1;
+		}
+	}
+
+	function get_type():HtmlType<Action> {
+		return this;
+	}
+}
+
+enum HtmlType<Action> {
+	Element(tag:String, attrs:Array<HtmlAttribute<Action>>, children:Html<Action>);
 	Text(text:String);
 	Comment(text:String);
+	Fragment(nodes:Array<Html<Action>>);
 	// TODO: Component
 }
 
@@ -57,11 +99,13 @@ enum HtmlAttribute<Action> {
 function mapHtml<InnerAction, OuterAction>(html:Html<InnerAction>, convert:InnerAction->Option<OuterAction>):Html<OuterAction> {
 	switch html {
 		case Element(tag, attrs, children):
-			return Element(tag, attrs.map(a -> mapAttr(a, convert)), children.map(c -> mapHtml(c, convert)));
+			return Element(tag, attrs.map(a -> mapAttr(a, convert)), mapHtml(children, convert));
 		case Text(text):
 			return Text(text);
 		case Comment(text):
 			return Comment(text);
+		case Fragment(nodes):
+			return Fragment(nodes.map(n -> mapHtml(n, convert)));
 	}
 }
 
