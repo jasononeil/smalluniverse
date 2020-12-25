@@ -5,10 +5,12 @@ import mealplanner.pages.MealPage;
 import mealplanner.pages.ShoppingPage;
 import mealplanner.pages.WeeklyPlanPage;
 import mealplanner.pages.HomePage;
+import smalluniverse.servers.NodeJs;
 import haxe.ds.Option;
 
 function main() {
 	trace("My meal plan shopping list");
+	start(new AppRoutes());
 }
 
 class AppRoutes implements Router {
@@ -18,6 +20,8 @@ class AppRoutes implements Router {
 		{pathname: "/weekly-plan", page: WeeklyPlanPage, params: {}},
 		{pathname: "/shopping", page: ShoppingPage, params: {}},
 	];
+
+	public function new() {}
 
 	public function routeToUri<PageAction, PageParams>(page, params) {
 		for (route in routes) {

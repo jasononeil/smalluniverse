@@ -1,5 +1,7 @@
 -cp src
 -cp example
+-lib hxnodejs
 --macro nullSafety("smalluniverse", Strict)
 --macro nullSafety("mealplanner", Strict)
---run mealplanner.App
+-js build/server.js
+--main mealplanner.App

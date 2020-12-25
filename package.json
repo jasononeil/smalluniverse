@@ -7,8 +7,12 @@
   "author": "Jason O'Neil",
   "license": "MIT",
   "scripts": {
-    "test": "haxe test.hxml && node build/test.js",
-    "example:build": "haxe example.hxml"
+    "test": "yarn -s test:build && yarn -s test:run",
+    "test:build": "haxe test.hxml",
+    "test:run": "node build/test.js",
+    "example": "yarn -s example:build && yarn -s example:start",
+    "example:build": "haxe example.hxml",
+    "example:start": "node build/server.js"
   },
   "dependencies": {
     "lix": "^15.9.1"
