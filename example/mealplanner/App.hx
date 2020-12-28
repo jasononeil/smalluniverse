@@ -14,30 +14,40 @@ function main() {
 }
 
 class AppRoutes implements Router {
-	var routes:Array<{pathname:String, page:Page<Dynamic, Dynamic, Dynamic>, params:Dynamic}> = [
-		{pathname: "/", page: HomePage, params: {}},
-		{pathname: "/meal", page: MealPage, params: {}},
-		{pathname: "/weekly-plan", page: WeeklyPlanPage, params: {}},
-		{pathname: "/shopping", page: ShoppingPage, params: {}},
-	];
-
 	public function new() {}
 
 	public function routeToUri<PageAction, PageParams>(page, params) {
-		for (route in routes) {
-			if (Type.enumEq(route.page, page)) {
-				return Some(route.pathname);
-			}
+		return switch page {
+			case HomePage:
+				Some("/");
+			case MealPage:
+				Some("meal");
+			case WeeklyPlanPage:
+				Some("weekly-plan");
+			case ShoppingPage:
+				Some("/shopping");
+			default:
+				None;
 		}
-		return None;
 	}
 
-	public function uriToRoute<PageParams>(uri) {
-		for (route in routes) {
-			if (route.pathname == uri) {
-				return Some({page: route.page, params: route.params});
-			}
+	public function uriToRoute<PageParams>(uri:String) {
+		page:Page<Dynamic, Dynamic, Dynamic>, params:Dynamic
+	} {
+
+		final path = uri.split("?")[0];
+		final parts = path.split("/").filter(s -> s != "");
+		return switch parts {
+			case []:
+				Some({page: HomePage, params: {}});
+			case ["meal"]:
+				Some({page: MealPage, params: {}});
+			case ["weekly-plan"]:
+				Some({page: WeeklyPlanPage, params: {}});
+			case ["shopping"]:
+				Some({page: ShoppingPage, params: {}});
+			default:
+				None;
 		}
-		return None;
 	}
 }
