@@ -1,7 +1,8 @@
 package mealplanner.pages;
 
 import smalluniverse.SmallUniverse;
-import smalluniverse.DOM;
+import mealplanner.ui.Layout;
+import mealplanner.ui.SiteHeader;
 
 final WeeklyPlanPage = Page(new WeeklyPlanView(), new WeeklyPlanApi());
 typedef WeeklyPlanParams = {}
@@ -11,7 +12,7 @@ class WeeklyPlanView implements PageView<AppAction, WeeklyPlanData> {
 	public function new() {}
 
 	public function render(data:WeeklyPlanData) {
-		return h1([], [text("My weekly plan!")]);
+		return Layout(SiteHeader('Weekly plan'), ["my weekly plan"]);
 	}
 }
 

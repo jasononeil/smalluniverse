@@ -1,7 +1,8 @@
 package mealplanner.pages;
 
 import smalluniverse.SmallUniverse;
-import smalluniverse.DOM;
+import mealplanner.ui.Layout;
+import mealplanner.ui.SiteHeader;
 
 final MealPage = Page(new MealView(), new MealApi());
 
@@ -17,7 +18,7 @@ class MealView implements PageView<AppAction, MealData> {
 	public function new() {}
 
 	public function render(data:MealData) {
-		return h1([], [text('Recipe for ${data.mealName}')]);
+		return Layout(SiteHeader('Recipe for ${data.mealName}'), ["my meal"]);
 	}
 }
 

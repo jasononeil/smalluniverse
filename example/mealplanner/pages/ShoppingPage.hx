@@ -1,7 +1,8 @@
 package mealplanner.pages;
 
 import smalluniverse.SmallUniverse;
-import smalluniverse.DOM;
+import mealplanner.ui.Layout;
+import mealplanner.ui.SiteHeader;
 
 final ShoppingPage = Page(new ShoppingView(), new ShoppingApi());
 typedef ShoppingParams = {}
@@ -11,7 +12,7 @@ class ShoppingView implements PageView<AppAction, ShoppingData> {
 	public function new() {}
 
 	public function render(data:ShoppingData) {
-		return h1([], [text("My shopping page!")]);
+		return Layout(SiteHeader('Shopping List'), ["my shopping list"]);
 	}
 }
 

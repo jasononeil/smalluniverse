@@ -1,7 +1,8 @@
 package mealplanner.pages;
 
 import smalluniverse.SmallUniverse;
-import smalluniverse.DOM;
+import mealplanner.ui.SiteHeader;
+import mealplanner.ui.Layout;
 
 final HomePage = Page(new HomeView(), new HomeApi());
 typedef HomeParams = {}
@@ -11,7 +12,7 @@ class HomeView implements PageView<AppAction, HomeData> {
 	public function new() {}
 
 	public function render(data:HomeData):Html<AppAction> {
-		return h1([], [text("My home page!")]);
+		return Layout(SiteHeader("Home"), ["homepage content"]);
 	}
 }
 
