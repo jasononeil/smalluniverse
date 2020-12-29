@@ -15,13 +15,15 @@ inline function comment<Action>(text:String):Html<Action>
 inline function attr<Action>(name:String, value:String):HtmlAttribute<Action>
 	return Attribute(name, value);
 
+inline function booleanAttribute<Action>(name:String, value:Bool):HtmlAttribute<Action>
+	return BooleanAttribute(name, value);
+
 inline function prop<Action>(name:String, value:Any):HtmlAttribute<Action>
 	return Property(name, value);
 
 inline function on<Action>(name:String, handler:() -> Option<Action>):HtmlAttribute<Action>
-	return Event(name, handler);
+	return Event(name, handler); //
 
-//
 // ELEMENTS
 //
 // TODO: add some better typing for attributes
@@ -79,11 +81,26 @@ inline function li<Action>(attrs:Array<HtmlAttribute<Action>>, children:Html<Act
 inline function a<Action>(attrs:Array<HtmlAttribute<Action>>, children:Html<Action>)
 	return element("a", attrs, children);
 
+inline function label<Action>(attrs:Array<HtmlAttribute<Action>>, children:Html<Action>)
+	return element("label", attrs, children);
+
+inline function input<Action>(attrs:Array<HtmlAttribute<Action>>)
+	return element("input", attrs, []);
+
+inline function inputText<Action>(attrs:Array<HtmlAttribute<Action>>)
+	return input([type("text")].concat(attrs));
+
+inline function checkbox<Action>(attrs:Array<HtmlAttribute<Action>>)
+	return input([type("checkbox")].concat(attrs));
+
+inline function radio<Action>(attrs:Array<HtmlAttribute<Action>>)
+	return input([type("radio")].concat(attrs));
+
 //
 // Attributes
 //
 
-function className(?single:String, ?multiple:Array<String>, ?toggles:Map<String, Bool>) {
+function className<Action>(?single:String, ?multiple:Array<String>, ?toggles:Map<String, Bool>):HtmlAttribute<Action> {
 	final attributeList = [];
 	if (single != null) {
 		attributeList.push(single);
@@ -103,5 +120,14 @@ function className(?single:String, ?multiple:Array<String>, ?toggles:Map<String,
 	return attr("class", attributeList.join(" "));
 }
 
-inline function href<Action>(value:String)
+inline function href<Action>(value:String):HtmlAttribute<Action>
 	return attr("href", value);
+
+inline function type<Action>(value:String):HtmlAttribute<Action>
+	return attr("type", value);
+
+inline function checked<Action>(value:Bool):HtmlAttribute<Action>
+	return booleanAttribute("checked", value);
+
+inline function disabled<Action>(value:Bool):HtmlAttribute<Action>
+	return booleanAttribute("disabled", value);

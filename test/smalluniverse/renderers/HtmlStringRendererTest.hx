@@ -43,6 +43,28 @@ class HtmlStringRendererTest {
 		return assert(stringifyHtml(element("p", [Attribute("class", 'lede">Hack'), Attribute("id", "intro'>Hack")],
 			[])) == '<p class="lede&quot;&gt;Hack" id="intro&#039;&gt;Hack"/>');
 
+	public function testBooleanAttrTrue()
+		return assert(stringifyHtml(element("button", [BooleanAttribute("disabled", true)], [])) == "<button disabled/>");
+
+	public function testBooleanAttrFalse()
+		return assert(stringifyHtml(element("button", [BooleanAttribute("disabled", false)], [])) == "<button/>");
+
+	public function testPropertiesDoNotRender()
+		return assert(stringifyHtml(element("p", [Property("className", "lede")], [])) == "<p/>");
+
+	public function testEventsDoNotRender()
+		return assert(stringifyHtml(element("p", [Event("click", () -> None)], [])) == "<p/>");
+
+	public function testMultipleAttrTypes()
+		return assert(stringifyHtml(element("button", [
+			Attribute("class", "primary"),
+			BooleanAttribute("disabled", false),
+			BooleanAttribute("active", true),
+			Attribute("id", "cta"),
+			Property("className", "primary-2"),
+			Event("click", () -> None)
+		], [])) == '<button class="primary" active id="cta"/>');
+
 	public function testChildren()
 		return assert(stringifyHtml(element("p", [], [text("Hello"), comment("Cruel"), text("World")])) == "<p>Hello<!--Cruel-->World</p>");
 

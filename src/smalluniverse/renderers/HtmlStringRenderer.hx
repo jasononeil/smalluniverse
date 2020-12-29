@@ -1,6 +1,7 @@
 package smalluniverse.renderers;
 
 import smalluniverse.SmallUniverse;
+import haxe.ds.Option;
 import StringBuf;
 
 function stringifyHtml(html:Html<Dynamic>):String {
@@ -9,7 +10,11 @@ function stringifyHtml(html:Html<Dynamic>):String {
 			final html = new StringBuf();
 			html.add('<$tag');
 			for (attr in attrs) {
-				html.add(' ' + stringifyAttr(attr));
+				switch stringifyAttr(attr) {
+					case Some(attrStr):
+						html.add(' ' + attrStr);
+					case None:
+				}
 			}
 			if (children.length == 0) {
 				html.add('/>');
@@ -30,17 +35,18 @@ function stringifyHtml(html:Html<Dynamic>):String {
 	}
 }
 
-private function stringifyAttr(attr:HtmlAttribute<Dynamic>):String {
+private function stringifyAttr(attr:HtmlAttribute<Dynamic>):Option<String> {
 	switch attr {
 		case Attribute(name, value):
 			final escapedValue = StringTools.htmlEscape(value, true);
-			return '$name="$escapedValue"';
+			return Some('$name="$escapedValue"');
+		case BooleanAttribute(name, value):
+			return value ? Some('$name') : None;
 		case Property(name, value):
 			// we only stringify attributes
-			return '';
+			return None;
 		case Event(on, fn):
 			// we only stringify attributes
-			return '';
+			return None;
 	}
-	return '';
 }

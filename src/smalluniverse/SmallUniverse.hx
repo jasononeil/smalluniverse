@@ -92,6 +92,7 @@ enum HtmlType<Action> {
 
 enum HtmlAttribute<Action> {
 	Attribute(name:String, value:String);
+	BooleanAttribute(name:String, value:Bool);
 	Property(name:String, value:Any);
 	Event(on:String, fn:() -> Option<Action>);
 }
@@ -113,6 +114,8 @@ function mapAttr<InnerAction, OuterAction>(attr:HtmlAttribute<InnerAction>, conv
 	switch attr {
 		case Attribute(name, value):
 			return Attribute(name, value);
+		case BooleanAttribute(name, value):
+			return BooleanAttribute(name, value);
 		case Property(name, value):
 			return Property(name, value);
 		case Event(on, innerFn):
