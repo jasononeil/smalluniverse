@@ -27,7 +27,7 @@ class AppRoutes implements Router {
 			return Some("/");
 		} else if (page.equals(cast MealPage)) {
 			final mealParams:MealParams = cast params;
-			return Some("/meal/${mealParams.mealName}");
+			return Some('/meal/${mealParams.mealName}');
 		} else if (page.equals(cast WeeklyPlanPage)) {
 			return Some("/weekly-plan");
 		} else if (page.equals(cast ShoppingPage)) {
