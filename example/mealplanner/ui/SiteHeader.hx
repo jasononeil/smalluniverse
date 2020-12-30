@@ -7,6 +7,7 @@ import smalluniverse.SmallUniverse.Page;
 import mealplanner.pages.MealPage;
 import mealplanner.App.AppRoutes;
 import smalluniverse.DOM;
+import mealplanner.App.getMockData;
 
 function SiteHeader(title:String) {
 	return [
@@ -17,14 +18,9 @@ function SiteHeader(title:String) {
 				MenuItem("Weekly Plan", WeeklyPlanPage, {}),
 				li([], [
 					"Meals",
-					ul([], [
-						MenuItem("Spaghetti", MealPage, {
-							mealName: "spaghetti"
-						}),
-						MenuItem("Tacos", MealPage, {
-							mealName: "tacos"
-						}),
-					])
+					ul([], getMockData().map(m -> MenuItem(m.name, MealPage, {
+						mealId: m.id
+					})))
 				]),
 				MenuItem("Shopping List", ShoppingPage, {}),
 			])

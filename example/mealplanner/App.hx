@@ -13,6 +13,10 @@ function main() {
 	start(new AppRoutes());
 }
 
+function getMockData() {
+	return CompileTime.parseJsonFile("mealplanner/sample-data.json");
+}
+
 class AppRoutes implements Router {
 	public function new() {}
 
@@ -27,7 +31,7 @@ class AppRoutes implements Router {
 			return Some("/");
 		} else if (page.equals(cast MealPage)) {
 			final mealParams:MealParams = cast params;
-			return Some('/meal/${mealParams.mealName}');
+			return Some('/meal/${mealParams.mealId}');
 		} else if (page.equals(cast WeeklyPlanPage)) {
 			return Some("/weekly-plan");
 		} else if (page.equals(cast ShoppingPage)) {
@@ -45,8 +49,8 @@ class AppRoutes implements Router {
 		switch parts {
 			case []:
 				return Some({page: HomePage, params: {}});
-			case ["meal", mealName]:
-				return Some({page: MealPage, params: {mealName: mealName}});
+			case ["meal", mealId]:
+				return Some({page: MealPage, params: {mealId: mealId}});
 			case ["weekly-plan"]:
 				return Some({page: WeeklyPlanPage, params: {}});
 			case ["shopping"]:

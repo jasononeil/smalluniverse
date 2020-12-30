@@ -1,0 +1,92 @@
+[
+  {
+    "id": "overnight-oats",
+    "name": "Overnight Oats",
+    "ingredients": [
+      { "store": "organic", "ingredient": "Bircher fruit", "ticked": false },
+      {
+        "store": "veg",
+        "ingredient": "Bircher and snack fruit",
+        "ticked": false
+      },
+      { "store": "bulk", "ingredient": "shredded coconut", "ticked": false },
+      { "store": "organic", "ingredient": "apple", "ticked": false },
+      { "store": "bulk", "ingredient": "Oats", "ticked": false },
+      { "store": "coles", "ingredient": "coyo", "ticked": false },
+      {
+        "store": "coles",
+        "ingredient": "Carmen’s fruit free muesli",
+        "ticked": true
+      },
+      { "store": "bulk", "ingredient": "dried cranberries", "ticked": true },
+      { "store": "veg", "ingredient": "banana", "ticked": true },
+      { "store": "bulk", "ingredient": "almonds", "ticked": true },
+      { "store": "organic", "ingredient": "lemon", "ticked": true },
+      { "store": "coles", "ingredient": "coconut milk", "ticked": true },
+      { "store": "veg", "ingredient": "strawberries", "ticked": true },
+      { "store": "bulk", "ingredient": "Chia", "ticked": true },
+      { "store": "bulk", "ingredient": "maple syrup", "ticked": true }
+    ]
+  },
+
+  {
+    "id": "meat-and-veg",
+    "name": "Meat and Veg",
+    "ingredients": [
+      { "store": "organic", "ingredient": "sweet potato", "ticked": false },
+      { "store": "butcher", "ingredient": "crumbed steak", "ticked": false },
+      { "store": "coles", "ingredient": "meat replacement", "ticked": false },
+      { "store": "organic", "ingredient": "asparagus", "ticked": false },
+      { "store": "coles", "ingredient": "corned beef", "ticked": true },
+      { "store": "coles", "ingredient": "wild Alaskan salmon", "ticked": true },
+      { "store": "coles", "ingredient": "sausages", "ticked": true },
+      { "store": "organic", "ingredient": "potato (for mash)", "ticked": true },
+      { "store": "coles", "ingredient": "porterhouse steak", "ticked": true },
+      { "store": "organic", "ingredient": "Brocoli", "ticked": true },
+      { "store": "organic", "ingredient": "Cauli", "ticked": true },
+      { "store": "organic", "ingredient": "Sweet Potato", "ticked": true }
+    ]
+  },
+
+  {
+    "id": "tacos",
+    "name": "Tacos",
+    "ingredients": [
+      { "store": "coles", "ingredient": "extra lean mince", "ticked": false },
+      { "store": "coles", "ingredient": "taco shells", "ticked": false },
+      { "store": "organic", "ingredient": "carrot", "ticked": false },
+      { "store": "coles", "ingredient": "tinned tomato", "ticked": false },
+      { "store": "coles", "ingredient": "kidney beans", "ticked": false },
+      { "store": "organic", "ingredient": "Tomato", "ticked": false },
+      { "store": "organic", "ingredient": "Avocado", "ticked": false },
+      { "store": "organic", "ingredient": "Lime", "ticked": false },
+      { "store": "organic", "ingredient": "lettuce", "ticked": false },
+      { "store": "organic", "ingredient": "coriander", "ticked": true },
+      { "store": "organic", "ingredient": "apple", "ticked": true },
+      { "store": "bulk", "ingredient": "taco seasoning", "ticked": true },
+      { "store": "bulk", "ingredient": "brown rice", "ticked": true },
+      { "store": "coles", "ingredient": "sour cream", "ticked": true },
+      { "store": "organic", "ingredient": "red onion", "ticked": true }
+    ]
+  },
+
+  {
+    "id": "buddha-bowls",
+    "name": "Buddha Bowls",
+    "ingredients": [
+      { "store": "organic", "ingredient": "salad greens", "ticked": false },
+      { "store": "organic", "ingredient": "cauli", "ticked": false },
+      { "store": "organic", "ingredient": "pumpkin", "ticked": false },
+      { "store": "coles", "ingredient": "chicken sausage", "ticked": true },
+      { "store": "coles", "ingredient": "black beans", "ticked": true },
+      { "store": "organic", "ingredient": "sweet potato", "ticked": true },
+      { "store": "bulk", "ingredient": "Quinoa", "ticked": true },
+      { "store": "organic", "ingredient": "beetroot", "ticked": true },
+      { "store": "organic", "ingredient": "avocado", "ticked": true },
+      { "store": "coles", "ingredient": "goats cheese", "ticked": true },
+      { "store": "coles", "ingredient": "hommus", "ticked": true },
+      { "store": "organic", "ingredient": "mushroom", "ticked": true },
+      { "store": "organic", "ingredient": "kale", "ticked": true }
+    ]
+  }
+]
