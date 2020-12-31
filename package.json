@@ -6,6 +6,10 @@
   "repository": "https://github.com/jasononeil/smalluniverse",
   "author": "Jason O'Neil",
   "license": "MIT",
+  "private": true,
+  "workspaces": [
+    "example/"
+  ],
   "scripts": {
     "test": "yarn -s test:build && yarn -s test:run",
     "test:build": "haxe test.hxml",

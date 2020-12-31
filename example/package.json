@@ -1,0 +1,9 @@
+{
+    "name": "mealplanner",
+    "description": "A meal planning app that is an example of smalluniverse",
+    "authors": "Jason O'Neil",
+    "version": "1.0.0",
+    "dependencies": {
+        "normalize.css": "^8.0.1"
+    }
+}
