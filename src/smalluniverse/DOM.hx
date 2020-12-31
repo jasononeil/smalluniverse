@@ -96,6 +96,9 @@ inline function checkbox<Action>(attrs:Array<HtmlAttribute<Action>>)
 inline function radio<Action>(attrs:Array<HtmlAttribute<Action>>)
 	return input([type("radio")].concat(attrs));
 
+inline function link<Action>(attrs:Array<HtmlAttribute<Action>>, content:String = "")
+	return element("link", attrs, content);
+
 inline function style<Action>(attrs:Array<HtmlAttribute<Action>>, content:String = "")
 	return element("style", attrs, content);
 
@@ -134,6 +137,9 @@ inline function href<Action>(value:String):HtmlAttribute<Action>
 
 inline function type<Action>(value:String):HtmlAttribute<Action>
 	return attr("type", value);
+
+inline function rel<Action>(value:String):HtmlAttribute<Action>
+	return attr("rel", value);
 
 inline function checked<Action>(value:Bool):HtmlAttribute<Action>
 	return booleanAttribute("checked", value);
