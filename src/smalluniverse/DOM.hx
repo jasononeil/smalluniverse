@@ -96,10 +96,19 @@ inline function checkbox<Action>(attrs:Array<HtmlAttribute<Action>>)
 inline function radio<Action>(attrs:Array<HtmlAttribute<Action>>)
 	return input([type("radio")].concat(attrs));
 
+inline function style<Action>(attrs:Array<HtmlAttribute<Action>>, content:String = "")
+	return element("style", attrs, content);
+
+inline function script<Action>(attrs:Array<HtmlAttribute<Action>>, content:String = "")
+	return element("script", attrs, content);
+
+/** A small helper to add inline CSS. **/
+inline function css<Action>(content:String = "")
+	return style([type("text/css")], content);
+
 //
 // Attributes
 //
-
 function className<Action>(?single:String, ?multiple:Array<String>, ?toggles:Map<String, Bool>):HtmlAttribute<Action> {
 	final attributeList = [];
 	if (single != null) {
