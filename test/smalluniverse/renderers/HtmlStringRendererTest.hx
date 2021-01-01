@@ -31,29 +31,29 @@ class HtmlStringRendererTest {
 		return assert(stringifyHtml(element("br", [], [])) == "<br/>");
 
 	public function testEmptyDivElement()
-		return assert(stringifyHtml(element("div", [], [])) == "<div/>");
+		return assert(stringifyHtml(element("div", [], [])) == "<div></div>");
 
 	public function testEmptyElementWithAttrs()
 		return assert(stringifyHtml(element("hr", [Attribute("class", "divider")], [])) == "<hr class=\"divider\"/>");
 
 	public function testMultipleAttrs()
-		return assert(stringifyHtml(element("p", [Attribute("class", "lede"), Attribute("id", "intro")], [])) == "<p class=\"lede\" id=\"intro\"/>");
+		return assert(stringifyHtml(element("p", [Attribute("class", "lede"), Attribute("id", "intro")], [])) == "<p class=\"lede\" id=\"intro\"></p>");
 
 	public function testAttrsWithHtml()
 		return assert(stringifyHtml(element("p", [Attribute("class", 'lede">Hack'), Attribute("id", "intro'>Hack")],
-			[])) == '<p class="lede&quot;&gt;Hack" id="intro&#039;&gt;Hack"/>');
+			[])) == '<p class="lede&quot;&gt;Hack" id="intro&#039;&gt;Hack"></p>');
 
 	public function testBooleanAttrTrue()
-		return assert(stringifyHtml(element("button", [BooleanAttribute("disabled", true)], [])) == "<button disabled/>");
+		return assert(stringifyHtml(element("button", [BooleanAttribute("disabled", true)], [])) == "<button disabled></button>");
 
 	public function testBooleanAttrFalse()
-		return assert(stringifyHtml(element("button", [BooleanAttribute("disabled", false)], [])) == "<button/>");
+		return assert(stringifyHtml(element("button", [BooleanAttribute("disabled", false)], [])) == "<button></button>");
 
 	public function testPropertiesDoNotRender()
-		return assert(stringifyHtml(element("p", [Property("className", "lede")], [])) == "<p/>");
+		return assert(stringifyHtml(element("p", [Property("className", "lede")], [])) == "<p></p>");
 
 	public function testEventsDoNotRender()
-		return assert(stringifyHtml(element("p", [Event("click", () -> None)], [])) == "<p/>");
+		return assert(stringifyHtml(element("p", [Event("click", () -> None)], [])) == "<p></p>");
 
 	public function testMultipleAttrTypes()
 		return assert(stringifyHtml(element("button", [
@@ -63,7 +63,7 @@ class HtmlStringRendererTest {
 			Attribute("id", "cta"),
 			Property("className", "primary-2"),
 			Event("click", () -> None)
-		], [])) == '<button class="primary" active id="cta"/>');
+		], [])) == '<button class="primary" active id="cta"></button>');
 
 	public function testChildren()
 		return assert(stringifyHtml(element("p", [], [text("Hello"), comment("Cruel"), text("World")])) == "<p>Hello<!--Cruel-->World</p>");

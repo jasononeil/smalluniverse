@@ -4,6 +4,10 @@ import smalluniverse.SmallUniverse;
 import haxe.ds.Option;
 import StringBuf;
 
+final selfClosingTags = [
+	"area", "base", "br", "col", "command", "embed", "hr", "img", "input", "keygen", "link", "menuitem", "meta", "param", "source", "track", "wbr",
+];
+
 function stringifyHtml(html:Html<Dynamic>):String {
 	switch html {
 		case Element(tag, attrs, children):
@@ -16,7 +20,7 @@ function stringifyHtml(html:Html<Dynamic>):String {
 					case None:
 				}
 			}
-			if (children.length == 0) {
+			if (children.length == 0 && selfClosingTags.contains(tag)) {
 				html.add('/>');
 			} else {
 				html.add('>');
