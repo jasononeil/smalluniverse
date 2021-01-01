@@ -141,6 +141,9 @@ inline function type<Action>(value:String):HtmlAttribute<Action>
 inline function rel<Action>(value:String):HtmlAttribute<Action>
 	return attr("rel", value);
 
+inline function src<Action>(value:String):HtmlAttribute<Action>
+	return attr("src", value);
+
 inline function checked<Action>(value:Bool):HtmlAttribute<Action>
 	return booleanAttribute("checked", value);
 
