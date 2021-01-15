@@ -81,6 +81,9 @@ inline function li<Action>(attrs:Array<HtmlAttribute<Action>>, children:Html<Act
 inline function a<Action>(attrs:Array<HtmlAttribute<Action>>, children:Html<Action>)
 	return element("a", attrs, children);
 
+inline function button<Action>(attrs:Array<HtmlAttribute<Action>>, children:Html<Action>)
+	return element("button", attrs, children);
+
 inline function label<Action>(attrs:Array<HtmlAttribute<Action>>, children:Html<Action>)
 	return element("label", attrs, children);
 
