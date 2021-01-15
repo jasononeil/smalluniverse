@@ -24,7 +24,7 @@ function handleRequest(router:Router, req:IncomingMessage, res:ServerResponse) {
 					case Page(view, api):
 						final pageData = api.getPageData(route.params);
 						final viewHtml = stringifyHtml(view.render(pageData));
-						res.setHeader("Content-Type", "text/html");
+						res.setHeader("Content-Type", "text/html; charset=UTF-8");
 						res.write(viewHtml);
 						res.statusCode = 200;
 				}
