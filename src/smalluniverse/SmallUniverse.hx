@@ -3,7 +3,6 @@ package smalluniverse;
 import haxe.ds.Option;
 
 interface Router {
-	function routeToUri<PageParams>(page:Page<Dynamic, PageParams, Dynamic>, params:PageParams):Option<String>;
 	function uriToRoute<PageParams>(uri:String):Option<{page:Page<Dynamic, PageParams, Dynamic>, params:PageParams}>;
 }
 
