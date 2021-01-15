@@ -4,7 +4,8 @@ import smalluniverse.SmallUniverse;
 import mealplanner.pages.MealPage;
 import mealplanner.pages.ShoppingPage;
 import mealplanner.pages.WeeklyPlanPage;
-import mealplanner.pages.HomePage;
+import mealplanner.pages.MealsListPage;
+import mealplanner.pages.IngredientPage;
 import smalluniverse.servers.NodeJs;
 import haxe.ds.Option;
 
@@ -20,24 +21,26 @@ function getMockData() {
 class AppRoutes implements Router {
 	public function new() {}
 
-	public function routeToUri<PageParams>(page:Page<Dynamic, PageParams, Dynamic>, params:PageParams):Option<String> {
-		// Why use casts here? Haxe forces type compatibility on `enum.equals()`.
-		// And it won't treat our loose `page` type as compatible with the specific types of each page.
-		// I'm hoping we can have a macro solution to generate these routes that is fully type safe and requires less boilerplate.
-		// Why use if/else instead of a switch statement?
-		// Because `page` is an enum value, it wants to use pattern matching rather than simple equality checks.
-		// This prevents us from having `case ${someVariable}`, so I'm using if/else statements instead.
-		if (page.equals(cast HomePage)) {
-			return Some("/");
-		} else if (page.equals(cast MealPage)) {
-			final mealParams:MealParams = cast params;
-			return Some('/meal/${mealParams.mealId}');
-		} else if (page.equals(cast WeeklyPlanPage)) {
-			return Some("/weekly-plan");
-		} else if (page.equals(cast ShoppingPage)) {
-			return Some("/shopping");
-		}
-		return None;
+	// I'm hoping we can have a macro solution to generate these routes that is fully type safe and requires less boilerplate.
+
+	public function uriForMealsListPage(params:MealsListParams):String {
+		return '/';
+	}
+
+	public function uriForMealPage(params:MealParams):String {
+		return '/meal/${params.mealId}';
+	}
+
+	public function uriForIngredientPage(params:IngredientParams):String {
+		return '/ingredient/${params.ingredient}';
+	}
+
+	public function uriForWeeklyPlanPage(params:WeeklyPlanParams):String {
+		return '/weekly-plan';
+	}
+
+	public function uriForShoppingPage(params:ShoppingParams):String {
+		return '/shopping';
 	}
 
 	public function uriToRoute(uri:String):Option<{
@@ -48,9 +51,11 @@ class AppRoutes implements Router {
 		final parts = path.split("/").filter(s -> s != "");
 		switch parts {
 			case []:
-				return Some({page: HomePage, params: {}});
+				return Some({page: MealsListPage, params: {}});
 			case ["meal", mealId]:
 				return Some({page: MealPage, params: {mealId: mealId}});
+			case ["ingredient", ingredientName]:
+				return Some({page: IngredientPage, params: {ingredient: StringTools.urlDecode(ingredientName)}});
 			case ["weekly-plan"]:
 				return Some({page: WeeklyPlanPage, params: {}});
 			case ["shopping"]:
@@ -60,3 +65,5 @@ class AppRoutes implements Router {
 		}
 	}
 }
+
+final appRouter = new AppRoutes();

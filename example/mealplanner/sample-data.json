@@ -82,7 +82,7 @@
       { "store": "organic", "ingredient": "sweet potato", "ticked": true },
       { "store": "bulk", "ingredient": "Quinoa", "ticked": true },
       { "store": "organic", "ingredient": "beetroot", "ticked": true },
-      { "store": "organic", "ingredient": "avocado", "ticked": true },
+      { "store": "organic", "ingredient": "Avocado", "ticked": false },
       { "store": "coles", "ingredient": "goats cheese", "ticked": true },
       { "store": "coles", "ingredient": "hommus", "ticked": true },
       { "store": "organic", "ingredient": "mushroom", "ticked": true },

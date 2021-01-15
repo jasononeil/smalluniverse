@@ -8,8 +8,10 @@ final sourceSansVariableUrl = "https://cdn.jsdelivr.net/npm/source-sans-pro@3.6.
 
 function Layout(headerContent:Html<AppAction>, mainContent:Html<AppAction>):Html<AppAction> {
 	return [
+		css(CompileTime.readFile("mealplanner/ui/Variables.css")),
+		css(CompileTime.readFile("mealplanner/ui/Layout.css")),
 		link([rel("stylesheet"), href(sourceSansVariableUrl)]),
 		css(CompileTime.readFile("node_modules/normalize.css/normalize.css")),
-		div([className("container")], [header([], headerContent), main([], mainContent)])
+		div([className("Layout__Container")], [header([], headerContent), main([], mainContent)])
 	];
 }

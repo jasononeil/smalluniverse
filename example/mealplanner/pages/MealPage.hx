@@ -5,6 +5,7 @@ import smalluniverse.SmallUniverse;
 import mealplanner.ui.Layout;
 import mealplanner.ui.SiteHeader;
 import mealplanner.ui.IngredientList;
+import mealplanner.ui.ListView;
 import mealplanner.App.getMockData;
 
 using Lambda;
@@ -27,7 +28,13 @@ class MealView implements PageView<AppAction, MealData> {
 	public function new() {}
 
 	public function render(data:MealData) {
-		return Layout(SiteHeader('Recipe for ${data.mealName}'), [IngredientList("Ingredients", data.ingredients)]);
+		return Layout(SiteHeader(data.mealName), [
+			IngredientList("Ingredients", data.ingredients.map(i -> {
+				ingredient: i.ingredient,
+				ticked: i.ticked,
+				info: i.store
+			}), ListItemInput("New Ingredient", "", _ -> Nothing))
+		]);
 	}
 }
 

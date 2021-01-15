@@ -115,6 +115,10 @@ inline function css<Action>(content:String = "")
 //
 // Attributes
 //
+
+inline function id<Action>(id:String):HtmlAttribute<Action>
+	return attr("id", id);
+
 function className<Action>(?single:String, ?multiple:Array<String>, ?toggles:Map<String, Bool>):HtmlAttribute<Action> {
 	final attributeList = [];
 	if (single != null) {
@@ -146,6 +150,15 @@ inline function rel<Action>(value:String):HtmlAttribute<Action>
 
 inline function src<Action>(value:String):HtmlAttribute<Action>
 	return attr("src", value);
+
+inline function htmlFor<Action>(htmlFor:String):HtmlAttribute<Action>
+	return attr("htmlFor", htmlFor);
+
+inline function defaultValue<Action>(value:String):HtmlAttribute<Action>
+	return attr("value", value);
+
+inline function placeholder<Action>(placeholder:String):HtmlAttribute<Action>
+	return attr("placeholder", placeholder);
 
 inline function checked<Action>(value:Bool):HtmlAttribute<Action>
 	return booleanAttribute("checked", value);

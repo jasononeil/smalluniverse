@@ -1,0 +1,22 @@
+:root {
+  --color-primary: blue;
+  --color-border: rgb(230, 230, 230);
+  --color-highlight: rgb(196, 205, 255);
+
+  --type-family: "Source Sans Variable";
+  --type-bold: 700;
+  --type-medium: 300;
+  --type-light: 200;
+  --type-h1: 3rem;
+  --type-h2: 2rem;
+  --type-h3: 1.5rem;
+  --type-body: 1.25rem;
+  --type-small: 1rem;
+
+  --space-s: 0.25rem;
+  --space-m: 0.75rem;
+  --space-l: 1.5rem;
+
+  --border: 1px solid var(--color-border);
+  --border-radius: 5px;
+}
