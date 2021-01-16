@@ -15,7 +15,7 @@
     "test:build": "haxe test.hxml",
     "test:run": "node build/test.js",
     "example": "yarn -s example:build && yarn -s example:start",
-    "example:build": "haxe example.hxml",
+    "example:build": "haxe example.hxml && haxe example_client.hxml",
     "example:start": "node build/server.js",
     "dev": "nodemon --watch src --watch example --ext hx,hxml,css --exec \"yarn -s example\""
   },

@@ -6,13 +6,7 @@ import mealplanner.pages.ShoppingPage;
 import mealplanner.pages.WeeklyPlanPage;
 import mealplanner.pages.MealsListPage;
 import mealplanner.pages.IngredientPage;
-import smalluniverse.servers.NodeJs;
 import haxe.ds.Option;
-
-function main() {
-	trace("My meal plan shopping list");
-	start(new AppRoutes());
-}
 
 function getMockData() {
 	return CompileTime.parseJsonFile("mealplanner/sample-data.json");
