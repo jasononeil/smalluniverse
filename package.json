@@ -17,12 +17,13 @@
     "example": "yarn -s example:build && yarn -s example:start",
     "example:build": "haxe example.hxml && haxe example_client.hxml",
     "example:start": "node build/server.js",
-    "dev": "nodemon --watch src --watch example --ext hx,hxml,css --exec \"yarn -s example\""
+    "dev": "nodemon --watch src --watch example --ext hx,hxml,html,css --exec \"yarn -s example\""
   },
   "dependencies": {
-    "lix": "^15.9.1"
+    "snabbdom": "^2.1.0"
   },
   "devDependencies": {
+    "lix": "^15.9.1",
     "nodemon": "^2.0.7"
   }
 }

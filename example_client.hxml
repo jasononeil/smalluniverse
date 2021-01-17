@@ -2,6 +2,7 @@
 -cp example
 -lib compiletime
 -lib tink_core
+-lib jsImport
 --macro nullSafety("smalluniverse", Strict)
 --macro nullSafety("mealplanner", Strict)
 -js build/client.js
