@@ -53,7 +53,7 @@ class HtmlStringRendererTest {
 		return assert(stringifyHtml(element("p", [Property("className", "lede")], [])) == "<p></p>");
 
 	public function testEventsDoNotRender()
-		return assert(stringifyHtml(element("p", [Event("click", () -> None)], [])) == "<p></p>");
+		return assert(stringifyHtml(element("p", [Event("click", (e) -> None)], [])) == "<p></p>");
 
 	public function testMultipleAttrTypes()
 		return assert(stringifyHtml(element("button", [
@@ -62,7 +62,7 @@ class HtmlStringRendererTest {
 			BooleanAttribute("active", true),
 			Attribute("id", "cta"),
 			Property("className", "primary-2"),
-			Event("click", () -> None)
+			Event("click", (e) -> None)
 		], [])) == '<button class="primary" active id="cta"></button>');
 
 	public function testChildren()

@@ -1,5 +1,6 @@
 package smalluniverse;
 
+import js.html.Event;
 import haxe.ds.Option;
 
 interface Router {
@@ -93,7 +94,7 @@ enum HtmlAttribute<Action> {
 	Attribute(name:String, value:String);
 	BooleanAttribute(name:String, value:Bool);
 	Property(name:String, value:Any);
-	Event(on:String, fn:() -> Option<Action>);
+	Event(on:String, fn:(e:Event) -> Option<Action>);
 }
 
 function mapHtml<InnerAction, OuterAction>(html:Html<InnerAction>, convert:InnerAction->Option<OuterAction>):Html<OuterAction> {
@@ -118,8 +119,8 @@ function mapAttr<InnerAction, OuterAction>(attr:HtmlAttribute<InnerAction>, conv
 		case Property(name, value):
 			return Property(name, value);
 		case Event(on, innerFn):
-			function outerFn() {
-				switch innerFn() {
+			function outerFn(e) {
+				switch innerFn(e) {
 					case Some(v):
 						return convert(v);
 					case None:

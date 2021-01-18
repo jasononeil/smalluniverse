@@ -1,5 +1,6 @@
 package smalluniverse;
 
+import js.html.Event;
 import smalluniverse.SmallUniverse;
 import haxe.ds.Option;
 
@@ -21,9 +22,10 @@ inline function booleanAttribute<Action>(name:String, value:Bool):HtmlAttribute<
 inline function prop<Action>(name:String, value:Any):HtmlAttribute<Action>
 	return Property(name, value);
 
-inline function on<Action>(name:String, handler:() -> Option<Action>):HtmlAttribute<Action>
-	return Event(name, handler); //
+inline function on<Action>(name:String, handler:(e:Event) -> Option<Action>):HtmlAttribute<Action>
+	return Event(name, handler);
 
+//
 // ELEMENTS
 //
 // TODO: add some better typing for attributes

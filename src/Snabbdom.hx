@@ -15,18 +15,27 @@ class Snabbdom {
 	inline public static function toVNode(node:Node):VNode
 		return SnabbdomToVNode.toVNode(node);
 
-	public static var propsModule = SnabbdomProps.propsModule;
+	public static var propsModule(get, never):SnabbdomModule;
 
-	public static var attributesModule = SnabbdomAttributes.attributesModule;
+	public static var attributesModule(get, never):SnabbdomModule;
 
-	public static var eventListenersModule = SnabbdomEventListeners.eventListenersModule;
+	public static var eventListenersModule(get, never):SnabbdomModule;
+
+	inline static function get_propsModule()
+		return SnabbdomProps.propsModule;
+
+	inline static function get_attributesModule()
+		return SnabbdomAttributes.attributesModule;
+
+	inline static function get_eventListenersModule()
+		return SnabbdomEventListeners.eventListenersModule;
 }
 
 typedef VNode = {
-	var sel:String;
-	var data:Dynamic<Dynamic>;
-	var children:Array<VNode>;
-	var text:String;
+	var sel:Null<String>;
+	var data:Null<Dynamic<Dynamic>>;
+	var children:Null<Array<VNode>>;
+	var text:Null<String>;
 	var elm:Null<Node>;
 	var key:Null<EitherType<String, Float>>;
 }

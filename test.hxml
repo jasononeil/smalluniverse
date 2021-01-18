@@ -3,5 +3,7 @@
 -js build/test.js
 -lib tink_unittest
 -lib hxnodejs
+-lib compiletime
+-lib tink_core
 --main Main
 --macro nullSafety("smalluniverse", Strict)

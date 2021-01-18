@@ -39,10 +39,21 @@ function handleRequest(router:Router, req:IncomingMessage, res:ServerResponse) {
 				switch route.page {
 					case Page(view, api):
 						final pageData = api.getPageData(route.params);
-						final viewHtml = stringifyHtml(view.render(pageData));
-						res.setHeader("Content-Type", "text/html; charset=UTF-8");
-						res.write(wrapHtml(viewHtml, pageData));
-						res.statusCode = 200;
+						// TODO: use tink.Json instead
+						final pageDataJson = Json.stringify(pageData);
+						switch (req.headers["accept"]) {
+							case "application/json":
+								// This is a request from our client JS. Return the data.
+								res.setHeader("Content-Type", "application/json; charset=UTF-8");
+								res.write(pageDataJson);
+								res.statusCode = 200;
+							default:
+								// Render the page as HTML
+								final viewHtml = stringifyHtml(view.render(pageData));
+								res.setHeader("Content-Type", "text/html; charset=UTF-8");
+								res.write(wrapHtml(viewHtml, pageDataJson));
+								res.statusCode = 200;
+						}
 				}
 			case None:
 				res.write("page not found");
@@ -56,8 +67,7 @@ function handleRequest(router:Router, req:IncomingMessage, res:ServerResponse) {
 	}
 }
 
-function wrapHtml(bodyContent:String, pageData:Dynamic) {
-	final pageDataJson = Json.stringify(pageData);
+function wrapHtml(bodyContent:String, pageDataJson:String) {
 	return CompileTime.interpolateFile("smalluniverse/template.html");
 }
 
