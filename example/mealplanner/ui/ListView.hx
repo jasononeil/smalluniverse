@@ -21,7 +21,7 @@ function ListItem(content:Html<AppAction>) {
 }
 
 function ListItemLink(content:Html<AppAction>, url:String) {
-	return a([className("ListView__Content"), href(url)], content);
+	return mealplanner.ui.Link.Link([className("ListView__Content"), href(url)], content);
 }
 
 function ListItemButton(content:Html<AppAction>, action:AppAction) {

@@ -1,6 +1,7 @@
 package mealplanner.ui;
 
 import mealplanner.ui.Heading;
+import mealplanner.ui.Link;
 import mealplanner.App;
 import smalluniverse.DOM;
 
@@ -22,5 +23,5 @@ function SiteHeader(title:String) {
 }
 
 function MenuItem<PageData>(label:String, uri:String) {
-	return li([], a([href(uri)], label));
+	return li([], Link([href(uri)], label));
 }
