@@ -13,16 +13,17 @@
   "scripts": {
     "test": "yarn -s test:build && yarn -s test:run",
     "test:build": "haxe test.hxml",
-    "test:run": "node build/test.js",
+    "test:run": "node build/test.bundle.js",
     "example": "yarn -s example:build && yarn -s example:start",
     "example:build": "haxe example.hxml && haxe example_client.hxml",
-    "example:start": "node build/server.js",
+    "example:start": "node build/server.bundle.js",
     "dev": "nodemon --watch src --watch example --ext hx,hxml,html,css --exec \"yarn -s example\""
   },
   "dependencies": {
     "snabbdom": "^2.1.0"
   },
   "devDependencies": {
+    "esbuild": "^0.8.34",
     "lix": "^15.9.1",
     "nodemon": "^2.0.7"
   }

@@ -21,12 +21,8 @@ function start(router:Router, host:String = "localhost", port:Int = 4723) {
 }
 
 function handleRequest(router:Router, req:IncomingMessage, res:ServerResponse) {
-	if (req.url == "/js/client.js") {
+	if (req.url == "/js/client.bundle.js") {
 		return loadClientScript(res);
-	}
-
-	if (req.url.startsWith("/js/npm/")) {
-		return loadNpmScript(req.url.substr("/js/npm/".length), res);
 	}
 
 	// This could use a big old tidy up.
@@ -72,38 +68,8 @@ function wrapHtml(bodyContent:String, pageDataJson:String) {
 }
 
 function loadClientScript(res:ServerResponse) {
-	final clientJsPath = Path.join(Node.__dirname, "client.js");
+	final clientJsPath = Path.join(Node.__dirname, "client.bundle.js");
 	Fs.readFile(clientJsPath, "utf-8", (err, content) -> {
-		res.setHeader("Content-Type", "application/javascript");
-		res.write(content);
-		res.statusCode = 200;
-		res.end();
-	});
-}
-
-// Note: these are sharing NPM files at /js/npm/*.
-// This path allows us to load ESM modules directly in the browser.
-// This is pretty weird, but I wanted to avoid a bundling step (eg webpack) for now.
-function loadNpmScript(path:String, res:ServerResponse) {
-	final allowedLibraries = ["snabbdom"];
-	if (!allowedLibraries.exists(lib -> path == lib || path.startsWith('$lib/'))) {
-		res.write("Library not whitelisted");
-		res.statusCode = 403;
-		res.end();
-		return;
-	}
-
-	var filePath;
-	try {
-		filePath = Require.resolve(path);
-	} catch (e:Dynamic) {
-		res.write("Module not found");
-		res.statusCode = 404;
-		res.end();
-		return;
-	}
-
-	Fs.readFile(filePath, "utf-8", (err, content) -> {
 		res.setHeader("Content-Type", "application/javascript");
 		res.write(content);
 		res.statusCode = 200;

@@ -3,7 +3,9 @@
 -lib hxnodejs
 -lib compiletime
 -lib tink_core
+-lib jsImport
 --macro nullSafety("smalluniverse", Strict)
 --macro nullSafety("mealplanner", Strict)
--js build/server.js
 --main mealplanner.Server
+-js build/server.js
+-cmd yarn -s esbuild --bundle build/server.js --platform=node --outfile=build/server.bundle.js

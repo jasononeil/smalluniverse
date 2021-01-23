@@ -1,9 +1,6 @@
 import js.html.Node;
 import haxe.extern.EitherType;
 
-// Note: these externs are importing from /js/npm/snabbdom/*
-// This path is set up explicitly on the server, and loaded as JS modules by the browser.
-// This is pretty weird, but I wanted to avoid a bundling step (eg webpack) for now.
 // Snabbdom doesn't have a single import, so I've got this class to gather the functions for easier access.
 class Snabbdom {
 	inline public static function init(modules:Array<SnabbdomModule>):PatchFunction
@@ -11,6 +8,9 @@ class Snabbdom {
 
 	inline public static function h(tag:String, data:{}, children:EitherType<String, Array<VNode>>):VNode
 		return SnabbdomH.h(tag, data, children);
+
+	inline public static function vnode(tag:String, data:{}, children:EitherType<String, Array<VNode>>, text:Null<String>, elm:Node):VNode
+		return SnabbdomVNode.vnode(tag, data, children, text, elm);
 
 	inline public static function toVNode(node:Node):VNode
 		return SnabbdomToVNode.toVNode(node);
@@ -74,32 +74,37 @@ typedef SnabbdomModule = {
 
 typedef PatchFunction = (old:EitherType<VNode, Node>, newVNode:VNode) -> Void;
 
-@:js.import(@star '/js/npm/snabbdom/build/package/init')
+@:js.import(@star 'snabbdom/build/package/init')
 extern class SnabbdomInit {
 	public static function init(modules:Array<SnabbdomModule>):PatchFunction;
 }
 
-@:js.import(@star '/js/npm/snabbdom/build/package/h')
+@:js.import(@star 'snabbdom/build/package/h')
 extern class SnabbdomH {
 	public static function h(tag:String, data:{}, children:EitherType<String, Array<VNode>>):VNode;
 }
 
-@:js.import(@star '/js/npm/snabbdom/build/package/tovnode')
+@:js.import(@star 'snabbdom/build/package/vnode')
+extern class SnabbdomVNode {
+	public static function vnode(tag:Null<String>, data:Null<{}>, children:Null<EitherType<String, Array<VNode>>>, text:Null<String>, elm:Null<Node>):VNode;
+}
+
+@:js.import(@star 'snabbdom/build/package/tovnode')
 extern class SnabbdomToVNode {
 	public static function toVNode(node:Node):VNode;
 }
 
-@:js.import(@star '/js/npm/snabbdom/build/package/modules/props')
+@:js.import(@star 'snabbdom/build/package/modules/props')
 extern class SnabbdomProps {
 	public static var propsModule:SnabbdomModule;
 }
 
-@:js.import(@star '/js/npm/snabbdom/build/package/modules/attributes')
+@:js.import(@star 'snabbdom/build/package/modules/attributes')
 extern class SnabbdomAttributes {
 	public static var attributesModule:SnabbdomModule;
 }
 
-@:js.import(@star '/js/npm/snabbdom/build/package/modules/eventlisteners')
+@:js.import(@star 'snabbdom/build/package/modules/eventlisteners')
 extern class SnabbdomEventListeners {
 	public static var eventListenersModule:SnabbdomModule;
 }

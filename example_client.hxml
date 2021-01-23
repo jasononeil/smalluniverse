@@ -7,3 +7,4 @@
 --macro nullSafety("mealplanner", Strict)
 -js build/client.js
 --main mealplanner.Client
+-cmd yarn -s esbuild --bundle build/client.js --outfile=build/client.bundle.js
