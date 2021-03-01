@@ -20,14 +20,12 @@ class SnabbdomRenderer {
 	}
 
 	public function update(html:Html<Dynamic>) {
-		final _prevNode = this.previousVNode;
-		final _patch = this.patch;
-		if (_patch == null || _prevNode == null) {
+		final newNode = htmlToVNode(html);
+		if (patch == null || previousVNode == null) {
 			throw 'update() called before init()';
 		}
 
-		final newNode = htmlToVNode(html);
-		_patch(_prevNode, newNode);
+		patch(previousVNode, newNode);
 		this.previousVNode = newNode;
 	}
 
@@ -55,7 +53,9 @@ function htmlToVNode(html:Html<Dynamic>):VNode {
 						data.attrs[name] = value;
 					case BooleanAttribute(name, value):
 						// Snabbdom looks for truthy/falsey values.
-						data.attrs[name] = value ? "true" : "";
+						if (value) {
+							data.attrs.set(name, name);
+						}
 					case Property(name, value):
 						data.props[name] = value;
 					case Event(on, fn):
@@ -75,13 +75,27 @@ function htmlToVNode(html:Html<Dynamic>):VNode {
 
 			return h(tag, data, childVNodes);
 		case Text(text):
-			return h(undefined, undefined, text);
+			if (text.length == 0) {
+				return h('!', undefined, '');
+			}
+			return Snabbdom.vnode(undefined, undefined, undefined, text, undefined);
 		case Comment(text):
 			return h('!', undefined, text);
 		case Fragment(nodes):
-			// Snabbdom can't render multiple elements as the top level of the virtual dom.
-			// For now I'm treating this as a fatal error - one alternative would be wrapping them in a <div>
-			throw 'Snabbdom does not allow rendering a Fragment at the top of your render tree, please render a single element with children.';
+			if (nodes.length == 0) {
+				return h('!', undefined, '');
+			}
+			// Snabbdom can't render multiple nodes as the top level of the virtual dom.
+			// We're wrapping in a div as a hacky workaround (and alternative to dropping content or throwing an exception)
+			final children:Array<EitherType<VNode, String>> = [];
+			children.push(h("!", undefined,
+				"This div wrapper added by SmallUniverse because Snabbdom requires a single element (not multiple nodes) at the top of the virtual dom tree."));
+			for (htmlNode in nodes) {
+				for (vnode in htmlToVNodeChild(htmlNode)) {
+					children.push(vnode);
+				}
+			}
+			return h('div', {}, children);
 	}
 }
 
@@ -91,6 +105,9 @@ function htmlToVNodeChild(html:Html<Dynamic>):Array<EitherType<VNode, String>> {
 		case Element(tag, attrs, children):
 			return [htmlToVNode(html)];
 		case Text(text):
+			if (text.length == 0) {
+				return [];
+			}
 			// Child text nodes are created as a plain string.
 			return [text];
 		case Comment(text):
