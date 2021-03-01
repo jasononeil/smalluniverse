@@ -21,7 +21,7 @@ function stringifyHtml(html:Html<Dynamic>):String {
 				}
 			}
 			if (children.length == 0 && selfClosingTags.contains(tag)) {
-				html.add('/>');
+				html.add('>');
 			} else {
 				html.add('>');
 				for (child in children) {

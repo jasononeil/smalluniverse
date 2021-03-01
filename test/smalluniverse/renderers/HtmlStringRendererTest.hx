@@ -28,13 +28,13 @@ class HtmlStringRendererTest {
 		return assert(stringifyHtml(comment("Look! -->")) == "<!--Look! --&gt;-->");
 
 	public function testEmptyBrElement()
-		return assert(stringifyHtml(element("br", [], [])) == "<br/>");
+		return assert(stringifyHtml(element("br", [], [])) == "<br>");
 
 	public function testEmptyDivElement()
 		return assert(stringifyHtml(element("div", [], [])) == "<div></div>");
 
 	public function testEmptyElementWithAttrs()
-		return assert(stringifyHtml(element("hr", [Attribute("class", "divider")], [])) == "<hr class=\"divider\"/>");
+		return assert(stringifyHtml(element("hr", [Attribute("class", "divider")], [])) == "<hr class=\"divider\">");
 
 	public function testMultipleAttrs()
 		return assert(stringifyHtml(element("p", [Attribute("class", "lede"), Attribute("id", "intro")], [])) == "<p class=\"lede\" id=\"intro\"></p>");
@@ -73,5 +73,5 @@ class HtmlStringRendererTest {
 			[text("Hello "), element("span", [], [text("Kind")]), text(" World")])) == "<p>Hello <span>Kind</span> World</p>");
 
 	public function testFragment()
-		return assert(stringifyHtml(["Kind Regards,", element("br", [], []), "Jason"]) == "Kind Regards,<br/>Jason");
+		return assert(stringifyHtml(["Kind Regards,", element("br", [], []), "Jason"]) == "Kind Regards,<br>Jason");
 }
