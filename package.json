@@ -11,6 +11,7 @@
     "example/"
   ],
   "scripts": {
+    "postinstall": "lix download",
     "test": "yarn -s test:build && yarn -s test:run",
     "test:build": "haxe test.hxml",
     "test:run": "node build/test.bundle.js",
@@ -26,7 +27,7 @@
     "esbuild": "^0.8.34",
     "jsdom": "^16.4.0",
     "jsdom-global": "^3.0.2",
-    "lix": "^15.9.1",
+    "lix": "^15.11.4",
     "nodemon": "^2.0.7",
     "snabbdom-testing-library": "^0.0.1"
   }

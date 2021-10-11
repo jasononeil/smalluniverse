@@ -890,10 +890,10 @@ levn@~0.3.0:
     prelude-ls "~1.1.2"
     type-check "~0.3.2"
 
-lix@^15.9.1:
-  version "15.9.1"
-  resolved "https://registry.yarnpkg.com/lix/-/lix-15.9.1.tgz#c0fe09535fa542d6a13193959401a6734274b228"
-  integrity sha512-HOK+F/IFO9E3SqfBVFDnCGIDX7Hqee8RleBuQKQQ2UWh/qZ5WqVV4XTFgYgMVS0g+fwtZuuULOiAEqCQkSo3YA==
+lix@^15.11.4:
+  version "15.11.4"
+  resolved "https://registry.yarnpkg.com/lix/-/lix-15.11.4.tgz#368b2262d6625ee684588138446e4a3ff3cdc2c4"
+  integrity sha512-OVoBQu2nvFqE1nXjnVh2mHzOqP1F+c5ehtleJfHglRCnHgdWPM2aAIQFEngjEG4eqeAiw2rdQQhGQs+1Q6gO+w==
 
 lodash.sortby@^4.7.0:
   version "4.7.0"
