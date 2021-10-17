@@ -38,7 +38,15 @@ function ListItemInput(inputLabel:String, inputValue:String, onChange:String->Ap
 			id(uniqueId),
 			className("ListView__Content"),
 			defaultValue(inputValue),
-			placeholder(inputLabel)
+			placeholder(inputLabel),
+			on("change", e -> {
+				final input:Null<js.html.InputElement> = Std.downcast(e.target, js.html.InputElement);
+				if (input == null) {
+					return None;
+				}
+
+				return Some(onChange(input.value));
+			})
 		]),
 	];
 }

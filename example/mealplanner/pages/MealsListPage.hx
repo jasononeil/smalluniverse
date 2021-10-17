@@ -26,7 +26,7 @@ class MealsListView implements PageView<AppAction, MealsListData> {
 
 function MealsListMenu(meals:MealsList) {
 	final mealLinks = meals.map(m -> ListItemLink(m.name, appRouter.uriForMealPage({mealId: m.id})));
-	final newMealInput = ListItemInput("New Meal", "", _ -> Nothing);
+	final newMealInput = ListItemInput("New Meal", "", name -> NewMeal(name));
 	final items = mealLinks.concat([newMealInput]);
 	return nav([], ListView(items));
 }
