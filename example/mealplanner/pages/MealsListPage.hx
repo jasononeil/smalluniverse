@@ -8,7 +8,7 @@ import mealplanner.ui.Layout;
 import mealplanner.ui.ListView;
 import mealplanner.App.getMockData;
 
-final MealsListPage = Page(new MealsListView(), new MealsListApi());
+final MealsListPage = Page(new MealsListView(), new MealsListApi(), new PageJsonEncoder<AppAction, MealsListData>());
 typedef MealsListParams = {}
 typedef MealsList = Array<{name:String, id:String}>
 

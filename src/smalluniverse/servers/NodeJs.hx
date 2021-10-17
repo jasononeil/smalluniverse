@@ -33,17 +33,17 @@ function handleRequest(router:Router, req:IncomingMessage, res:ServerResponse) {
 		switch router.uriToRoute(req.url) {
 			case Some(route):
 				switch route.page {
-					case Page(view, api):
+					case Page(view, api, encoder):
 						if (req.method == "POST" && req.headers["content-type"] == "application/json") {
 							var body = "";
 							req.on("data", chunk -> body += chunk);
 							req.on("end", () -> {
-								trace("ACTION:", body);
+								final action = encoder.decodeAction(body);
+								trace("ACTION:", action);
 							});
 						}
 						final pageData = api.getPageData(route.params);
-						// TODO: use tink.Json instead
-						final pageDataJson = Json.stringify(pageData);
+						final pageDataJson = encoder.encodePageData(pageData);
 						switch (req.headers["accept"]) {
 							case "application/json":
 								// This is a request from our client JS. Return the data.

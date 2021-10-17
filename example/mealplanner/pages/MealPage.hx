@@ -10,7 +10,7 @@ import mealplanner.App.getMockData;
 
 using Lambda;
 
-final MealPage = Page(new MealView(), new MealApi());
+final MealPage = Page(new MealView(), new MealApi(), new PageJsonEncoder<AppAction, MealData>());
 
 typedef MealParams = {
 	mealId:String

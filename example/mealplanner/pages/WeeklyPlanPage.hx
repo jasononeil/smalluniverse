@@ -4,7 +4,7 @@ import smalluniverse.SmallUniverse;
 import mealplanner.ui.Layout;
 import mealplanner.ui.SiteHeader;
 
-final WeeklyPlanPage = Page(new WeeklyPlanView(), new WeeklyPlanApi());
+final WeeklyPlanPage = Page(new WeeklyPlanView(), new WeeklyPlanApi(), new PageJsonEncoder<AppAction, WeeklyPlanData>());
 typedef WeeklyPlanParams = {}
 typedef WeeklyPlanData = {}
 

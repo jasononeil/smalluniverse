@@ -1,6 +1,6 @@
 package smalluniverse.renderers;
 
-import smalluniverse.clients.Browser.postAction;
+import smalluniverse.clients.Browser.triggerAction;
 import haxe.DynamicAccess;
 import haxe.extern.EitherType;
 import smalluniverse.SmallUniverse.Html;
@@ -64,7 +64,7 @@ function htmlToVNode(html:Html<Dynamic>):VNode {
 						data.on[eventType] = (e:Event) -> {
 							switch eventHandler(e) {
 								case Some(actionValue):
-									postAction(actionValue);
+									triggerAction(actionValue);
 								case None:
 							}
 						};
