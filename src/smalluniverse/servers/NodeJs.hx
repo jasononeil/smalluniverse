@@ -34,6 +34,13 @@ function handleRequest(router:Router, req:IncomingMessage, res:ServerResponse) {
 			case Some(route):
 				switch route.page {
 					case Page(view, api):
+						if (req.method == "POST" && req.headers["content-type"] == "application/json") {
+							var body = "";
+							req.on("data", chunk -> body += chunk);
+							req.on("end", () -> {
+								trace("ACTION:", body);
+							});
+						}
 						final pageData = api.getPageData(route.params);
 						// TODO: use tink.Json instead
 						final pageDataJson = Json.stringify(pageData);
@@ -49,7 +56,7 @@ function handleRequest(router:Router, req:IncomingMessage, res:ServerResponse) {
 								res.setHeader("Content-Type", "text/html; charset=UTF-8");
 								res.write(wrapHtml(viewHtml, pageDataJson));
 								res.statusCode = 200;
-						}
+						}		
 				}
 			case None:
 				res.write("page not found");

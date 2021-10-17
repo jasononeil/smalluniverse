@@ -74,3 +74,25 @@ function triggerNavigation(url:String) {
 	window.history.pushState({}, "", url);
 	changeUrlTrigger.trigger(Noise);
 }
+
+/**
+	Post an action to the API.
+	For internal use only - you should be posting actions by triggering events from the DOM and trusting the framework to call this function.
+**/
+function postAction<Action>(action:Action) {
+	final fetchResult = window.fetch("" + document.location, {
+		method: "POST",
+		// TODO: we should be using tink.Json for compile safe encoding/decoding
+		body: Json.stringify(action),
+		headers: {
+			"Content-Type": "application/json",
+			"Accept": "application/json"
+		}
+	}).then((result) -> {
+		result.json().then(json -> {
+			// We will need to refactor this function to be somewhere where we have access to rerender
+			// We don't have access to `router` or `renderer` in this static function.
+			// renderPage(router, renderer, json);
+		});
+	});
+}

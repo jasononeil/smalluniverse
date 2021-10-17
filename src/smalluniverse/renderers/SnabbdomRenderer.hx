@@ -1,9 +1,11 @@
 package smalluniverse.renderers;
 
+import smalluniverse.clients.Browser.postAction;
 import haxe.DynamicAccess;
 import haxe.extern.EitherType;
 import smalluniverse.SmallUniverse.Html;
 import js.html.Node;
+import js.html.Event;
 import js.Lib.undefined;
 import Snabbdom;
 import Snabbdom.h;
@@ -58,9 +60,14 @@ function htmlToVNode(html:Html<Dynamic>):VNode {
 						}
 					case Property(name, value):
 						data.props[name] = value;
-					case Event(on, fn):
-						// TODO: figure out our plan for event handlers.
-						data.on[on] = fn;
+					case Event(eventType, eventHandler):
+						data.on[eventType] = (e:Event) -> {
+							switch eventHandler(e) {
+								case Some(actionValue):
+									postAction(actionValue);
+								case None:
+							}
+						};
 				}
 				// TODO: hooks.
 				// TODO: key.
