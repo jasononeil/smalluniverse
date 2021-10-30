@@ -33,17 +33,17 @@ function handleRequest(router:Router, req:IncomingMessage, res:ServerResponse) {
 		switch router.uriToRoute(req.url) {
 			case Some(route):
 				switch route.page {
-					case Page(view, api, encoder):
+					case Page(view, api, actionEncoder, pageDataEncoder):
 						if (req.method == "POST" && req.headers["content-type"] == "application/json") {
 							var body = "";
 							req.on("data", chunk -> body += chunk);
 							req.on("end", () -> {
-								final action = encoder.decodeAction(body);
+								final action = actionEncoder.decode(body);
 								trace("ACTION:", action);
 							});
 						}
 						final pageData = api.getPageData(route.params);
-						final pageDataJson = encoder.encodePageData(pageData);
+						final pageDataJson = pageDataEncoder.encode(pageData);
 						switch (req.headers["accept"]) {
 							case "application/json":
 								// This is a request from our client JS. Return the data.
@@ -56,7 +56,7 @@ function handleRequest(router:Router, req:IncomingMessage, res:ServerResponse) {
 								res.setHeader("Content-Type", "text/html; charset=UTF-8");
 								res.write(wrapHtml(viewHtml, pageDataJson));
 								res.statusCode = 200;
-						}		
+						}
 				}
 			case None:
 				res.write("page not found");

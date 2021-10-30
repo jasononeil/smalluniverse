@@ -10,7 +10,6 @@ import js.Browser.window;
 using tink.CoreApi;
 
 private var changeUrlTrigger = new SignalTrigger<Noise>();
-
 private var actionTrigger = new SignalTrigger<Any>();
 
 function init(router:Router) {
@@ -62,8 +61,8 @@ function renderPage(router:Router, renderer:SnabbdomRenderer, pageDataJson:Strin
 	switch router.uriToRoute(document.location.pathname) {
 		case Some(route):
 			switch route.page {
-				case Page(view, _api, encoder):
-					final pageData = encoder.decodePageData(pageDataJson);
+				case Page(view, _api, _actionEncoder, pageDataEncoder):
+					final pageData = pageDataEncoder.decode(pageDataJson);
 					final html = view.render(pageData);
 					renderer.update(html);
 			}
@@ -91,24 +90,24 @@ function triggerAction<Action>(action:Action) {
 private function postAction<Action>(action:Action, router:Router, renderer:SnabbdomRenderer) {
 	// Get the JSON encoder.
 	// This is a bit gross. It might be better to somehow set postAction up with whatever encoder is known from the current routing event.
-	final encoder = switch router.uriToRoute(document.location.pathname) {
+	final actionEncoder = switch router.uriToRoute(document.location.pathname) {
 		case Some(route):
 			switch route.page {
-				case Page(_view, _api, encoder):
-					encoder;
+				case Page(_view, _api, actionEncoder, _pageDataEncoder):
+					actionEncoder;
 			}
 		case None:
 			// TODO: handle Not Found errors.
 			null;
 	}
-	if (encoder == null) {
+	if (actionEncoder == null) {
 		throw "Violation: we couldn't find a page for the current route, despite an action being triggered (presumably from a page)";
 	}
 
 	window.fetch("" + document.location, {
 		method: "POST",
 		// TODO: we should be using tink.Json for compile safe encoding/decoding
-		body: encoder.encodeAction(action),
+		body: actionEncoder.encode(action),
 		headers: {
 			"Content-Type": "application/json",
 			"Accept": "application/json"
@@ -118,4 +117,4 @@ private function postAction<Action>(action:Action, router:Router, renderer:Snabb
 			renderPage(router, renderer, pageDataJson);
 		});
 	});
-} 
+}

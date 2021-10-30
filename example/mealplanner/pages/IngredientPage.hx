@@ -10,7 +10,7 @@ import mealplanner.App.getMockData;
 
 using Lambda;
 
-final IngredientPage = Page(new IngredientView(), new IngredientApi(), new PageJsonEncoder<AppAction, IngredientData>());
+final IngredientPage = Page(new IngredientView(), new IngredientApi(), new JsonEncoder<AppAction>(), new JsonEncoder<IngredientData>());
 
 typedef IngredientParams = {
 	ingredient:String

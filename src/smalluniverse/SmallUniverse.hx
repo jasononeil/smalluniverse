@@ -30,19 +30,18 @@ interface PageView<Action, PageData> {
 	function render(data:PageData):Html<Action>;
 }
 
-@:genericBuild(smalluniverse.macros.PageJsonEncoderMacros.build())
-class PageJsonEncoder<Action, PageData> {}
+@:genericBuild(smalluniverse.macros.JsonEncoderMacros.build())
+class JsonEncoder<T> {}
 
-interface IPageJsonEncoder<Action, PageData> {
-	public function encodeAction(action:Action):String;
-	public function decodeAction(actionJson:String):Action;
-	public function encodePageData(pageData:PageData):String;
-	public function decodePageData(pageDataJson:String):PageData;
+interface IJsonEncoder<T> {
+	public function encode(value:T):String;
+	public function decode(json:String):T;
 }
 
 enum Page<Action, PageParams, PageData> {
 	// Should these be instances or classes that we instantiate as needed?
-	Page(view:PageView<Action, PageData>, api:PageApi<Action, PageParams, PageData>, encoder:IPageJsonEncoder<Action, PageData>);
+	Page(view:PageView<Action, PageData>, api:PageApi<Action, PageParams, PageData>, actionEncoder:IJsonEncoder<Action>,
+		pageDataEncoder:IJsonEncoder<PageData>);
 }
 
 interface Component<Props, State, InnerAction, OuterAction> {

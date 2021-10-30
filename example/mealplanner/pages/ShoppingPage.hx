@@ -7,7 +7,7 @@ import mealplanner.ui.SiteHeader;
 import mealplanner.ui.IngredientList;
 import mealplanner.App.getMockData;
 
-final ShoppingPage = Page(new ShoppingView(), new ShoppingApi(), new PageJsonEncoder<AppAction, ShoppingData>());
+final ShoppingPage = Page(new ShoppingView(), new ShoppingApi(), new JsonEncoder<AppAction>(), new JsonEncoder<ShoppingData>());
 typedef ShoppingParams = {}
 
 typedef ShoppingData = {
