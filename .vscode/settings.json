@@ -1,0 +1,8 @@
+{
+  "haxe.executable": "./node_modules/.bin/haxe",
+  "editor.useTabStops": true,
+  "[haxe]": {
+    "editor.defaultFormatter": "nadako.vshaxe"
+  },
+  "editor.formatOnSave": true
+}
