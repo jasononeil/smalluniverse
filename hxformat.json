@@ -29,6 +29,18 @@
         }
       ]
     },
+    "typeParameter": {
+      "defaultWrap": "noWrap",
+      "rules": [
+        {
+          "type": "onePerLine",
+          "conditions": [
+            { "cond": "exceedsMaxLineLength", "value": 1 },
+            { "cond": "itemCount >= n", "value": 2 }
+          ]
+        }
+      ]
+    },
     "opBoolChain": {
       "defaultWrap": "noWrap",
       "rules": [
