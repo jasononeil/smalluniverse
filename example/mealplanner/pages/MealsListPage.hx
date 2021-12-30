@@ -8,7 +8,13 @@ import mealplanner.ui.Layout;
 import mealplanner.ui.ListView;
 import mealplanner.App.getMockData;
 
-final MealsListPage = Page(new MealsListView(), new MealsListApi(), new JsonEncoder<AppAction>(), new JsonEncoder<MealsListData>());
+final MealsListPage = Page(
+	new MealsListView(),
+	new MealsListApi(),
+	new JsonEncoder<AppAction>(),
+	new JsonEncoder<MealsListData>()
+);
+
 typedef MealsListParams = {}
 typedef MealsList = Array<{name:String, id:String}>
 
@@ -25,13 +31,21 @@ class MealsListView implements PageView<AppAction, MealsListData> {
 }
 
 function MealsListMenu(meals:MealsList) {
-	final mealLinks = meals.map(m -> ListItemLink(m.name, appRouter.uriForMealPage({mealId: m.id})));
+	final mealLinks = meals.map(
+		m -> ListItemLink(m.name, appRouter.uriForMealPage({
+			mealId: m.id
+		}))
+	);
 	final newMealInput = ListItemInput("New Meal", "", name -> NewMeal(name));
 	final items = mealLinks.concat([newMealInput]);
 	return nav([], ListView(items));
 }
 
-class MealsListApi implements PageApi<AppAction, MealsListParams, MealsListData> {
+class MealsListApi implements PageApi<
+	AppAction,
+	MealsListParams,
+	MealsListData
+	> {
 	public function new() {}
 
 	public function getPageData(params:MealsListParams) {
@@ -40,7 +54,10 @@ class MealsListApi implements PageApi<AppAction, MealsListParams, MealsListData>
 		};
 	}
 
-	public function pageDataShouldUpdate(params:MealsListParams, action:AppAction) {
+	public function pageDataShouldUpdate(
+		params:MealsListParams,
+		action:AppAction
+	) {
 		return false;
 	}
 }

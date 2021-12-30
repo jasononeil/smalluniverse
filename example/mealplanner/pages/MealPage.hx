@@ -10,7 +10,12 @@ import mealplanner.App.getMockData;
 
 using Lambda;
 
-final MealPage = Page(new MealView(), new MealApi(), new JsonEncoder<AppAction>(), new JsonEncoder<MealData>());
+final MealPage = Page(
+	new MealView(),
+	new MealApi(),
+	new JsonEncoder<AppAction>(),
+	new JsonEncoder<MealData>()
+);
 
 typedef MealParams = {
 	mealId:String
@@ -47,7 +52,11 @@ class MealApi implements PageApi<AppAction, MealParams, MealData> {
 		if (meal == null) {
 			throw new Error(NotFound, 'Could not find meal ${params.mealId}');
 		}
-		return {mealId: meal.id, mealName: meal.name, ingredients: meal.ingredients}
+		return {
+			mealId: meal.id,
+			mealName: meal.name,
+			ingredients: meal.ingredients
+		}
 	}
 
 	public function pageDataShouldUpdate(params:MealParams, action:AppAction) {

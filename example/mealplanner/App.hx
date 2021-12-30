@@ -49,7 +49,12 @@ class AppRoutes implements Router {
 			case ["meal", mealId]:
 				return Some({page: MealPage, params: {mealId: mealId}});
 			case ["ingredient", ingredientName]:
-				return Some({page: IngredientPage, params: {ingredient: StringTools.urlDecode(ingredientName)}});
+				return Some({
+					page: IngredientPage,
+					params: {
+						ingredient: StringTools.urlDecode(ingredientName)
+					}
+				});
 			case ["weekly-plan"]:
 				return Some({page: WeeklyPlanPage, params: {}});
 			case ["shopping"]:

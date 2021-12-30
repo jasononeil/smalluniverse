@@ -5,7 +5,23 @@ import haxe.ds.Option;
 import StringBuf;
 
 final selfClosingTags = [
-	"area", "base", "br", "col", "command", "embed", "hr", "img", "input", "keygen", "link", "menuitem", "meta", "param", "source", "track", "wbr",
+	"area",
+	"base",
+	"br",
+	"col",
+	"command",
+	"embed",
+	"hr",
+	"img",
+	"input",
+	"keygen",
+	"link",
+	"menuitem",
+	"meta",
+	"param",
+	"source",
+	"track",
+	"wbr",
 ];
 
 function stringifyHtml(html:Html<Dynamic>):String {

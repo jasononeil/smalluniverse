@@ -26,7 +26,9 @@ function init(router:Router) {
 
 	changeUrlTrigger.asSignal().handle(() -> handleUrlChange(router, renderer));
 
-	actionTrigger.asSignal().handle(action -> postAction(action, router, renderer));
+	actionTrigger
+			.asSignal()
+			.handle(action -> postAction(action, router, renderer));
 }
 
 /**
@@ -57,7 +59,11 @@ function handleUrlChange(router:Router, renderer:SnabbdomRenderer) {
 /**
 	Use the router to find the current page and render it.
 **/
-function renderPage(router:Router, renderer:SnabbdomRenderer, pageDataJson:String) {
+function renderPage(
+	router:Router,
+	renderer:SnabbdomRenderer,
+	pageDataJson:String
+) {
 	switch router.uriToRoute(document.location.pathname) {
 		case Some(route):
 			switch route.page {
@@ -87,7 +93,11 @@ function triggerAction<Action>(action:Action) {
 	actionTrigger.trigger(action);
 }
 
-private function postAction<Action>(action:Action, router:Router, renderer:SnabbdomRenderer) {
+private function postAction<Action>(
+	action:Action,
+	router:Router,
+	renderer:SnabbdomRenderer
+) {
 	// Get the JSON encoder.
 	// This is a bit gross. It might be better to somehow set postAction up with whatever encoder is known from the current routing event.
 	final actionEncoder = switch router.uriToRoute(document.location.pathname) {

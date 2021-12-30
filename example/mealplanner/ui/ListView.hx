@@ -10,10 +10,9 @@ enum ItemAction {
 }
 
 function ListView(items:Html<AppAction>):Html<AppAction> {
-	return [
-		css(CompileTime.readFile("mealplanner/ui/ListView.css")),
-		ul([className("ListView__List")], items)
-	];
+	return [css(CompileTime.readFile("mealplanner/ui/ListView.css")), ul([
+		className("ListView__List")
+	], items)];
 }
 
 function ListItem(content:Html<AppAction>) {
@@ -21,7 +20,10 @@ function ListItem(content:Html<AppAction>) {
 }
 
 function ListItemLink(content:Html<AppAction>, url:String) {
-	return mealplanner.ui.Link.Link([className("ListView__Content"), href(url)], content);
+	return mealplanner.ui.Link.Link([
+		className("ListView__Content"),
+		href(url)
+	], content);
 }
 
 function ListItemButton(content:Html<AppAction>, action:AppAction) {
@@ -29,29 +31,42 @@ function ListItemButton(content:Html<AppAction>, action:AppAction) {
 	return button([className("ListView__Content")], content);
 }
 
-function ListItemInput(inputLabel:String, inputValue:String, onChange:String->AppAction) {
+function ListItemInput(
+	inputLabel:String,
+	inputValue:String,
+	onChange:String->AppAction
+) {
 	// TODO: onChange Action
 	final uniqueId = Std.string(Math.random()); // TODO: use a UUID generator
-	return [
-		label([className("ListView__SROnly"), htmlFor(uniqueId)], inputLabel),
-		inputText([
-			id(uniqueId),
-			className("ListView__Content"),
-			defaultValue(inputValue),
-			placeholder(inputLabel),
-			on("change", e -> {
-				final input:Null<js.html.InputElement> = Std.downcast(e.target, js.html.InputElement);
-				if (input == null) {
-					return None;
-				}
+	return [label([
+		className("ListView__SROnly"),
+		htmlFor(uniqueId)
+	], inputLabel), inputText([
+		id(uniqueId),
+		className("ListView__Content"),
+		defaultValue(inputValue),
+		placeholder(inputLabel),
+		on("change", e -> {
+			final input:Null<js.html.InputElement> = Std.downcast(
+				e.target,
+				js.html.InputElement
+			);
+			if (input == null) {
+				return None;
+			}
 
-				return Some(onChange(input.value));
-			})
-		]),
-	];
+			return Some(onChange(input.value));
+		})
+		]),];
 }
 
-function ListItemCheckbox(content:Html<AppAction>, ticked:Bool, onChange:Bool->AppAction) {
+function ListItemCheckbox(
+	content:Html<AppAction>,
+	ticked:Bool,
+	onChange:Bool->AppAction
+) {
 	// TODO: onChange Action
-	return label([className("ListView__Content")], [checkbox([checked(ticked)]), content]);
+	return label([className("ListView__Content")], [checkbox([
+		checked(ticked)
+	]), content]);
 }

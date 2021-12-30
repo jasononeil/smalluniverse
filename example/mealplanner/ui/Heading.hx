@@ -13,7 +13,13 @@ enum abstract HeadingTag(String) to String {
 function Heading(tag:HeadingTag, content:Html<AppAction>):Html<AppAction> {
 	return [
 		css(CompileTime.readFile("mealplanner/ui/Heading.css")),
-		element(tag, [className(["Heading", 'Heading--$tag']), on("click", _ -> Some(Nothing))], content)
+		element(tag, [
+			className([
+				"Heading",
+				'Heading--$tag'
+			]),
+			on("click", _ -> Some(Nothing))
+		], content)
 	];
 }
 

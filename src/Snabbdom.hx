@@ -3,13 +3,25 @@ import haxe.extern.EitherType;
 
 // Snabbdom doesn't have a single import, so I've got this class to gather the functions for easier access.
 class Snabbdom {
-	inline public static function init(modules:Array<SnabbdomModule>):PatchFunction
+	inline public static function init(
+		modules:Array<SnabbdomModule>
+	):PatchFunction
 		return SnabbdomInit.init(modules);
 
-	inline public static function h(tag:String, data:{}, children:EitherType<String, Array<VNode>>):VNode
+	inline public static function h(
+		tag:String,
+		data:{},
+		children:EitherType<String, Array<VNode>>
+	):VNode
 		return SnabbdomH.h(tag, data, children);
 
-	inline public static function vnode(tag:String, data:{}, children:EitherType<String, Array<VNode>>, text:Null<String>, elm:Node):VNode
+	inline public static function vnode(
+		tag:String,
+		data:{},
+		children:EitherType<String, Array<VNode>>,
+		text:Null<String>,
+		elm:Node
+	):VNode
 		return SnabbdomVNode.vnode(tag, data, children, text, elm);
 
 	inline public static function toVNode(node:Node):VNode
@@ -81,12 +93,22 @@ extern class SnabbdomInit {
 
 @:js.import(@star 'snabbdom/build/package/h')
 extern class SnabbdomH {
-	public static function h(tag:String, data:{}, children:EitherType<String, Array<VNode>>):VNode;
+	public static function h(
+		tag:String,
+		data:{},
+		children:EitherType<String, Array<VNode>>
+	):VNode;
 }
 
 @:js.import(@star 'snabbdom/build/package/vnode')
 extern class SnabbdomVNode {
-	public static function vnode(tag:Null<String>, data:Null<{}>, children:Null<EitherType<String, Array<VNode>>>, text:Null<String>, elm:Null<Node>):VNode;
+	public static function vnode(
+		tag:Null<String>,
+		data:Null<{}>,
+		children:Null<EitherType<String, Array<VNode>>>,
+		text:Null<String>,
+		elm:Null<Node>
+	):VNode;
 }
 
 @:js.import(@star 'snabbdom/build/package/tovnode')

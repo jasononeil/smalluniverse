@@ -4,7 +4,9 @@ import js.html.Event;
 import haxe.ds.Option;
 
 interface Router {
-	function uriToRoute<PageParams>(uri:String):Option<{page:Page<Dynamic, PageParams, Dynamic>, params:PageParams}>;
+	function uriToRoute<PageParams>(
+		uri:String
+	):Option<{page:Page<Dynamic, PageParams, Dynamic>, params:PageParams}>;
 }
 
 interface Projection<Action> {
@@ -40,17 +42,26 @@ interface IJsonEncoder<T> {
 
 enum Page<Action, PageParams, PageData> {
 	// Should these be instances or classes that we instantiate as needed?
-	Page(view:PageView<Action, PageData>, api:PageApi<Action, PageParams, PageData>, actionEncoder:IJsonEncoder<Action>,
-		pageDataEncoder:IJsonEncoder<PageData>);
+	Page(
+		view:PageView<Action, PageData>,
+		api:PageApi<Action, PageParams, PageData>,
+		actionEncoder:IJsonEncoder<Action>,
+		pageDataEncoder:IJsonEncoder<PageData>
+	);
 }
 
 interface Component<Props, State, InnerAction, OuterAction> {
 	function render(props:Props, state:State):Html<InnerAction>;
 	function defaultState(props:Props):State;
-	function update(currentState:State, action:InnerAction):{newState:State, outerAction:Option<OuterAction>}
+	function update(
+		currentState:State,
+		action:InnerAction
+	):{newState:State, outerAction:Option<OuterAction>}
 }
 
-abstract Html<Action>(HtmlType<Action>) from HtmlType<Action> to HtmlType<Action> {
+abstract Html<Action>(
+	HtmlType<Action>
+) from HtmlType<Action> to HtmlType<Action> {
 	@:from public static function fromString<T>(str:String):Html<T> {
 		return Text(str);
 	}
@@ -92,7 +103,11 @@ abstract Html<Action>(HtmlType<Action>) from HtmlType<Action> to HtmlType<Action
 }
 
 enum HtmlType<Action> {
-	Element(tag:String, attrs:Array<HtmlAttribute<Action>>, children:Html<Action>);
+	Element(
+		tag:String,
+		attrs:Array<HtmlAttribute<Action>>,
+		children:Html<Action>
+	);
 	Text(text:String);
 	Comment(text:String);
 	Fragment(nodes:Array<Html<Action>>);
@@ -106,36 +121,52 @@ enum HtmlAttribute<Action> {
 	Event(on:String, fn:(e:Event) -> Option<Action>);
 }
 
-function mapHtml<InnerAction, OuterAction>(html:Html<InnerAction>, convert:InnerAction->Option<OuterAction>):Html<OuterAction> {
-	switch html {
-		case Element(tag, attrs, children):
-			return Element(tag, attrs.map(a -> mapAttr(a, convert)), mapHtml(children, convert));
-		case Text(text):
-			return Text(text);
-		case Comment(text):
-			return Comment(text);
-		case Fragment(nodes):
-			return Fragment(nodes.map(n -> mapHtml(n, convert)));
-	}
+function mapHtml<
+	InnerAction,
+	OuterAction
+	>(
+		html:Html<InnerAction>,
+		convert:InnerAction->Option<OuterAction>
+	):Html<OuterAction> {
+		switch html {
+			case Element(tag, attrs, children):
+				return Element(
+					tag,
+					attrs.map(a -> mapAttr(a, convert)),
+					mapHtml(children, convert)
+				);
+			case Text(text):
+				return Text(text);
+			case Comment(text):
+				return Comment(text);
+			case Fragment(nodes):
+				return Fragment(nodes.map(n -> mapHtml(n, convert)));
+		}
 }
 
-function mapAttr<InnerAction, OuterAction>(attr:HtmlAttribute<InnerAction>, convert:InnerAction->Option<OuterAction>):HtmlAttribute<OuterAction> {
-	switch attr {
-		case Attribute(name, value):
-			return Attribute(name, value);
-		case BooleanAttribute(name, value):
-			return BooleanAttribute(name, value);
-		case Property(name, value):
-			return Property(name, value);
-		case Event(on, innerFn):
-			function outerFn(e) {
-				switch innerFn(e) {
-					case Some(v):
-						return convert(v);
-					case None:
-						return None;
+function mapAttr<
+	InnerAction,
+	OuterAction
+	>(
+		attr:HtmlAttribute<InnerAction>,
+		convert:InnerAction->Option<OuterAction>
+	):HtmlAttribute<OuterAction> {
+		switch attr {
+			case Attribute(name, value):
+				return Attribute(name, value);
+			case BooleanAttribute(name, value):
+				return BooleanAttribute(name, value);
+			case Property(name, value):
+				return Property(name, value);
+			case Event(on, innerFn):
+				function outerFn(e) {
+					switch innerFn(e) {
+						case Some(v):
+							return convert(v);
+						case None:
+							return None;
+					}
 				}
-			}
-			return Event(on, outerFn);
-	}
+				return Event(on, outerFn);
+		}
 }

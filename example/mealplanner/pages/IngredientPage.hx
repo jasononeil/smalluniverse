@@ -10,7 +10,12 @@ import mealplanner.App.getMockData;
 
 using Lambda;
 
-final IngredientPage = Page(new IngredientView(), new IngredientApi(), new JsonEncoder<AppAction>(), new JsonEncoder<IngredientData>());
+final IngredientPage = Page(
+	new IngredientView(),
+	new IngredientApi(),
+	new JsonEncoder<AppAction>(),
+	new JsonEncoder<IngredientData>()
+);
 
 typedef IngredientParams = {
 	ingredient:String
@@ -36,12 +41,18 @@ class IngredientView implements PageView<AppAction, IngredientData> {
 			ListView([
 				for (store => selected in data.stores)
 					ListItemCheckbox(store, selected, _ -> AppAction.Nothing)
-			].concat([ListItemInput("Other store", "", _ -> AppAction.Nothing)]))
+			].concat([
+				ListItemInput("Other store", "", _ -> AppAction.Nothing)
+				]))
 		]);
 	}
 }
 
-class IngredientApi implements PageApi<AppAction, IngredientParams, IngredientData> {
+class IngredientApi implements PageApi<
+	AppAction,
+	IngredientParams,
+	IngredientData
+	> {
 	public function new() {}
 
 	public function getPageData(params:IngredientParams):IngredientData {
@@ -58,10 +69,16 @@ class IngredientApi implements PageApi<AppAction, IngredientParams, IngredientDa
 			}
 		}
 
-		final meals = mockData.filter(meal -> meal.ingredients.find((i) -> i.ingredient == params.ingredient && !i.ticked) != null).map(meal -> {
-			name: meal.name,
-			mealId: meal.id,
-		});
+		final meals = mockData
+				.filter(
+				meal -> meal.ingredients.find(
+					(i) ->
+						i.ingredient == params.ingredient && !i.ticked) != null
+			)
+				.map(meal -> {
+				name: meal.name,
+				mealId: meal.id,
+			});
 
 		return {
 			ingredient: params.ingredient,
@@ -70,7 +87,10 @@ class IngredientApi implements PageApi<AppAction, IngredientParams, IngredientDa
 		}
 	}
 
-	public function pageDataShouldUpdate(params:IngredientParams, action:AppAction) {
+	public function pageDataShouldUpdate(
+		params:IngredientParams,
+		action:AppAction
+	) {
 		return false;
 	}
 }

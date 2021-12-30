@@ -17,7 +17,11 @@ class SnabbdomRenderer {
 	public function new() {}
 
 	public function init(node:Node) {
-		patch = Snabbdom.init([Snabbdom.attributesModule, Snabbdom.propsModule, Snabbdom.eventListenersModule]);
+		patch = Snabbdom.init([
+			Snabbdom.attributesModule,
+			Snabbdom.propsModule,
+			Snabbdom.eventListenersModule
+		]);
 		previousVNode = Snabbdom.toVNode(node);
 	}
 
@@ -85,7 +89,13 @@ function htmlToVNode(html:Html<Dynamic>):VNode {
 			if (text.length == 0) {
 				return h('!', undefined, '');
 			}
-			return Snabbdom.vnode(undefined, undefined, undefined, text, undefined);
+			return Snabbdom.vnode(
+				undefined,
+				undefined,
+				undefined,
+				text,
+				undefined
+			);
 		case Comment(text):
 			return h('!', undefined, text);
 		case Fragment(nodes):
@@ -95,8 +105,13 @@ function htmlToVNode(html:Html<Dynamic>):VNode {
 			// Snabbdom can't render multiple nodes as the top level of the virtual dom.
 			// We're wrapping in a div as a hacky workaround (and alternative to dropping content or throwing an exception)
 			final children:Array<EitherType<VNode, String>> = [];
-			children.push(h("!", undefined,
-				"This div wrapper added by SmallUniverse because Snabbdom requires a single element (not multiple nodes) at the top of the virtual dom tree."));
+			children.push(
+				h(
+					"!",
+					undefined,
+					"This div wrapper added by SmallUniverse because Snabbdom requires a single element (not multiple nodes) at the top of the virtual dom tree."
+				)
+			);
 			for (htmlNode in nodes) {
 				for (vnode in htmlToVNodeChild(htmlNode)) {
 					children.push(vnode);

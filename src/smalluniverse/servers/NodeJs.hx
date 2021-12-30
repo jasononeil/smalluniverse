@@ -34,7 +34,9 @@ function handleRequest(router:Router, req:IncomingMessage, res:ServerResponse) {
 			case Some(route):
 				switch route.page {
 					case Page(view, api, actionEncoder, pageDataEncoder):
-						if (req.method == "POST" && req.headers["content-type"] == "application/json") {
+						if (req.method == "POST" && req.headers[
+							"content-type"
+						] == "application/json") {
 							var body = "";
 							req.on("data", chunk -> body += chunk);
 							req.on("end", () -> {
@@ -47,13 +49,21 @@ function handleRequest(router:Router, req:IncomingMessage, res:ServerResponse) {
 						switch (req.headers["accept"]) {
 							case "application/json":
 								// This is a request from our client JS. Return the data.
-								res.setHeader("Content-Type", "application/json; charset=UTF-8");
+								res.setHeader(
+									"Content-Type",
+									"application/json; charset=UTF-8"
+								);
 								res.write(pageDataJson);
 								res.statusCode = 200;
 							default:
 								// Render the page as HTML
-								final viewHtml = stringifyHtml(view.render(pageData));
-								res.setHeader("Content-Type", "text/html; charset=UTF-8");
+								final viewHtml = stringifyHtml(
+									view.render(pageData)
+								);
+								res.setHeader(
+									"Content-Type",
+									"text/html; charset=UTF-8"
+								);
 								res.write(wrapHtml(viewHtml, pageDataJson));
 								res.statusCode = 200;
 						}
