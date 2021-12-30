@@ -1,0 +1,63 @@
+{
+  "wrapping": {
+    "maxLineLength": 80,
+    "methodChain": {
+      "defaultWrap": "noWrap",
+      "rules": [
+        {
+          "type": "onePerLine",
+          "additionalIndent": 1,
+          "conditions": [{ "cond": "exceedsMaxLineLength", "value": 1 }]
+        }
+      ]
+    },
+    "functionSignature": {
+      "defaultWrap": "noWrap",
+      "rules": [
+        {
+          "type": "onePerLine",
+          "conditions": [{ "cond": "exceedsMaxLineLength", "value": 1 }]
+        }
+      ]
+    },
+    "objectLiteral": {
+      "defaultWrap": "noWrap",
+      "rules": [
+        {
+          "type": "onePerLine",
+          "conditions": [{ "cond": "exceedsMaxLineLength", "value": 1 }]
+        }
+      ]
+    },
+    "opBoolChain": {
+      "defaultWrap": "noWrap",
+      "rules": [
+        {
+          "type": "onePerLine",
+          "conditions": [{ "cond": "exceedsMaxLineLength", "value": 1 }]
+        }
+      ]
+    },
+    "arrayWrap": {
+      "defaultWrap": "noWrap",
+      "rules": [
+        {
+          "type": "onePerLine",
+          "conditions": [{ "cond": "exceedsMaxLineLength", "value": 1 }]
+        }
+      ]
+    },
+    "callParameter": {
+      "defaultWrap": "noWrap",
+      "rules": [
+        {
+          "type": "onePerLine",
+          "conditions": [{ "cond": "exceedsMaxLineLength", "value": 1 }]
+        }
+      ]
+    },
+    "casePattern": {
+      "defaultAdditionalIndent": 1
+    }
+  }
+}

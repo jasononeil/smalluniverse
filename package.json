@@ -12,6 +12,8 @@
   ],
   "scripts": {
     "postinstall": "lix download",
+    "formatter": "node `(yarn -s haxelib path formatter | sed 1q)`/../run.js",
+    "format": "yarn -s formatter -s src && yarn -s formatter -s example",
     "test": "yarn -s test:build && yarn -s test:run",
     "test:build": "haxe test.hxml",
     "test:run": "node build/test.bundle.js",
