@@ -18,7 +18,7 @@ class JsonEncoderMacros {
 					"_"
 				);
 				final complexType = type.toComplex();
-				s // Return early if the type already exists.
+				// Return early if the type already exists.
 				try {
 					final existingType = Context.getType(encoderClassName);
 					return existingType.toComplex();
@@ -36,7 +36,6 @@ class JsonEncoderMacros {
 				switch type {
 					case TInst(classType, _):
 						if (classType.get().kind.match(KTypeParameter(_))) {
-							trace(actionId, pageDataId);
 							Context.error(
 								'JsonEncoder was called with the type parameter ${classType.get().name} which is a generic, but the type parameter must be a concrete type',
 								Context.currentPos()
@@ -50,11 +49,11 @@ class JsonEncoderMacros {
 					public function new() {}
 
 					public function encode(value:$complexType):String {
-						return tink.Json.stringify(action);
+						return tink.Json.stringify(value);
 					}
 
 					public function decode(json:String):$complexType {
-						return tink.Json.parse(actionJson);
+						return tink.Json.parse(json);
 					}
 				}
 				Context.defineType(typeDefinition);
