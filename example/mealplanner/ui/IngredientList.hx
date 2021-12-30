@@ -7,10 +7,10 @@ import smalluniverse.DOM;
 import mealplanner.ui.ListView;
 import mealplanner.ui.Heading;
 
-function IngredientList(
+function IngredientList<Action>(
 	name:String,
 	ingredients:Array<{ingredient:String, ticked:Bool, info:Null<String>}>,
-	?extraItems:Html<AppAction>
+	?extraItems:Html<Action>
 ) {
 	return [
 		css(CompileTime.readFile("mealplanner/ui/IngredientList.css")),

@@ -9,32 +9,32 @@ enum ItemAction {
 	Link(url:String);
 }
 
-function ListView(items:Html<AppAction>):Html<AppAction> {
+function ListView<Action>(items:Html<Action>):Html<Action> {
 	return [css(CompileTime.readFile("mealplanner/ui/ListView.css")), ul([
 		className("ListView__List")
 	], items)];
 }
 
-function ListItem(content:Html<AppAction>) {
+function ListItem<Action>(content:Html<Action>) {
 	return div([className("ListView__Content")], content);
 }
 
-function ListItemLink(content:Html<AppAction>, url:String) {
+function ListItemLink<Action>(content:Html<Action>, url:String) {
 	return mealplanner.ui.Link.Link([
 		className("ListView__Content"),
 		href(url)
 	], content);
 }
 
-function ListItemButton(content:Html<AppAction>, action:AppAction) {
+function ListItemButton<Action>(content:Html<Action>, action:Action) {
 	// TODO: onClick Action
 	return button([className("ListView__Content")], content);
 }
 
-function ListItemInput(
+function ListItemInput<Action>(
 	inputLabel:String,
 	inputValue:String,
-	onChange:String->AppAction
+	onChange:String->Action
 ) {
 	// TODO: onChange Action
 	final uniqueId = Std.string(Math.random()); // TODO: use a UUID generator
@@ -60,10 +60,10 @@ function ListItemInput(
 		]),];
 }
 
-function ListItemCheckbox(
-	content:Html<AppAction>,
+function ListItemCheckbox<Action>(
+	content:Html<Action>,
 	ticked:Bool,
-	onChange:Bool->AppAction
+	onChange:Bool->Action
 ) {
 	// TODO: onChange Action
 	return label([className("ListView__Content")], [checkbox([

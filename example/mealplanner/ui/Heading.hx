@@ -10,27 +10,26 @@ enum abstract HeadingTag(String) to String {
 	var H3;
 }
 
-function Heading(tag:HeadingTag, content:Html<AppAction>):Html<AppAction> {
+function Heading<T>(tag:HeadingTag, content:Html<T>):Html<T> {
 	return [
 		css(CompileTime.readFile("mealplanner/ui/Heading.css")),
 		element(tag, [
 			className([
 				"Heading",
 				'Heading--$tag'
-			]),
-			on("click", _ -> Some(Nothing))
+			])
 		], content)
 	];
 }
 
-inline function Heading1(content:Html<AppAction>):Html<AppAction> {
+inline function Heading1<Action>(content:Html<Action>):Html<Action> {
 	return Heading(H1, content);
 }
 
-inline function Heading2(content:Html<AppAction>):Html<AppAction> {
+inline function Heading2<Action>(content:Html<Action>):Html<Action> {
 	return Heading(H2, content);
 }
 
-inline function Heading3(content:Html<AppAction>):Html<AppAction> {
+inline function Heading3<Action>(content:Html<Action>):Html<Action> {
 	return Heading(H3, content);
 }

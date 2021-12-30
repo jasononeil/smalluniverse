@@ -4,8 +4,9 @@ import mealplanner.ui.Heading;
 import mealplanner.ui.Link;
 import mealplanner.App;
 import smalluniverse.DOM;
+import smalluniverse.SmallUniverse.Html;
 
-function SiteHeader(title:String) {
+function SiteHeader<Action>(title:String):Html<Action> {
 	return [css(CompileTime.readFile("mealplanner/ui/SiteHeader.css")), header([
 		className("SiteHeader")
 	], [

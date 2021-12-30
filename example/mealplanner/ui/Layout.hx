@@ -6,10 +6,10 @@ import mealplanner.AppAction;
 
 final sourceSansVariableUrl = "https://cdn.jsdelivr.net/npm/source-sans-pro@3.6.0/source-sans-variable.css";
 
-function Layout(
-	headerContent:Html<AppAction>,
-	mainContent:Html<AppAction>
-):Html<AppAction> {
+function Layout<Action>(
+	headerContent:Html<Action>,
+	mainContent:Html<Action>
+):Html<Action> {
 	return div([], [
 		css(CompileTime.readFile("mealplanner/ui/Variables.css")),
 		css(CompileTime.readFile("mealplanner/ui/Layout.css")),
