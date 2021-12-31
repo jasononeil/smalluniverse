@@ -116,7 +116,6 @@ private function postAction<Action>(
 
 	window.fetch("" + document.location, {
 		method: "POST",
-		// TODO: we should be using tink.Json for compile safe encoding/decoding
 		body: actionEncoder.encode(action),
 		headers: {
 			"Content-Type": "application/json",
