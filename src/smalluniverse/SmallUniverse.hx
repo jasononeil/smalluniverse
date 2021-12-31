@@ -24,8 +24,12 @@ interface CommandHandler<Action> extends Projection<Action> {
 
 interface PageApi<Action, PageParams, PageData> {
 	function getPageData(pageParams:PageParams):PageData;
-	// Optional: we could use this for websocket updates.
-	function pageDataShouldUpdate(pageParams:PageParams, action:Action):Bool;
+	// TODO: `actionToEvent` needs a workable API signature
+	// function actionToEvent(
+	// 	action:Action
+	// ):{eventSource:Class<EventSource<Any>>, event:Any};
+	// In future we could do something like this for websockets
+	// var subscriptions:Array<{ projection: Projection<T>, shouldUpdate: T->Bool }>
 }
 
 interface PageView<Action, PageData> {

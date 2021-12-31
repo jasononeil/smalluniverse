@@ -58,8 +58,4 @@ class MealApi implements PageApi<AppAction, MealParams, MealData> {
 			ingredients: meal.ingredients
 		}
 	}
-
-	public function pageDataShouldUpdate(params:MealParams, action:AppAction) {
-		return false;
-	}
 }

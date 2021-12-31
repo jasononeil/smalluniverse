@@ -97,11 +97,4 @@ class ShoppingApi implements PageApi<AppAction, ShoppingParams, ShoppingData> {
 			list: storesList
 		};
 	}
-
-	public function pageDataShouldUpdate(
-		params:ShoppingParams,
-		action:AppAction
-	) {
-		return false;
-	}
 }

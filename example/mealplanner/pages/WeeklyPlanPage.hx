@@ -32,11 +32,4 @@ class WeeklyPlanApi implements PageApi<
 	public function getPageData(params:WeeklyPlanParams) {
 		return {}
 	}
-
-	public function pageDataShouldUpdate(
-		params:WeeklyPlanParams,
-		action:AppAction
-	) {
-		return false;
-	}
 }

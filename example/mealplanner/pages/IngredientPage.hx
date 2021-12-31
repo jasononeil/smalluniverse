@@ -86,11 +86,4 @@ class IngredientApi implements PageApi<
 			meals: meals
 		}
 	}
-
-	public function pageDataShouldUpdate(
-		params:IngredientParams,
-		action:AppAction
-	) {
-		return false;
-	}
 }

@@ -53,11 +53,4 @@ class MealsListApi implements PageApi<
 			meals: getMockData().map(m -> {name: m.name, id: m.id})
 		};
 	}
-
-	public function pageDataShouldUpdate(
-		params:MealsListParams,
-		action:AppAction
-	) {
-		return false;
-	}
 }
