@@ -48,9 +48,14 @@ class MealsListApi implements PageApi<
 	> {
 	public function new() {}
 
-	public function getPageData(params:MealsListParams) {
+	public function getPageData(params:MealsListParams):Promise<MealsListData> {
 		return {
 			meals: getMockData().map(m -> {name: m.name, id: m.id})
 		};
+	}
+
+	public function actionToCommand(pageParams, action) {
+		// TODO
+		return Command.DoNothing;
 	}
 }

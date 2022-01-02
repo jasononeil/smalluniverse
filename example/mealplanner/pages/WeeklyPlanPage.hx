@@ -4,6 +4,8 @@ import smalluniverse.SmallUniverse;
 import mealplanner.ui.Layout;
 import mealplanner.ui.SiteHeader;
 
+using tink.CoreApi;
+
 final WeeklyPlanPage = Page(
 	new WeeklyPlanView(),
 	new WeeklyPlanApi(),
@@ -29,7 +31,14 @@ class WeeklyPlanApi implements PageApi<
 	> {
 	public function new() {}
 
-	public function getPageData(params:WeeklyPlanParams) {
+	public function getPageData(
+		params:WeeklyPlanParams
+	):Promise<WeeklyPlanData> {
 		return {}
+	}
+
+	public function actionToCommand(pageParams, action) {
+		// TODO
+		return Command.DoNothing;
 	}
 }

@@ -3,6 +3,8 @@ package smalluniverse;
 import js.html.Event;
 import haxe.ds.Option;
 
+using tink.CoreApi;
+
 interface Router {
 	function uriToRoute<PageParams>(
 		uri:String
@@ -23,11 +25,8 @@ interface CommandHandler<Action> extends Projection<Action> {
 }
 
 interface PageApi<Action, PageParams, PageData> {
-	function getPageData(pageParams:PageParams):PageData;
-	// TODO: `actionToEvent` needs a workable API signature
-	// function actionToEvent(
-	// 	action:Action
-	// ):{eventSource:Class<EventSource<Any>>, event:Any};
+	function getPageData(pageParams:PageParams):Promise<PageData>;
+	function actionToCommand(pageParams:PageParams, action:Action):Command<Any>;
 	// In future we could do something like this for websockets
 	// var subscriptions:Array<{ projection: Projection<T>, shouldUpdate: T->Bool }>
 }

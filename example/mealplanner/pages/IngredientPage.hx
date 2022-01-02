@@ -8,6 +8,7 @@ import mealplanner.ui.Layout;
 import mealplanner.ui.SiteHeader;
 import mealplanner.App.getMockData;
 
+using tink.CoreApi;
 using Lambda;
 
 final IngredientPage = Page(
@@ -55,7 +56,9 @@ class IngredientApi implements PageApi<
 	> {
 	public function new() {}
 
-	public function getPageData(params:IngredientParams):IngredientData {
+	public function getPageData(
+		params:IngredientParams
+	):Promise<IngredientData> {
 		final mockData = getMockData();
 
 		final stores = new Map<String, Bool>();
@@ -85,5 +88,10 @@ class IngredientApi implements PageApi<
 			stores: stores,
 			meals: meals
 		}
+	}
+
+	public function actionToCommand(pageParams, action) {
+		// TODO
+		return Command.DoNothing;
 	}
 }

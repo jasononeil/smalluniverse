@@ -7,6 +7,8 @@ import mealplanner.ui.SiteHeader;
 import mealplanner.ui.IngredientList;
 import mealplanner.App.getMockData;
 
+using tink.CoreApi;
+
 final ShoppingPage = Page(
 	new ShoppingView(),
 	new ShoppingApi(),
@@ -53,7 +55,7 @@ class ShoppingView implements PageView<AppAction, ShoppingData> {
 class ShoppingApi implements PageApi<AppAction, ShoppingParams, ShoppingData> {
 	public function new() {}
 
-	public function getPageData(params:ShoppingParams):ShoppingData {
+	public function getPageData(params:ShoppingParams):Promise<ShoppingData> {
 		final mockData = getMockData();
 		final allIngredients = [for (meal in mockData) for (ingredient in meal.ingredients) if (!ingredient.ticked) {
 			meal: meal,
@@ -96,5 +98,10 @@ class ShoppingApi implements PageApi<AppAction, ShoppingParams, ShoppingData> {
 		return {
 			list: storesList
 		};
+	}
+
+	public function actionToCommand(pageParams, action) {
+		// TODO
+		return Command.DoNothing;
 	}
 }
