@@ -1,6 +1,6 @@
 package mealplanner.pages;
 
-import tink.core.Error;
+import mealplanner.domains.Meals;
 import smalluniverse.SmallUniverse;
 import mealplanner.ui.Layout;
 import mealplanner.ui.SiteHeader;
@@ -11,10 +11,14 @@ import mealplanner.App.getMockData;
 using tink.CoreApi;
 using Lambda;
 
+enum MealAction {
+	AddIngredient(mealUrl:String, ingredient:String);
+}
+
 final MealPage = Page(
 	new MealView(),
 	new MealApi(),
-	new JsonEncoder<AppAction>(),
+	new JsonEncoder<MealAction>(),
 	new JsonEncoder<MealData>()
 );
 
@@ -30,7 +34,7 @@ typedef MealData = {
 
 typedef Ingredients = Array<{ingredient:String, ticked:Bool, store:String}>;
 
-class MealView implements PageView<AppAction, MealData> {
+class MealView implements PageView<MealAction, MealData> {
 	public function new() {}
 
 	public function render(data:MealData) {
@@ -39,12 +43,16 @@ class MealView implements PageView<AppAction, MealData> {
 				ingredient: i.ingredient,
 				ticked: i.ticked,
 				info: i.store
-			}), ListItemInput("New Ingredient", "", _ -> Nothing))
+			}), ListItemInput(
+				"New Ingredient",
+				"",
+				text -> AddIngredient(data.mealId, text)
+			))
 		]);
 	}
 }
 
-class MealApi implements PageApi<AppAction, MealParams, MealData> {
+class MealApi implements PageApi<MealAction, MealParams, MealData> {
 	public function new() {}
 
 	public function getPageData(params:MealParams):Promise<MealData> {
@@ -60,8 +68,13 @@ class MealApi implements PageApi<AppAction, MealParams, MealData> {
 		}
 	}
 
-	public function actionToCommand(params:MealParams, action:MealEvent) {
-		// Our page actions happen to be the same as the meal events.
-		return new Command(MealsEventSource, action);
+	public function actionToCommand(params:MealParams, action:MealAction) {
+		switch action {
+			case AddIngredient(mealUrl, ingredient):
+				return new Command(
+					MealsEventSource,
+					AddIngredient(mealUrl, ingredient)
+				);
+		}
 	}
 }

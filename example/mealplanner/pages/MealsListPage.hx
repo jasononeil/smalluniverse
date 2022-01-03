@@ -7,11 +7,23 @@ import mealplanner.ui.SiteHeader;
 import mealplanner.ui.Layout;
 import mealplanner.ui.ListView;
 import mealplanner.App.getMockData;
+import mealplanner.domains.Meals;
+
+using tink.CoreApi;
+
+enum MealsListAction {
+	NewMeal(name:String);
+}
 
 final MealsListPage = Page(
 	new MealsListView(),
-	new MealsListApi(),
-	new JsonEncoder<AppAction>(),
+	new MealsListApi(
+		new MealsEventSource(
+			untyped {}, // TODO: trying to instantiate this here, in a spot compiled by the client, is annoying and I'm doing dumb hacks to work around it.
+			"./example/mealplanner/content/write-models/MealsEventSource.json"
+		)
+	),
+	new JsonEncoder<MealsListAction>(),
 	new JsonEncoder<MealsListData>()
 );
 
@@ -22,10 +34,10 @@ typedef MealsListData = {
 	meals:MealsList
 };
 
-class MealsListView implements PageView<AppAction, MealsListData> {
+class MealsListView implements PageView<MealsListAction, MealsListData> {
 	public function new() {}
 
-	public function render(data:MealsListData):Html<AppAction> {
+	public function render(data:MealsListData):Html<MealsListAction> {
 		return Layout(SiteHeader("Meals"), MealsListMenu(data.meals));
 	}
 }
@@ -42,20 +54,34 @@ function MealsListMenu(meals:MealsList) {
 }
 
 class MealsListApi implements PageApi<
-	AppAction,
+	MealsListAction,
 	MealsListParams,
 	MealsListData
 	> {
-	public function new() {}
+	var mealsModel:MealsEventSource;
 
-	public function getPageData(params:MealsListParams):Promise<MealsListData> {
-		return {
-			meals: getMockData().map(m -> {name: m.name, id: m.id})
-		};
+	public function new(mealsModel:MealsEventSource) {
+		this.mealsModel = mealsModel;
 	}
 
-	public function actionToCommand(pageParams, action) {
-		// TODO
-		return Command.DoNothing;
+	public function getPageData(params:MealsListParams):Promise<MealsListData> {
+		return mealsModel.getMealsList().next(meals -> {
+			return {
+				meals: meals.map(m -> {
+					name: m.name,
+					id: m.slug
+				})
+			};
+		});
+	}
+
+	public function actionToCommand(
+		params:MealsListParams,
+		action:MealsListAction
+	) {
+		switch action {
+			case NewMeal(name):
+				return new Command(MealsEventSource, NewMeal(name));
+		}
 	}
 }
