@@ -6,6 +6,7 @@
 -lib tink_macro
 -lib tink_json
 -lib jsImport
+-lib uuid
 --macro nullSafety("smalluniverse", Strict)
 --macro nullSafety("mealplanner", Strict)
 --main mealplanner.Server

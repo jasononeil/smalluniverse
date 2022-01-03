@@ -5,6 +5,7 @@
 -lib compiletime
 -lib tink_core
 -lib jsImport
+-lib uuid
 --main Main
 --macro nullSafety("smalluniverse", Strict)
 -js build/test.js
