@@ -37,28 +37,22 @@ class AppRoutes implements Router {
 		return '/shopping';
 	}
 
-	public function uriToRoute(uri:String):Option<{
-		page:Page<Dynamic, Dynamic, Dynamic>,
-		params:Dynamic
-	}> {
+	public function uriToRoute(uri:String):Option<ResolvedRoute<Dynamic>> {
 		final path = uri.split("?")[0];
 		final parts = path.split("/").filter(s -> s != "");
 		switch parts {
 			case []:
-				return Some({page: MealsListPage, params: {}});
+				return Some(Page(new MealsListPage(), {}));
 			case ["meal", mealId]:
-				return Some({page: MealPage, params: {mealId: mealId}});
+				return Some(Page(new MealPage(), {mealId: mealId}));
 			case ["ingredient", ingredientName]:
-				return Some({
-					page: IngredientPage,
-					params: {
-						ingredient: StringTools.urlDecode(ingredientName)
-					}
-				});
+				return Some(Page(new IngredientPage(), {
+					ingredient: StringTools.urlDecode(ingredientName)
+				}));
 			case ["weekly-plan"]:
-				return Some({page: WeeklyPlanPage, params: {}});
+				return Some(Page(new WeeklyPlanPage(), {}));
 			case ["shopping"]:
-				return Some({page: ShoppingPage, params: {}});
+				return Some(Page(new ShoppingPage(), {}));
 			default:
 				return None;
 		}

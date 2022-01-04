@@ -56,26 +56,10 @@ function handleRequest(
 		return loadClientScript(res);
 	}
 
-	// This could use a big old tidy up.
-	// And it also probably needs to handle async getPageData() calls.
-	// And probably lazy loading (with dependency injection?) for out API objects.
-	// And wrapping the view in a HTML template.
 	try {
 		switch router.uriToRoute(req.url) {
-			case Some(route):
-				switch route.page {
-					case Page(view, api, actionEncoder, pageDataEncoder):
-						handlePage(
-							req,
-							res,
-							orchestrator,
-							route,
-							api,
-							view,
-							actionEncoder,
-							pageDataEncoder
-						);
-				}
+			case Some(Page(page, params)):
+				handlePage(req, res, orchestrator, page, params);
 			case None:
 				printError(res, new Error(NotFound, "Page not found"));
 		}
@@ -96,12 +80,10 @@ function handlePage<
 		req:IncomingMessage,
 		res:ServerResponse,
 		orchestrator:Orchestrator,
-		route:ResolvedRoute<PageParams>,
-		api:PageApi<Action, PageParams, PageData>,
-		view:PageView<Action, PageData>,
-		actionEncoder:IJsonEncoder<Action>,
-		pageDataEncoder:IJsonEncoder<PageData>
+		page:Page<Action, PageParams, PageData>,
+		params:PageParams
 	):Promise<Noise> {
+		final api = orchestrator.apiForPage(page);
 		return Promise.NOISE.next((_) -> {
 			// Handle POST Action if there is one.
 			final jsonRequest = req.headers["content-type"] == "application/json";
@@ -110,16 +92,16 @@ function handlePage<
 				return Noise;
 			}
 			return readRequestBody(req).next(body -> {
-				final action = actionEncoder.decode(body);
-				final command = api.actionToCommand(route.params, action);
+				final action = page.actionEncoder.decode(body);
+				final command = api.actionToCommand(params, action);
 				return orchestrator.handleCommand(command);
 			});
 		}).next((_) -> {
 			// Get Page Data
-			return api.getPageData(route.params);
+			return api.getPageData(params);
 		}).next((pageData) -> {
 			// Render response
-			final pageDataJson = pageDataEncoder.encode(pageData);
+			final pageDataJson = page.dataEncoder.encode(pageData);
 			switch (req.headers["accept"]) {
 				case "application/json":
 					// This is a request from our client JS. Return the data.
@@ -132,7 +114,7 @@ function handlePage<
 					res.end();
 				default:
 					// Render the page as HTML
-					final viewHtml = stringifyHtml(view.render(pageData));
+					final viewHtml = stringifyHtml(page.render(pageData));
 					final html = wrapHtml(viewHtml, pageDataJson);
 					res.statusCode = 200;
 					res.setHeader("Content-Type", "text/html; charset=UTF-8");

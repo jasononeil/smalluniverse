@@ -1,11 +1,6 @@
 package smalluniverse.orchestrators;
 
-import smalluniverse.SmallUniverse.Command;
-import smalluniverse.SmallUniverse.ProjectionSubscriptions;
-import smalluniverse.SmallUniverse.EventSource;
-import smalluniverse.SmallUniverse.Projection;
-import smalluniverse.SmallUniverse.Orchestrator;
-import smalluniverse.SmallUniverse.EventId;
+import smalluniverse.SmallUniverse;
 
 using tink.CoreApi;
 using Lambda;
@@ -14,6 +9,12 @@ typedef Subscription = {
 	source:EventSource<Any>,
 	projections:Array<ProjectionSubscriptions<Any>>
 };
+
+typedef SynchronousOrchestratorConfig = {
+	eventSources:Array<EventSource<Any>>,
+	projections:Array<Projection>,
+	pageApis:Array<PageApi<Any, Any, Any>>
+}
 
 /**
 	An Orchestrator that attempts to update projections during the same HTTP Request as the Event Source.
@@ -32,14 +33,16 @@ typedef Subscription = {
 **/
 class SynchronousOrchestrator implements Orchestrator {
 	var subscriptions:Array<Subscription> = [];
+	var pageApis:Map<String, PageApi<Any, Any, Any>>;
 
-	public function new(
-		setup:{eventSources:Array<EventSource<Any>>, projections:Array<Projection>}
-	) {
+	public function new(setup:SynchronousOrchestratorConfig) {
 		this.subscriptions = [for (eventSource in setup.eventSources) {
 			source: eventSource,
 			projections: []
 		}];
+		this.pageApis = [for (api in setup.pageApis) Type.getClassName(
+			api.relatedPage
+		) => api];
 		for (projection in setup.projections) {
 			for (projectionSubscription in projection.subscriptions) {
 				final subscription = getSubscription(
@@ -112,6 +115,21 @@ class SynchronousOrchestrator implements Orchestrator {
 	}
 
 	public function teardown() {}
+
+	public function apiForPage(page:Page<Any, Any, Any>) {
+		// For some reason Haxe's null safety checks are refusing to play nicely with Type.getClass and Type.getClassName.
+		// I'm just going to disable it for now, we know the page is non null, and is a class instance, so it will have a class name.
+		final pageClassName = @:nullSafety(Off)
+			Type.getClassName(Type.getClass(page));
+		final api = this.pageApis[pageClassName];
+		if (api == null) {
+			throw new Error(
+				InternalError,
+				'Page ${pageClassName} does not have a corresponding PageApi added to your SynchronousOrchestrator'
+			);
+		}
+		return api;
+	}
 
 	public function bringProjectionsUpToDate():Promise<Noise> {
 		final projectionUpdates = [];

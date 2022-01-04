@@ -16,27 +16,43 @@ using tink.CoreApi;
 	A Router takes a URI and returns a `ResolvedRoute` (a known page to display) if one exists.
 **/
 interface Router {
-	function uriToRoute<PageParams>(
-		uri:String
-	):Option<ResolvedRoute<PageParams>>;
+	function uriToRoute(uri:String):Option<ResolvedRoute<Dynamic>>;
 }
 
 /**
-	A page to display and the parameters to display it with.
+	A known route, including the parameters passed to it, and the page that should be displayed.
 **/
-typedef ResolvedRoute<PageParams> = {
-	page:Page<Dynamic, PageParams, Dynamic>,
-	params:PageParams
-};
+enum ResolvedRoute<PageParams> {
+	Page(page:Page<Dynamic, PageParams, Dynamic>, params:PageParams);
+	// In future we might have other types for non-page server routes (eg RSS, iCal, Rest APIs etc)
+}
 
-enum Page<Action, PageParams, PageData> {
-	// Should these be instances or classes that we instantiate as needed? Or factory functions?
-	Page(
-		view:PageView<Action, PageData>,
-		api:PageApi<Action, PageParams, PageData>,
-		actionEncoder:IJsonEncoder<Action>,
-		pageDataEncoder:IJsonEncoder<PageData>
-	);
+/**
+	A Page to be displayed in the users browser.
+**/
+interface Page<Action, PageParams, PageData> {
+	/**
+		A type-safe JSON encoder used to encode our actions for transferring to our PageAPI.
+
+		Usually `public var actionEncoder = new JsonEncoder<Action>()` is sufficient.
+		This will use macros to generate a type safe decoder for your Action.
+	**/
+	var actionEncoder:IJsonEncoder<Action>;
+
+	/**
+		A type-safe JSON encoder used to encode our page data for transferring from our PageAPI.
+
+		Usually `public var dataEncoder = new JsonEncoder<PageData>()` is sufficient.
+		This will use macros to generate a type safe decoder for your PageData.
+	**/
+	var dataEncoder:IJsonEncoder<PageData>;
+
+	/**
+		The view function for rendering a page.
+		You can compose your page from multiple components and functions but each page has one root-level `render()` function.	
+		The data passed to it is the data received from the `PageApi.getPageData()` function.
+	**/
+	function render(data:PageData):Html<Action>;
 }
 
 /**
@@ -45,21 +61,17 @@ enum Page<Action, PageParams, PageData> {
 	Each Page should have exactly one PageApi, and the PageApi can interact with multiple `EventSource` or `Projection` services.
 **/
 interface PageApi<Action, PageParams, PageData> {
+	/** A reference to the Page class this API is tightly coupled to. **/
+	var relatedPage(default, null):Class<Page<Action, PageParams, PageData>>;
+
+	/** Load data for the given page. **/
 	function getPageData(pageParams:PageParams):Promise<PageData>;
+
+	/** Convert a page Action into the relevant Command for our Event Stores.**/
 	function actionToCommand(pageParams:PageParams, action:Action):Command<Any>;
+
 	// In future we could do something like this for websockets
 	// var subscriptions:Array<{ projection: Projection<T>, shouldUpdate: T->Bool }>
-}
-
-/**
-	A PageView is the view function for rendering a page.
-
-	You can compose your page from multiple components and functions but each page has one root-level `render()` function.
-
-	The data passed to it is the data received from the `PageApi.getPageData()` function.
-**/
-interface PageView<Action, PageData> {
-	function render(data:PageData):Html<Action>;
 }
 
 /**
@@ -316,6 +328,11 @@ interface Orchestrator {
 		See https://nodejs.org/docs/latest-v10.x/api/process.html#process_warning_using_uncaughtexception_correctly for examples of correct usage.
 	**/
 	public function teardown():Void;
+
+	/**
+		Get the PageApi for the current page.
+	**/
+	public function apiForPage(page:Page<Any, Any, Any>):PageApi<Any, Any, Any>;
 
 	// Should the Orchestrator also be responsible for handling pages?
 	// The code for these in NodeJS isn't much, but it's also not platform specific and could be shared.

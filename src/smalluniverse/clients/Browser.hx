@@ -65,13 +65,10 @@ function renderPage(
 	pageDataJson:String
 ) {
 	switch router.uriToRoute(document.location.pathname) {
-		case Some(route):
-			switch route.page {
-				case Page(view, _api, _actionEncoder, pageDataEncoder):
-					final pageData = pageDataEncoder.decode(pageDataJson);
-					final html = view.render(pageData);
-					renderer.update(html);
-			}
+		case Some(Page(page, params)):
+			final pageData = page.dataEncoder.decode(pageDataJson);
+			final html = page.render(pageData);
+			renderer.update(html);
 		case None:
 			// TODO: handle Not Found errors.
 	}
@@ -101,11 +98,8 @@ private function postAction<Action>(
 	// Get the JSON encoder.
 	// This is a bit gross. It might be better to somehow set postAction up with whatever encoder is known from the current routing event.
 	final actionEncoder = switch router.uriToRoute(document.location.pathname) {
-		case Some(route):
-			switch route.page {
-				case Page(_view, _api, actionEncoder, _pageDataEncoder):
-					actionEncoder;
-			}
+		case Some(Page(page, params)):
+			page.actionEncoder;
 		case None:
 			// TODO: handle Not Found errors.
 			null;

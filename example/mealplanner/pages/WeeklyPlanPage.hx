@@ -6,39 +6,20 @@ import mealplanner.ui.SiteHeader;
 
 using tink.CoreApi;
 
-final WeeklyPlanPage = Page(
-	new WeeklyPlanView(),
-	new WeeklyPlanApi(),
-	new JsonEncoder<AppAction>(),
-	new JsonEncoder<WeeklyPlanData>()
-);
-
 typedef WeeklyPlanParams = {}
 typedef WeeklyPlanData = {}
 
-class WeeklyPlanView implements PageView<AppAction, WeeklyPlanData> {
-	public function new() {}
-
-	public function render(data:WeeklyPlanData) {
-		return Layout(SiteHeader('Weekly plan'), ["my weekly plan"]);
-	}
-}
-
-class WeeklyPlanApi implements PageApi<
+class WeeklyPlanPage implements Page<
 	AppAction,
 	WeeklyPlanParams,
 	WeeklyPlanData
 	> {
+	public var actionEncoder:IJsonEncoder<AppAction> = new JsonEncoder<AppAction>();
+	public var dataEncoder:IJsonEncoder<WeeklyPlanData> = new JsonEncoder<WeeklyPlanData>();
+
 	public function new() {}
 
-	public function getPageData(
-		params:WeeklyPlanParams
-	):Promise<WeeklyPlanData> {
-		return {}
-	}
-
-	public function actionToCommand(pageParams, action) {
-		// TODO
-		return Command.DoNothing;
+	public function render(data:WeeklyPlanData) {
+		return Layout(SiteHeader('Weekly plan'), ["my weekly plan"]);
 	}
 }

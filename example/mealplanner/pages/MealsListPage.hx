@@ -6,26 +6,12 @@ import smalluniverse.DOM;
 import mealplanner.ui.SiteHeader;
 import mealplanner.ui.Layout;
 import mealplanner.ui.ListView;
-import mealplanner.App.getMockData;
-import mealplanner.domains.Meals;
 
 using tink.CoreApi;
 
 enum MealsListAction {
 	NewMeal(name:String);
 }
-
-final MealsListPage = Page(
-	new MealsListView(),
-	new MealsListApi(
-		new MealsEventSource(
-			untyped {}, // TODO: trying to instantiate this here, in a spot compiled by the client, is annoying and I'm doing dumb hacks to work around it.
-			"./example/mealplanner/content/write-models/MealsEventSource.json"
-		)
-	),
-	new JsonEncoder<MealsListAction>(),
-	new JsonEncoder<MealsListData>()
-);
 
 typedef MealsListParams = {}
 typedef MealsList = Array<{name:String, id:String}>
@@ -34,7 +20,14 @@ typedef MealsListData = {
 	meals:MealsList
 };
 
-class MealsListView implements PageView<MealsListAction, MealsListData> {
+class MealsListPage implements Page<
+	MealsListAction,
+	MealsListParams,
+	MealsListData
+	> {
+	public var actionEncoder:IJsonEncoder<MealsListAction> = new JsonEncoder<MealsListAction>();
+	public var dataEncoder:IJsonEncoder<MealsListData> = new JsonEncoder<MealsListData>();
+
 	public function new() {}
 
 	public function render(data:MealsListData):Html<MealsListAction> {
@@ -51,37 +44,4 @@ function MealsListMenu(meals:MealsList) {
 	final newMealInput = ListItemInput("New Meal", "", name -> NewMeal(name));
 	final items = mealLinks.concat([newMealInput]);
 	return nav([], ListView(items));
-}
-
-class MealsListApi implements PageApi<
-	MealsListAction,
-	MealsListParams,
-	MealsListData
-	> {
-	var mealsModel:MealsEventSource;
-
-	public function new(mealsModel:MealsEventSource) {
-		this.mealsModel = mealsModel;
-	}
-
-	public function getPageData(params:MealsListParams):Promise<MealsListData> {
-		return mealsModel.getMealsList().next(meals -> {
-			return {
-				meals: meals.map(m -> {
-					name: m.name,
-					id: m.slug
-				})
-			};
-		});
-	}
-
-	public function actionToCommand(
-		params:MealsListParams,
-		action:MealsListAction
-	) {
-		switch action {
-			case NewMeal(name):
-				return new Command(MealsEventSource, NewMeal(name));
-		}
-	}
 }

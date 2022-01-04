@@ -2,9 +2,7 @@ package mealplanner.domains;
 
 import tink.Json;
 import smalluniverse.SmallUniverse;
-#if nodejs
 import js.node.Fs;
-#end
 
 using tink.CoreApi;
 using Lambda;
@@ -113,7 +111,6 @@ class MealsEventSource implements EventSource<MealsEvent> {
 	}
 
 	function readModel():Promise<MealsModel> {
-		#if nodejs
 		final trigger = Promise.trigger();
 		Fs.readFile(jsonFile, {encoding: "utf8"}, (err, jsonContent) -> {
 			if (err != null) {
@@ -134,13 +131,9 @@ class MealsEventSource implements EventSource<MealsEvent> {
 			}
 		});
 		return trigger.asPromise();
-		#else
-		return throw "NodeJS implementation only";
-		#end
 	}
 
 	function writeModel(model:MealsModel):Promise<Noise> {
-		#if nodejs
 		final trigger = Promise.trigger();
 		final jsonContent = Json.stringify(model);
 		Fs.writeFile(jsonFile, jsonContent, {encoding: "utf8"}, (err) -> {
@@ -151,9 +144,6 @@ class MealsEventSource implements EventSource<MealsEvent> {
 			}
 		});
 		return trigger.asPromise();
-		#else
-		return throw "NodeJS implementation only";
-		#end
 	}
 
 	function getSlugFromName(name:String):String {
