@@ -42,8 +42,14 @@ button.ListView__Content {
   text-align: left;
 }
 
+.ListView__FormWrapper {
+  margin: 0;
+  display: flex;
+}
+
 input.ListView__Content {
   border: 0;
+  flex-grow: 1;
 }
 
 .ListView__Content:hover {

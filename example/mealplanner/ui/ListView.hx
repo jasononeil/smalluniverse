@@ -1,5 +1,8 @@
 package mealplanner.ui;
 
+import js.html.InputElement;
+import js.html.FormElement;
+import uuid.Uuid;
 import mealplanner.AppAction;
 import smalluniverse.SmallUniverse;
 import smalluniverse.DOM;
@@ -36,28 +39,28 @@ function ListItemInput<Action>(
 	inputValue:String,
 	onChange:String->Action
 ) {
-	// TODO: onChange Action
-	final uniqueId = Std.string(Math.random()); // TODO: use a UUID generator
-	return [label([
+	final uniqueId = Uuid.v4();
+	return form([className("ListView__FormWrapper"), on("submit", (e) -> {
+		final form:Null<FormElement> = Std.downcast(e.target, FormElement);
+		if (form == null) {
+			return None;
+		}
+
+		final input = cast(form.elements.namedItem(uniqueId), InputElement);
+
+		e.preventDefault();
+
+		return Some(onChange(input.value));
+	})], [label([
 		className("ListView__SROnly"),
 		htmlFor(uniqueId)
 	], inputLabel), inputText([
-		id(uniqueId),
 		className("ListView__Content"),
+		id(uniqueId),
+		name(uniqueId),
 		defaultValue(inputValue),
 		placeholder(inputLabel),
-		on("change", e -> {
-			final input:Null<js.html.InputElement> = Std.downcast(
-				e.target,
-				js.html.InputElement
-			);
-			if (input == null) {
-				return None;
-			}
-
-			return Some(onChange(input.value));
-		})
-		]),];
+		])]);
 }
 
 function ListItemCheckbox<Action>(

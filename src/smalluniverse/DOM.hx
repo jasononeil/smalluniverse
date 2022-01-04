@@ -156,6 +156,12 @@ inline function label<Action>(
 ):Html<Action>
 	return element("label", attrs, children);
 
+inline function form<Action>(
+	attrs:Array<HtmlAttribute<Action>>,
+	children:Html<Action>
+):Html<Action>
+	return element("form", attrs, children);
+
 inline function input<Action>(attrs:Array<HtmlAttribute<Action>>):Html<Action>
 	return element("input", attrs, []);
 
@@ -245,6 +251,9 @@ inline function defaultValue<Action>(value:String):HtmlAttribute<Action>
 
 inline function placeholder<Action>(placeholder:String):HtmlAttribute<Action>
 	return attr("placeholder", placeholder);
+
+inline function name<Action>(name:String):HtmlAttribute<Action>
+	return attr("name", name);
 
 inline function checked<Action>(value:Bool):HtmlAttribute<Action>
 	return booleanAttribute("checked", value);
