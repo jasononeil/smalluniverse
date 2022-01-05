@@ -8,9 +8,9 @@ import mealplanner.pages.MealsListPage;
 import mealplanner.pages.IngredientPage;
 import haxe.ds.Option;
 
-function getMockData() {
-	return CompileTime.parseJsonFile("mealplanner/sample-data.json");
-}
+// function getMockData() {
+// 	return CompileTime.parseJsonFile("mealplanner/sample-data.json");
+// }
 
 class AppRoutes implements Router {
 	public function new() {}
