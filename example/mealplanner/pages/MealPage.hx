@@ -22,7 +22,7 @@ typedef MealData = {
 	ingredients:Ingredients
 }
 
-typedef Ingredients = Array<{ingredient:String, ticked:Bool, store:String}>;
+typedef Ingredients = Array<{name:String}>;
 
 class MealPage implements Page<MealAction, MealParams, MealData> {
 	public var actionEncoder:IJsonEncoder<MealAction> = new JsonEncoder<MealAction>();
@@ -33,9 +33,9 @@ class MealPage implements Page<MealAction, MealParams, MealData> {
 	public function render(data:MealData) {
 		return Layout(SiteHeader(data.mealName), [
 			IngredientList("Ingredients", data.ingredients.map(i -> {
-				ingredient: i.ingredient,
-				ticked: i.ticked,
-				info: i.store
+				ingredient: i.name,
+				ticked: null, // "null" is a hacky way of saying we don't want a checkbox.
+				info: null, // TODO: i.store
 			}), ListItemInput(
 				"New Ingredient",
 				"",

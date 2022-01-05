@@ -9,20 +9,18 @@ using Lambda;
 
 enum MealsEvent {
 	NewMeal(name:String);
-	AddIngredient(mealUrl:String, ingredient:String);
-	RenameIngredient(
-		mealUrl:String,
-		oldIngredient:String,
-		newIngredient:String
-	);
+	AddIngredient(meal:String, ingredient:String);
+	RenameIngredient(meal:String, oldIngredient:String, newIngredient:String);
 }
 
 typedef MealsModel = {
-	meals:Array<{
-		slug:String,
-		name:String,
-		ingredients:Array<{name:String}>
-	}>
+	meals:Array<Meal>
+}
+
+typedef Meal = {
+	slug:String,
+	name:String,
+	ingredients:Array<{name:String}>
 }
 
 class MealsEventSource implements EventSource<MealsEvent> {
@@ -125,6 +123,19 @@ class MealsEventSource implements EventSource<MealsEvent> {
 					meal -> {name: meal.name, slug: meal.slug}
 				)
 			);
+	}
+
+	public function getMeal(slug:String):Promise<Meal> {
+		return readModel()
+				.next(model -> model.meals.find(meal -> meal.slug == slug))
+				.next(meal -> {
+				if (meal == null) {
+					return Promise.reject(
+						new Error(NotFound, 'Meal $slug not found')
+					);
+				}
+				return meal;
+			});
 	}
 
 	function readModel():Promise<MealsModel> {
