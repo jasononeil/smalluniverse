@@ -41,7 +41,11 @@ function MealsListMenu(meals:MealsList) {
 			mealId: m.id
 		}))
 	);
-	final newMealInput = ListItemInput("New Meal", "", name -> NewMeal(name));
+	final newMealInput = ListItemInput(
+		"New Meal",
+		"",
+		name -> name != "" ? Some(NewMeal(name)) : None
+	);
 	final items = mealLinks.concat([newMealInput]);
 	return nav([], ListView(items));
 }

@@ -42,7 +42,7 @@ class IngredientPage implements Page<
 				for (store => selected in data.stores)
 					ListItemCheckbox(store, selected, _ -> AppAction.Nothing)
 			].concat([
-				ListItemInput("Other store", "", _ -> AppAction.Nothing)
+				ListItemInput("Other store", "", _ -> None)
 				]))
 		]);
 	}

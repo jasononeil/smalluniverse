@@ -39,7 +39,9 @@ class MealPage implements Page<MealAction, MealParams, MealData> {
 			}), ListItemInput(
 				"New Ingredient",
 				"",
-				text -> AddIngredient(data.mealId, text)
+				text -> text != "" ? Some(
+					AddIngredient(data.mealId, text)
+				) : None
 			))
 		]);
 	}

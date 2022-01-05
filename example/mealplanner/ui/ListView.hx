@@ -7,6 +7,8 @@ import mealplanner.AppAction;
 import smalluniverse.SmallUniverse;
 import smalluniverse.DOM;
 
+using tink.CoreApi;
+
 enum ItemAction {
 	Action(action:AppAction);
 	Link(url:String);
@@ -37,7 +39,7 @@ function ListItemButton<Action>(content:Html<Action>, action:Action) {
 function ListItemInput<Action>(
 	inputLabel:String,
 	inputValue:String,
-	onChange:String->Action
+	onChange:String->Option<Action>
 ) {
 	final uniqueId = Uuid.v4();
 	return form([className("ListView__FormWrapper"), on("submit", (e) -> {
@@ -50,7 +52,7 @@ function ListItemInput<Action>(
 
 		e.preventDefault();
 
-		return Some(onChange(input.value));
+		return onChange(input.value);
 	})], [label([
 		className("ListView__SROnly"),
 		htmlFor(uniqueId)
