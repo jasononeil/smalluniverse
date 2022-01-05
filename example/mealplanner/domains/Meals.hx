@@ -41,8 +41,25 @@ class MealsEventSource implements EventSource<MealsEvent> {
 		return readModel().next(model -> {
 			switch event {
 				case NewMeal(name):
-					// TODO: validate it doesn't already exist
-					// TODO: validate it isn't empty
+					final slug = getSlugFromName(name);
+					if (name == "" || slug == "") {
+						return Promise.reject(
+							new Error(
+								BadRequest,
+								'Cannot create a meal with no name'
+							)
+						);
+					}
+					if (model.meals.find(
+						m -> m.slug == getSlugFromName(name)
+					) != null) {
+						return Promise.reject(
+							new Error(
+								BadRequest,
+								'A meal with ID ${slug} already exists'
+							)
+						);
+					}
 					model.meals.push({
 						name: name,
 						slug: getSlugFromName(name),
