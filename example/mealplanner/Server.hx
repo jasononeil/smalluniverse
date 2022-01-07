@@ -6,6 +6,7 @@ import smalluniverse.servers.NodeJs;
 import smalluniverse.SmallUniverse;
 import smalluniverse.eventlogs.TSVEventStore;
 import mealplanner.domains.Meals;
+import mealplanner.domains.WeeklyPlan;
 import smalluniverse.orchestrators.SynchronousOrchestrator;
 
 final mealsEventSource = new MealsEventSource(
@@ -16,15 +17,26 @@ final mealsEventSource = new MealsEventSource(
 	"./example/mealplanner/content/write-models/MealsEventSource.json"
 );
 
+final weeklyPlanEventSource = new WeeklyPlanEventSource(
+	new TSVEventStore(
+		"./example/mealplanner/content/event-stores/events-weekly-plan.tsv",
+		new JsonEncoder<WeeklyPlanEvent>()
+	),
+	"./example/mealplanner/content/write-models/WeeklyPlanEventSource.json"
+);
+
 final appOrchestrator = new SynchronousOrchestrator({
-	eventSources: [mealsEventSource],
+	eventSources: [
+		mealsEventSource,
+		weeklyPlanEventSource
+	],
 	projections: [],
 	pageApis: [
 		new IngredientPageApi(),
 		new MealPageApi(mealsEventSource),
 		new MealsListPageApi(mealsEventSource),
 		new ShoppingPageApi(),
-		new WeeklyPlanPageApi()
+		new WeeklyPlanPageApi(weeklyPlanEventSource, mealsEventSource)
 	]
 });
 

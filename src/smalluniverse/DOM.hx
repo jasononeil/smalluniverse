@@ -1,5 +1,6 @@
 package smalluniverse;
 
+import js.html.FormElement;
 import js.html.Event;
 import smalluniverse.SmallUniverse;
 import haxe.ds.Option;
@@ -178,6 +179,18 @@ inline function checkbox<Action>(
 inline function radio<Action>(attrs:Array<HtmlAttribute<Action>>):Html<Action>
 	return input([type("radio")].concat(attrs));
 
+inline function select<Action>(
+	attrs:Array<HtmlAttribute<Action>>,
+	children:Html<Action>
+):Html<Action>
+	return element("select", attrs, children);
+
+inline function option<Action>(
+	attrs:Array<HtmlAttribute<Action>>,
+	children:Html<Action>
+):Html<Action>
+	return element("option", attrs, children);
+
 inline function link<Action>(
 	attrs:Array<HtmlAttribute<Action>>,
 	content:String = ""
@@ -260,3 +273,18 @@ inline function checked<Action>(value:Bool):HtmlAttribute<Action>
 
 inline function disabled<Action>(value:Bool):HtmlAttribute<Action>
 	return booleanAttribute("disabled", value);
+
+/**
+	Handle a form submit event.
+	This will preventDefault() on the submit() event, and call your `actionFromForm` to generate the action.
+**/
+function onSubmit<Action>(actionFromForm:FormElement->Option<Action>) {
+	return on("submit", e -> {
+		final form:Null<FormElement> = Std.downcast(e.target, FormElement);
+		if (form == null) {
+			return None;
+		}
+		e.preventDefault();
+		return actionFromForm(form);
+	});
+}
