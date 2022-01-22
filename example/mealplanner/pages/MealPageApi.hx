@@ -24,7 +24,10 @@ class MealPageApi implements PageApi<MealAction, MealParams, MealData> {
 		});
 	}
 
-	public function actionToCommand(params:MealParams, action:MealAction) {
+	public function actionToCommand(
+		params:MealParams,
+		action:MealAction
+	):Promise<Command<Any>> {
 		switch action {
 			case AddIngredient(mealUrl, ingredient):
 				return new Command(

@@ -68,7 +68,10 @@ interface PageApi<Action, PageParams, PageData> {
 	function getPageData(pageParams:PageParams):Promise<PageData>;
 
 	/** Convert a page Action into the relevant Command for our Event Stores.**/
-	function actionToCommand(pageParams:PageParams, action:Action):Command<Any>;
+	function actionToCommand(
+		pageParams:PageParams,
+		action:Action
+	):Promise<Command<Any>>;
 
 	// In future we could do something like this for websockets
 	// var subscriptions:Array<{ projection: Projection<T>, shouldUpdate: T->Bool }>

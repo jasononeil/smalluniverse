@@ -68,7 +68,7 @@ class WeeklyPlanPageApi implements PageApi<
 	public function actionToCommand(
 		pageParams,
 		action:WeeklyPlanAction
-	):Command<Any> {
+	):Promise<Command<Any>> {
 		switch action {
 			case AddMealToDay(date, meal):
 				return new Command(

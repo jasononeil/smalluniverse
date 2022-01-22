@@ -33,7 +33,7 @@ class MealsListPageApi implements PageApi<
 	public function actionToCommand(
 		params:MealsListParams,
 		action:MealsListAction
-	) {
+	):Promise<Command<Any>> {
 		switch action {
 			case NewMeal(name):
 				return new Command(MealsEventSource, NewMeal(name));

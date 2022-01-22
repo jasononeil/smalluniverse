@@ -54,7 +54,7 @@ class IngredientPageApi implements PageApi<
 		// }
 	}
 
-	public function actionToCommand(pageParams, action) {
+	public function actionToCommand(pageParams, action):Promise<Command<Any>> {
 		// TODO
 		return Command.DoNothing;
 	}

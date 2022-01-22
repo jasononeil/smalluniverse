@@ -93,8 +93,9 @@ function handlePage<
 			}
 			return readRequestBody(req).next(body -> {
 				final action = page.actionEncoder.decode(body);
-				final command = api.actionToCommand(params, action);
-				return orchestrator.handleCommand(command);
+				return api
+						.actionToCommand(params, action)
+						.next(command -> orchestrator.handleCommand(command));
 			});
 		}).next((_) -> {
 			// Get Page Data
