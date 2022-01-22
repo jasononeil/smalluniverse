@@ -1,5 +1,6 @@
 package mealplanner.ui;
 
+import js.html.InputElement;
 import mealplanner.App.appRouter;
 import mealplanner.AppAction;
 import smalluniverse.SmallUniverse;
@@ -9,11 +10,12 @@ import mealplanner.ui.Heading;
 
 // TODO: consider if this component still makes sense. There's now an IngredientList for a shopping page (with a checkbox),
 // and a meals page (no checkbox), and they're "info" strings are different. Trying to unify them might not be worth it.
-function IngredientList<Action>(
-	name:String,
-	ingredients:Array<{ingredient:String, ticked:Null<Bool>, info:Null<String>}>,
-	?extraItems:Html<Action>
-) {
+function IngredientList<Action>(name:String, ingredients:Array<{
+	ingredient:String,
+	ticked:Bool,
+	info:Null<String>,
+	onChange:Bool->Action
+}>, ?extraItems:Html<Action>) {
 	return [
 		css(CompileTime.readFile("mealplanner/ui/IngredientList.css")),
 		section([
@@ -28,15 +30,20 @@ function IngredientList<Action>(
 				final infoSpan:Html<Action> = info != null ? span([
 					className("IngredientList__Info")
 				], info) : "";
-				var itemContent:Html<Action> = [i.ingredient, infoSpan];
-				if (i.ticked != null) {
-					// Render a checkbox and wrap it all in a label.
-					itemContent = label([], [checkbox([
-						checked(i.ticked),
-						className("IngredientList__Checkbox"),
-					]), itemContent]);
-				}
-				return ListItemLink(itemContent, ingredientUrl);
+				final itemContent = label([], [checkbox([on("click", (e) -> {
+					final inputElement:Null<InputElement> = Std.downcast(
+						e.currentTarget,
+						InputElement
+					);
+					final value = inputElement != null ? inputElement.checked : false;
+					return Some(i.onChange(value));
+				}), checked(
+					i.ticked
+				), className(
+					"IngredientList__Checkbox"
+					),]), i.ingredient, infoSpan]);
+				// This used to be ListItemLink with ingredientUrl
+				return ListItem(itemContent);
 			}).concat(extraItems != null ? [extraItems] : []))
 		])
 	];

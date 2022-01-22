@@ -10,12 +10,14 @@ using tink.CoreApi;
 
 typedef ShoppingParams = {}
 
-typedef ShoppingData = {
-	list:Array<{
-		shopName:String,
-		list:Array<IngredientToBuy>
-	}>
+enum ShoppingAction {
+	TickItem(name:String);
+	UntickItem(name:String);
 }
+
+typedef ShoppingData = {
+	list:Map<String, Array<IngredientToBuy>>
+};
 
 typedef IngredientToBuy = {
 	ingredient:String,
@@ -23,8 +25,12 @@ typedef IngredientToBuy = {
 	meals:Array<{name:String, id:String}>
 }
 
-class ShoppingPage implements Page<AppAction, ShoppingParams, ShoppingData> {
-	public var actionEncoder:IJsonEncoder<AppAction> = new JsonEncoder<AppAction>();
+class ShoppingPage implements Page<
+	ShoppingAction,
+	ShoppingParams,
+	ShoppingData
+	> {
+	public var actionEncoder:IJsonEncoder<ShoppingAction> = new JsonEncoder<ShoppingAction>();
 	public var dataEncoder:IJsonEncoder<ShoppingData> = new JsonEncoder<ShoppingData>();
 
 	public function new() {}
@@ -33,16 +39,17 @@ class ShoppingPage implements Page<AppAction, ShoppingParams, ShoppingData> {
 		return Layout(SiteHeader('Shopping List'), renderLists(data));
 	}
 
-	function renderLists(data:ShoppingData):Html<AppAction> {
-		return data.list.map(
-			store -> section(
-				[],
-				IngredientList(store.shopName, store.list.map(i -> {
-					ingredient: i.ingredient,
-					ticked: i.ticked,
-					info: i.meals.map(m -> m.name).join(", ")
-				}))
-			)
-		);
+	function renderLists(data:ShoppingData):Html<ShoppingAction> {
+		return [for (storeName => itemsForStore in data.list) section(
+			[],
+			IngredientList(storeName, itemsForStore.map(i -> {
+				ingredient: i.ingredient,
+				ticked: i.ticked,
+				info: i.meals.map(m -> m.name).join(", "),
+				onChange: ticked -> ticked ? TickItem(
+					i.ingredient
+				) : UntickItem(i.ingredient)
+			}))
+		)];
 	}
 }
