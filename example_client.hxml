@@ -7,6 +7,7 @@
 -lib jsImport
 -lib uuid
 -lib datetime
+--dce full
 --macro nullSafety("smalluniverse", Strict)
 --macro nullSafety("mealplanner", Strict)
 -js build/client.js
