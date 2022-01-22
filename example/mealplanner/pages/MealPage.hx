@@ -1,5 +1,7 @@
 package mealplanner.pages;
 
+import smalluniverse.DOM.on;
+import smalluniverse.DOM.button;
 import smalluniverse.SmallUniverse;
 import mealplanner.ui.Layout;
 import mealplanner.ui.SiteHeader;
@@ -10,6 +12,9 @@ using tink.CoreApi;
 
 enum MealAction {
 	AddIngredient(mealUrl:String, ingredient:String);
+	AddToShoppingList;
+	TickIngredient(ingredient:String);
+	UntickIngredient(ingredient:String);
 }
 
 typedef MealParams = {
@@ -31,18 +36,21 @@ class MealPage implements Page<MealAction, MealParams, MealData> {
 	public function new() {}
 
 	public function render(data:MealData) {
-		return Layout(SiteHeader(data.mealName), [
-			IngredientList("Ingredients", data.ingredients.map(i -> {
-				ingredient: i.name,
-				ticked: null, // "null" is a hacky way of saying we don't want a checkbox.
-				info: null, // TODO: i.store
-			}), ListItemInput(
-				"New Ingredient",
-				"",
-				text -> text != "" ? Some(
-					AddIngredient(data.mealId, text)
-				) : None
-			))
-		]);
+		return Layout(SiteHeader(data.mealName), [button([
+			on("click", (e) -> Some(AddToShoppingList))
+		], [
+			"Add to shopping list"
+		]), IngredientList("Ingredients", data.ingredients.map(i -> {
+			ingredient: i.name,
+			ticked: true, // TODO: include in the page data
+			info: null, // TODO: i.store
+			onChange: (
+				ticked
+			) -> ticked ? TickIngredient(i.name) : UntickIngredient(i.name)
+		}), ListItemInput(
+			"New Ingredient",
+			"",
+			text -> text != "" ? Some(AddIngredient(data.mealId, text)) : None
+		))]);
 	}
 }
