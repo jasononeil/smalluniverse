@@ -17,6 +17,11 @@
   content: ")";
 }
 
+.IngredientList__Label {
+  display: block;
+  width: 100%;
+}
+
 .IngredientList__Checkbox.IngredientList__Checkbox {
   margin: var(--space-s);
 }

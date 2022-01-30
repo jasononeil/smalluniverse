@@ -2,7 +2,6 @@ package mealplanner.ui;
 
 import js.html.InputElement;
 import mealplanner.App.appRouter;
-import mealplanner.AppAction;
 import smalluniverse.SmallUniverse;
 import smalluniverse.DOM;
 import mealplanner.ui.ListView;
@@ -30,18 +29,25 @@ function IngredientList<Action>(name:String, ingredients:Array<{
 				final infoSpan:Html<Action> = info != null ? span([
 					className("IngredientList__Info")
 				], info) : "";
-				final itemContent = label([], [checkbox([on("click", (e) -> {
-					final inputElement:Null<InputElement> = Std.downcast(
-						e.currentTarget,
-						InputElement
-					);
-					final value = inputElement != null ? inputElement.checked : false;
-					return Some(i.onChange(value));
-				}), checked(
-					i.ticked
-				), className(
-					"IngredientList__Checkbox"
-					),]), i.ingredient, infoSpan]);
+				final itemContent = label(
+					[className("IngredientList__Label")],
+					[
+						checkbox([
+							on("change", (e) -> {
+								final inputElement:Null<InputElement> = Std.downcast(
+									e.currentTarget,
+									InputElement
+								);
+								final value = inputElement != null ? inputElement.checked : false;
+								return Some(i.onChange(value));
+							}),
+							checked(i.ticked),
+							className("IngredientList__Checkbox"),
+						]),
+						i.ingredient,
+						infoSpan
+					]
+				);
 				// This used to be ListItemLink with ingredientUrl
 				return ListItem(itemContent);
 			}).concat(extraItems != null ? [extraItems] : []))
