@@ -1,5 +1,11 @@
 package mealplanner.pages;
 
+import smalluniverse.DOM.nothing;
+import smalluniverse.DOM.element;
+import mealplanner.ui.Paragraph;
+import mealplanner.App.appRouter;
+import smalluniverse.DOM.href;
+import smalluniverse.DOM.a;
 import smalluniverse.DOM.section;
 import smalluniverse.SmallUniverse;
 import mealplanner.ui.Layout;
@@ -16,7 +22,8 @@ enum ShoppingAction {
 }
 
 typedef ShoppingData = {
-	list:Map<String, Array<IngredientToBuy>>
+	list:Map<String, Array<IngredientToBuy>>,
+	numberOfItemsWithoutShop:Int,
 };
 
 typedef IngredientToBuy = {
@@ -40,16 +47,26 @@ class ShoppingPage implements Page<
 	}
 
 	function renderLists(data:ShoppingData):Html<ShoppingAction> {
-		return [for (storeName => itemsForStore in data.list) section(
+		final shopLists = [for (storeName =>
+			itemsForStore in data.list) section(
 			[],
-			IngredientList(storeName, itemsForStore.map(i -> {
+			[IngredientList(storeName, itemsForStore.map(i -> {
 				ingredient: i.ingredient,
 				ticked: i.ticked,
 				info: i.meals.map(m -> m.name).join(", "),
 				onChange: ticked -> ticked ? TickItem(
 					i.ingredient
 				) : UntickItem(i.ingredient)
-			}))
+			}))]
 		)];
+		final alertItemsWithNoShop = (data.numberOfItemsWithoutShop > 0) ? element(
+			"strong",
+			[],
+			'${data.numberOfItemsWithoutShop} items without a shop set. '
+		) : nothing();
+		final linkToSelectShop = Paragraph([alertItemsWithNoShop, a([
+			href(appRouter.uriForShopSelectorPage({}))
+		], 'Select Shops for Items.')]);
+		return [linkToSelectShop, shopLists];
 	}
 }

@@ -24,11 +24,18 @@ class ShoppingPageApi implements PageApi<
 		return shoppingListEventSource
 				.getAllItems()
 				.next(function(items):ShoppingData {
+				var itemsWithoutShop = 0;
 				final list = new Map<String, Array<IngredientToBuy>>();
 				for (i in items) {
-					final shopList = list[i.shop].orGet(
-						() -> list[i.shop] = []
-					);
+					final shopName = i.shop;
+					if (shopName == null) {
+						itemsWithoutShop++;
+						continue;
+					}
+					final shopList = list[shopName].orGet(() -> list[
+						shopName
+					] = []);
+
 					shopList.push({
 						ingredient: i.itemName,
 						meals: i.meals.map(
@@ -38,6 +45,7 @@ class ShoppingPageApi implements PageApi<
 					});
 				}
 				return {
+					numberOfItemsWithoutShop: itemsWithoutShop,
 					list: list
 				};
 			});
