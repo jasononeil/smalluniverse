@@ -1,13 +1,8 @@
 package mealplanner.pages;
 
-import mealplanner.App.appRouter;
-import smalluniverse.DOM.href;
-import smalluniverse.DOM.a;
-import smalluniverse.DOM.section;
 import smalluniverse.SmallUniverse;
 import mealplanner.ui.Layout;
 import mealplanner.ui.SiteHeader;
-import mealplanner.ui.IngredientList;
 import mealplanner.ui.ShopSelector;
 
 using tink.CoreApi;
