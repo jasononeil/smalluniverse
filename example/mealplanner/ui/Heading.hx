@@ -1,6 +1,5 @@
 package mealplanner.ui;
 
-import mealplanner.AppAction;
 import smalluniverse.SmallUniverse;
 import smalluniverse.DOM;
 
