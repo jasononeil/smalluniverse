@@ -18,6 +18,10 @@ inline function text<Action>(text:String):Html<Action>
 inline function comment<Action>(text:String):Html<Action>
 	return Comment(text);
 
+/** Add nothing to the DOM. You can also use `""` (an empty string) or `[]` an empty array. This is more readable and has explicit typing which is occasional useful. **/
+inline function nothing<Action>():Html<Action>
+	return "";
+
 inline function attr<Action>(name:String, value:String):HtmlAttribute<Action>
 	return Attribute(name, value);
 
