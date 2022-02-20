@@ -3,6 +3,7 @@ package mealplanner;
 import smalluniverse.SmallUniverse;
 import mealplanner.pages.MealPage;
 import mealplanner.pages.ShoppingPage;
+import mealplanner.pages.ShopSelectorPage;
 import mealplanner.pages.WeeklyPlanPage;
 import mealplanner.pages.MealsListPage;
 import mealplanner.pages.IngredientPage;
@@ -37,6 +38,10 @@ class AppRoutes implements Router {
 		return '/shopping';
 	}
 
+	public function uriForShopSelectorPage(params:ShopSelectorParams):String {
+		return '/shopping/select-shop';
+	}
+
 	public function uriToRoute(uri:String):Option<ResolvedRoute<Dynamic>> {
 		final path = uri.split("?")[0];
 		final parts = path.split("/").filter(s -> s != "");
@@ -51,6 +56,8 @@ class AppRoutes implements Router {
 				}));
 			case ["weekly-plan"]:
 				return Some(Page(new WeeklyPlanPage(), {}));
+			case ["shopping", "select-shop"]:
+				return Some(Page(new ShopSelectorPage(), {}));
 			case ["shopping"]:
 				return Some(Page(new ShoppingPage(), {}));
 			default:

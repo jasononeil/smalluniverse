@@ -13,15 +13,18 @@ enum ShoppingListEvent {
 	RemoveMealFromShoppingList(mealId:String);
 	TickItem(itemName:String);
 	UntickItem(itemName:String);
+	AddShop(shopName:String);
+	SetShop(itemName:String, shopName:Option<String>);
 }
 
 typedef ShoppingListModel = {
-	items:Array<ShoppingListItem>
+	items:Array<ShoppingListItem>,
+	shops:Array<String>
 }
 
 typedef ShoppingListItem = {
 	itemName:String,
-	shop:String,
+	shop:Null<String>,
 	meals:Array<{mealId:String, mealName:String}>,
 	ticked:Bool
 }
@@ -52,6 +55,10 @@ class ShoppingListEventSource extends JsonFileEventSource<
 		return this.readModel().next(model -> model.items);
 	}
 
+	public function getShops():Promise<Array<String>> {
+		return this.readModel().next(model -> model.shops);
+	}
+
 	function update(
 		model:ShoppingListModel,
 		event:ShoppingListEvent
@@ -76,6 +83,14 @@ class ShoppingListEventSource extends JsonFileEventSource<
 				for (item in model.items) {
 					if (item.itemName == itemName) {
 						item.ticked = false;
+					}
+				}
+			case AddShop(shopName):
+				model.shops.push(shopName);
+			case SetShop(itemName, shopName):
+				for (item in model.items) {
+					if (item.itemName == itemName) {
+						item.shop = shopName.orNull();
 					}
 				}
 		}
@@ -104,13 +119,11 @@ class ShoppingListEventSource extends JsonFileEventSource<
 			if (itemToAdd == null) {
 				itemToAdd = {
 					itemName: item.itemName,
-					shop: Math.random() > 0.5 ? "Coles" : "Bulk",
-					meals: [
-						{
-							mealId: meal.mealId,
-							mealName: meal.name
-						}
-					],
+					shop: null,
+					meals: [{
+						mealId: meal.mealId,
+						mealName: meal.name
+					}],
 					ticked: false
 				}
 			}
