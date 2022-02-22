@@ -9,29 +9,30 @@ import mealplanner.domains.Meals;
 import mealplanner.domains.WeeklyPlan;
 import mealplanner.domains.ShoppingList;
 import smalluniverse.orchestrators.SynchronousOrchestrator;
+import js.node.Fs;
 
 final mealsEventSource = new MealsEventSource(
 	new TSVEventStore(
-		"./example/mealplanner/content/event-stores/events-meals.tsv",
+		"./app-content/event-stores/events-meals.tsv",
 		new JsonEncoder<MealsEvent>()
 	),
-	"./example/mealplanner/content/write-models/MealsEventSource.json"
+	"./app-content/write-models/MealsEventSource.json"
 );
 
 final weeklyPlanEventSource = new WeeklyPlanEventSource(
 	new TSVEventStore(
-		"./example/mealplanner/content/event-stores/events-weekly-plan.tsv",
+		"./app-content/event-stores/events-weekly-plan.tsv",
 		new JsonEncoder<WeeklyPlanEvent>()
 	),
-	"./example/mealplanner/content/write-models/WeeklyPlanEventSource.json"
+	"./app-content/write-models/WeeklyPlanEventSource.json"
 );
 
 final shoppingListEventSource = new ShoppingListEventSource(
 	new TSVEventStore(
-		"./example/mealplanner/content/event-stores/events-shopping-list.tsv",
+		"./app-content/event-stores/events-shopping-list.tsv",
 		new JsonEncoder<ShoppingListEvent>()
 	),
-	"./example/mealplanner/content/write-models/ShoppingListEventSource.json"
+	"./app-content/write-models/ShoppingListEventSource.json"
 );
 
 final appOrchestrator = new SynchronousOrchestrator({
