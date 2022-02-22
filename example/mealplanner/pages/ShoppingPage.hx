@@ -9,6 +9,7 @@ import smalluniverse.DOM.a;
 import smalluniverse.DOM.section;
 import smalluniverse.SmallUniverse;
 import mealplanner.ui.Layout;
+import mealplanner.ui.Link;
 import mealplanner.ui.SiteHeader;
 import mealplanner.ui.IngredientList;
 
@@ -64,7 +65,7 @@ class ShoppingPage implements Page<
 			[],
 			'${data.numberOfItemsWithoutShop} items without a shop set. '
 		) : nothing();
-		final linkToSelectShop = Paragraph([alertItemsWithNoShop, a([
+		final linkToSelectShop = Paragraph([alertItemsWithNoShop, Link([
 			href(appRouter.uriForShopSelectorPage({}))
 		], 'Select Shops for Items.')]);
 		return [linkToSelectShop, shopLists];
