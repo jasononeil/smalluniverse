@@ -16,7 +16,7 @@ using tink.CoreApi;
 function start(
 	router:Router,
 	orchestrator:Orchestrator,
-	host:String = "localhost",
+	host:String = "0.0.0.0",
 	port:Int = 4723
 ) {
 	listenForNodeEvents();
@@ -52,6 +52,8 @@ function handleRequest(
 	req:IncomingMessage,
 	res:ServerResponse
 ) {
+	trace('Request: ${req.url}');
+
 	if (req.url == "/js/client.bundle.js") {
 		return loadClientScript(res);
 	}
