@@ -6,7 +6,7 @@
   "license": "AGPL-3.0-or-later",
   "scripts": {
     "buildAndStart": "yarn -s build && yarn -s start",
-    "build": "haxe --connect 6000 example.hxml & haxe --connect 6000 example_client.hxml",
+    "build": "haxe example.hxml & haxe example_client.hxml",
     "start": "node build/server.bundle.js",
     "dev": "yarn -s dev:haxeDevServer & yarn -s dev:nodemon",
     "dev:nodemon": "nodemon --watch ../src/ --watch ./mealplanner --ext hx,hxml,html,css --exec \"yarn -s buildAndStart\"",
