@@ -8,6 +8,7 @@ using Lambda;
 
 enum ShoppingListEvent {
 	AddItemToShoppingList(item:ShoppingListItem);
+	RemoveItemFromShoppingList(itemName:String, mealId:Null<String>);
 	AddMealToShoppingList(meal:ShoppingListForMeal);
 	UpdateMealOnShoppingList(meal:ShoppingListForMeal);
 	RemoveMealFromShoppingList(mealId:String);
@@ -52,10 +53,12 @@ class ShoppingListEventSource extends JsonFileEventSource<
 		);
 	}
 
+	/** Return all items in the shipping list. **/
 	public function getAllItems():Promise<Array<ShoppingListItem>> {
 		return this.readModel().next(model -> model.items);
 	}
 
+	/** Return the items on the shopping list that are for a specific meal. **/
 	public function getItemsForMeal(
 		mealId:String
 	):Promise<Array<ShoppingListItem>> {
@@ -68,6 +71,7 @@ class ShoppingListEventSource extends JsonFileEventSource<
 			);
 	}
 
+	/** Return the list of shops we have to chose from. **/
 	public function getShops():Promise<Array<String>> {
 		return this.readModel().next(model -> model.shops);
 	}
@@ -78,7 +82,9 @@ class ShoppingListEventSource extends JsonFileEventSource<
 	):Promise<ShoppingListModel> {
 		switch event {
 			case AddItemToShoppingList(item):
-				addItem(model, item);
+				addOrUpdateItem(model, item);
+			case RemoveItemFromShoppingList(itemName, mealId):
+				removeItem(model, itemName, mealId);
 			case AddMealToShoppingList(meal):
 				addMealToShoppingList(model, meal);
 			case UpdateMealOnShoppingList(meal):
@@ -110,48 +116,32 @@ class ShoppingListEventSource extends JsonFileEventSource<
 		return model;
 	}
 
-	function setMealOnItem(
-		item:ShoppingListItem,
-		mealId:String,
-		mealName:String
-	) {
-		var existingMeal = item.meals.find(m -> m.mealId == mealId);
-		if (existingMeal != null) {
-			existingMeal.mealName = mealName;
-		} else {
-			item.meals.push({mealId: mealId, mealName: mealName});
-		}
-	}
-
 	function addMealToShoppingList(
 		model:ShoppingListModel,
 		meal:ShoppingListForMeal
 	) {
 		for (item in meal.items) {
-			var itemToAdd = model.items.find(i -> i.itemName == item.itemName);
-			if (itemToAdd == null) {
-				itemToAdd = {
-					itemName: item.itemName,
-					shop: null,
-					meals: [{
-						mealId: meal.mealId,
-						mealName: meal.name
-					}],
-					ticked: false
-				}
-			}
-			setMealOnItem(itemToAdd, meal.mealId, meal.name);
-			addItem(model, itemToAdd);
+			final itemToAdd = {
+				itemName: item.itemName,
+				shop: null,
+				meals: [{
+					mealId: meal.mealId,
+					mealName: meal.name
+				}],
+				ticked: false
+			};
+			addOrUpdateItem(model, itemToAdd);
 		}
 	}
 
-	function addItem(model:ShoppingListModel, item:ShoppingListItem) {
+	function addOrUpdateItem(model:ShoppingListModel, item:ShoppingListItem) {
 		final existing = model.items.find(i -> i.itemName == item.itemName);
 		if (existing != null) {
-			// Update shop, ticked, meals/
-			existing.shop = item.shop;
+			// Merge "shop", "ticked" and "meals" fields with existing item in a sensible way.
+			existing.shop = item.shop != null ? item.shop : existing.shop;
 			// Tick only if both the existing and the new are ticked.
 			existing.ticked = item.ticked && existing.ticked;
+
 			for (meal in item.meals) {
 				final existingMeal = existing.meals.find(
 					m -> meal.mealId == m.mealId
@@ -167,20 +157,40 @@ class ShoppingListEventSource extends JsonFileEventSource<
 		}
 	}
 
+	function removeItem(
+		model:ShoppingListModel,
+		itemName:String,
+		mealId:Null<String>
+	) {
+		for (item in model.items) {
+			if (item.itemName == itemName) {
+				if (mealId != null) {
+					item.meals = item.meals.filter(m -> m.mealId != mealId);
+				} else {
+					// Emptying it of meals will mean it is removed in the next step.
+					// (Calling `model.items.remove(item)` now will mess up the for loop iterator).
+					item.meals = [];
+				}
+			}
+		}
+		cleanUpItemsNotInAnyMeals(model);
+	}
+
 	function removeMealFromShoppingList(
 		model:ShoppingListModel,
 		mealId:String
 	) {
 		for (item in model.items) {
-			for (meal in item.meals) {
-				if (meal.mealId == mealId) {
-					// Is removing an item while we're iterating okay?
-					item.meals.remove(meal);
-					if (item.meals.length == 0) {
-						model.items.remove(item);
-					}
-				}
-			}
+			item.meals = item.meals.filter(meal -> meal.mealId != mealId);
 		}
+		cleanUpItemsNotInAnyMeals(model);
+	}
+
+	/**
+		Currently our assumption is that shopping list items can be present for multiple "meals".
+		If an item isn't for any meals, it shouldn't be on the list.
+	**/
+	function cleanUpItemsNotInAnyMeals(model:ShoppingListModel) {
+		model.items = model.items.filter(i -> i.meals.length > 0);
 	}
 }

@@ -75,13 +75,25 @@ class MealPageApi implements PageApi<MealAction, MealParams, MealData> {
 			case TickIngredient(ingredient):
 				return new Command(
 					ShoppingListEventSource,
-					TickItem(ingredient)
+					RemoveItemFromShoppingList(ingredient, params.mealId)
 				);
 			case UntickIngredient(ingredient):
-				return new Command(
-					ShoppingListEventSource,
-					UntickItem(ingredient)
-				);
+				return mealsModel
+						.getMeal(params.mealId)
+						.next(
+						meal -> new Command(
+							ShoppingListEventSource,
+							AddItemToShoppingList({
+								itemName: ingredient,
+								shop: null,
+								meals: [{
+									mealId: params.mealId,
+									mealName: meal.name
+								}],
+								ticked: false
+							})
+						)
+					);
 		}
 	}
 }
