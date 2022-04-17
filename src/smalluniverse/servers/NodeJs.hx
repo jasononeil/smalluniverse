@@ -75,8 +75,10 @@ function handleRequest(
 
 // This function signature would be way less ugly if `Page` was an object and not an enum instance, then we could pass that in.
 function handlePage<
-	Action,
-	PageParams,
+	Action
+	,
+	PageParams
+	,
 	PageData
 	>(
 		req:IncomingMessage,
@@ -95,9 +97,11 @@ function handlePage<
 			}
 			return readRequestBody(req).next(body -> {
 				final action = page.actionEncoder.decode(body);
-				return api
-						.actionToCommand(params, action)
-						.next(command -> orchestrator.handleCommand(command));
+				trace('Received action', action);
+				return api.actionToCommand(params, action).next(command -> {
+					trace('Command', command.toString());
+					orchestrator.handleCommand(command);
+				});
 			});
 		}).next((_) -> {
 			// Get Page Data

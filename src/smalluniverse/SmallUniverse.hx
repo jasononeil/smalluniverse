@@ -305,6 +305,19 @@ abstract Command<Event>(
 		this = Some({eventSourceClass: eventSourceClass, event: event});
 	}
 
+	/** Return a log-friendly string representing the command. **/
+	public function toString():String {
+		switch this {
+			case Some(value):
+				final eventSourceName = Type.getClassName(
+					value.eventSourceClass
+				);
+				return 'On ${eventSourceName} attempt ${value.event}';
+			case None:
+				return "DoNothing";
+		}
+	}
+
 	public static var DoNothing:Command<Any> = None;
 }
 
@@ -474,7 +487,8 @@ abstract Html<Action>(
 // }
 
 function mapHtml<
-	InnerAction,
+	InnerAction
+	,
 	OuterAction
 	>(
 		html:Html<InnerAction>,
@@ -497,7 +511,8 @@ function mapHtml<
 }
 
 function mapAttr<
-	InnerAction,
+	InnerAction
+	,
 	OuterAction
 	>(
 		attr:HtmlAttribute<InnerAction>,
