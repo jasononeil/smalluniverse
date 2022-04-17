@@ -4,24 +4,46 @@ import mealplanner.domains.ShoppingList.ShoppingListEventSource;
 import smalluniverse.SmallUniverse;
 import mealplanner.pages.MealPage;
 import mealplanner.domains.Meals;
+import mealplanner.domains.ShoppingList;
 
 using tink.CoreApi;
 using Lambda;
+using mealplanner.helpers.NullHelper;
 
 class MealPageApi implements PageApi<MealAction, MealParams, MealData> {
 	public var relatedPage = MealPage;
 
 	var mealsModel:MealsEventSource;
+	var shoppingListModel:ShoppingListEventSource;
 
-	public function new(mealsModel:MealsEventSource) {
+	public function new(
+		mealsModel:MealsEventSource,
+		shoppingListModel:ShoppingListEventSource
+	) {
 		this.mealsModel = mealsModel;
+		this.shoppingListModel = shoppingListModel;
 	}
 
 	public function getPageData(params:MealParams):Promise<MealData> {
-		return mealsModel.getMeal(params.mealId).next(meal -> {
-			mealId: meal.slug,
-			mealName: meal.name,
-			ingredients: meal.ingredients
+		final mealPromise = mealsModel.getMeal(params.mealId);
+		final shoppingListPromise = shoppingListModel.getItemsForMeal(
+			params.mealId
+		);
+		final bothPromises = mealPromise && shoppingListPromise;
+		return bothPromises.next(pair -> {
+			final meal = pair.a;
+			final shoppingList = pair.b;
+			return {
+				mealId: meal.slug,
+				mealName: meal.name,
+				ingredients: meal.ingredients.map(i -> {
+					name: i.name,
+					ticked: shoppingList
+							.find(item -> item.itemName == i.name)
+							.mapNonNullValue(item -> item.ticked)
+							.or(true)
+				})
+			};
 		});
 	}
 

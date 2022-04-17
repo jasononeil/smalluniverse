@@ -36,7 +36,8 @@ typedef ShoppingListForMeal = {
 }
 
 class ShoppingListEventSource extends JsonFileEventSource<
-	ShoppingListEvent,
+	ShoppingListEvent
+	,
 	ShoppingListModel
 	> {
 	public function new(
@@ -53,6 +54,18 @@ class ShoppingListEventSource extends JsonFileEventSource<
 
 	public function getAllItems():Promise<Array<ShoppingListItem>> {
 		return this.readModel().next(model -> model.items);
+	}
+
+	public function getItemsForMeal(
+		mealId:String
+	):Promise<Array<ShoppingListItem>> {
+		return this
+				.readModel()
+				.next(
+				model -> model.items.filter(
+					item -> item.meals.find(m -> m.mealId == mealId) != null
+				)
+			);
 	}
 
 	public function getShops():Promise<Array<String>> {

@@ -27,7 +27,7 @@ typedef MealData = {
 	ingredients:Ingredients
 }
 
-typedef Ingredients = Array<{name:String}>;
+typedef Ingredients = Array<{name:String, ticked:Bool}>;
 
 class MealPage implements Page<MealAction, MealParams, MealData> {
 	public var actionEncoder:IJsonEncoder<MealAction> = new JsonEncoder<MealAction>();
@@ -42,8 +42,8 @@ class MealPage implements Page<MealAction, MealParams, MealData> {
 			"Add to shopping list"
 		]), IngredientList("Ingredients", data.ingredients.map(i -> {
 			ingredient: i.name,
-			ticked: true, // TODO: include in the page data
-			info: null, // TODO: i.store
+			ticked: i.ticked,
+			info: null, // not displaying on this screen
 			onChange: (
 				ticked
 			) -> ticked ? TickIngredient(i.name) : UntickIngredient(i.name)

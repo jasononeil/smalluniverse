@@ -44,7 +44,7 @@ final appOrchestrator = new SynchronousOrchestrator({
 	projections: [],
 	pageApis: [
 		new IngredientPageApi(),
-		new MealPageApi(mealsEventSource),
+		new MealPageApi(mealsEventSource, shoppingListEventSource),
 		new MealsListPageApi(mealsEventSource),
 		new ShoppingPageApi(shoppingListEventSource),
 		new ShopSelectorPageApi(shoppingListEventSource),
