@@ -30,3 +30,10 @@ function sure<T>(value:Null<T>, ?pos:PosInfos):T {
 	}
 	return value;
 }
+
+/**
+	Transform a value if it's not null, otherwise leave it null.
+**/
+function mapNonNullValue<A, B>(value:Null<A>, transform:A->B):Null<B> {
+	return value != null ? transform(value) : null;
+}
