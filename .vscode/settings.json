@@ -1,5 +1,16 @@
 {
   "haxe.executable": "./node_modules/.bin/haxe",
+  "haxe.configurations": [
+    { "label": "test", "args": ["test.hxml"] },
+    {
+      "label": "example (server)",
+      "args": ["--cwd", "example", "example.hxml"]
+    },
+    {
+      "label": "example (client)",
+      "args": ["--cwd", "example", "example_client.hxml"]
+    }
+  ],
   "editor.useTabStops": true,
   "[haxe]": {
     "editor.defaultFormatter": "nadako.vshaxe"
