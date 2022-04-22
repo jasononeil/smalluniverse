@@ -3,8 +3,6 @@ package mealplanner.ui;
 import js.html.AnchorElement;
 import js.html.MouseEvent;
 import js.html.Event;
-import js.Browser.window;
-import js.Browser.location;
 import smalluniverse.DOM;
 import smalluniverse.SmallUniverse;
 import smalluniverse.clients.Browser;

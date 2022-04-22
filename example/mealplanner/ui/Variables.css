@@ -2,6 +2,7 @@
   --color-primary: blue;
   --color-border: rgb(230, 230, 230);
   --color-highlight: rgb(196, 205, 255);
+  --color-text: rgb(0, 0, 0);
 
   --type-family: "Source Sans Variable";
   --type-bold: 700;

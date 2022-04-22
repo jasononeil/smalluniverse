@@ -1,0 +1,24 @@
+.Button {
+  /* Shape */
+  border: var(--border);
+  border-radius: var(--border-radius);
+  padding: var(--space-m);
+  appearance: none;
+  display: inline-block;
+  /* Typography */
+  font-family: var(--type-family);
+  font-size: var(--type-body);
+  font-weight: var(--type-medium);
+  text-decoration: none;
+  line-height: 1;
+  /* Color */
+  background: transparent;
+  border-color: var(--color-highlight);
+  color: var(--color-text);
+}
+
+.Button:hover,
+.Button:focus-visible {
+  background: var(--color-highlight);
+  outline: none;
+}

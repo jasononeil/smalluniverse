@@ -5,6 +5,7 @@ import mealplanner.ui.ListView;
 import smalluniverse.DOM;
 import smalluniverse.SmallUniverse.Html;
 import mealplanner.ui.Heading;
+import mealplanner.ui.Button;
 
 using tink.CoreApi;
 using Lambda;
@@ -13,7 +14,8 @@ typedef ShopSelectorProps<Action> = {
 	shops:Array<String>,
 	itemsWithoutShop:Array<{itemName:String, meals:Array<{name:String, id:String}>}>,
 	itemsWithShop:Map<
-		String,
+		String
+		,
 		Array<{itemName:String, meals:Array<{name:String, id:String}>}>
 		>,
 	onNewShop:String->Action,
@@ -100,5 +102,5 @@ function renderShopList<Action>(
 			final select = cast(event.target, SelectElement);
 			return Some(actionForShop(select.value));
 		})
-	], [blank, shopsList]), button([type("submit")], "Set")]);
+	], [blank, shopsList]), Button(Submit, "Set")]);
 }

@@ -1,5 +1,6 @@
 package mealplanner.pages;
 
+import mealplanner.ui.Button;
 import mealplanner.ui.CalendarGrid;
 import mealplanner.helpers.DateString;
 import js.html.SelectElement;
@@ -33,8 +34,10 @@ typedef MealPlanForDate = {
 }
 
 class WeeklyPlanPage implements Page<
-	WeeklyPlanAction,
-	WeeklyPlanParams,
+	WeeklyPlanAction
+	,
+	WeeklyPlanParams
+	,
 	WeeklyPlanData
 	> {
 	public var actionEncoder:IJsonEncoder<WeeklyPlanAction> = new JsonEncoder<WeeklyPlanAction>();
@@ -94,9 +97,9 @@ function renderMealSelect(
 		return (select.value == "") ? None : Some(
 			AddMealToDay(date, select.value)
 		);
-	})], [select([name("mealId")], [blankOption].concat(mealOptions)), button([
-		type("submit")
-	], "Add meal")]);
+	})], [select([name("mealId")], [
+		blankOption
+	].concat(mealOptions)), Button(Submit, "Add meal")]);
 }
 
 final weekdays = [

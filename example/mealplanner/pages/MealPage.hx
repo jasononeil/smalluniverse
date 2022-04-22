@@ -1,7 +1,6 @@
 package mealplanner.pages;
 
-import smalluniverse.DOM.on;
-import smalluniverse.DOM.button;
+import mealplanner.ui.Button;
 import smalluniverse.SmallUniverse;
 import mealplanner.ui.Layout;
 import mealplanner.ui.SiteHeader;
@@ -36,21 +35,22 @@ class MealPage implements Page<MealAction, MealParams, MealData> {
 	public function new() {}
 
 	public function render(data:MealData) {
-		return Layout(SiteHeader(data.mealName), [button([
-			on("click", (e) -> Some(AddToShoppingList))
-		], [
-			"Add to shopping list"
-		]), IngredientList("Ingredients", data.ingredients.map(i -> {
-			ingredient: i.name,
-			ticked: i.ticked,
-			info: null, // not displaying on this screen
-			onChange: (
-				ticked
-			) -> ticked ? TickIngredient(i.name) : UntickIngredient(i.name)
-		}), ListItemInput(
-			"New Ingredient",
-			"",
-			text -> text != "" ? Some(AddIngredient(data.mealId, text)) : None
-		))]);
+		return Layout(SiteHeader(data.mealName), [
+			Button(Action(AddToShoppingList), "Add to shopping list"),
+			IngredientList("Ingredients", data.ingredients.map(i -> {
+				ingredient: i.name,
+				ticked: i.ticked,
+				info: null, // not displaying on this screen
+				onChange: (
+					ticked
+				) -> ticked ? TickIngredient(i.name) : UntickIngredient(i.name)
+			}), ListItemInput(
+				"New Ingredient",
+				"",
+				text -> text != "" ? Some(
+					AddIngredient(data.mealId, text)
+				) : None
+			))
+		]);
 	}
 }

@@ -4,14 +4,12 @@ import smalluniverse.DOM.nothing;
 import smalluniverse.DOM.element;
 import mealplanner.ui.Paragraph;
 import mealplanner.App.appRouter;
-import smalluniverse.DOM.href;
-import smalluniverse.DOM.a;
 import smalluniverse.DOM.section;
 import smalluniverse.SmallUniverse;
 import mealplanner.ui.Layout;
-import mealplanner.ui.Link;
 import mealplanner.ui.SiteHeader;
 import mealplanner.ui.IngredientList;
+import mealplanner.ui.Button;
 
 using tink.CoreApi;
 
@@ -34,8 +32,10 @@ typedef IngredientToBuy = {
 }
 
 class ShoppingPage implements Page<
-	ShoppingAction,
-	ShoppingParams,
+	ShoppingAction
+	,
+	ShoppingParams
+	,
 	ShoppingData
 	> {
 	public var actionEncoder:IJsonEncoder<ShoppingAction> = new JsonEncoder<ShoppingAction>();
@@ -65,9 +65,13 @@ class ShoppingPage implements Page<
 			[],
 			'${data.numberOfItemsWithoutShop} items without a shop set. '
 		) : nothing();
-		final linkToSelectShop = Paragraph([alertItemsWithNoShop, Link([
-			href(appRouter.uriForShopSelectorPage({}))
-		], 'Select Shops for Items.')]);
+		final linkToSelectShop = Paragraph([
+			alertItemsWithNoShop,
+			Button(
+				Link(appRouter.uriForShopSelectorPage({})),
+				'Select Shops for Items.'
+			)
+		]);
 		return [linkToSelectShop, shopLists];
 	}
 }
