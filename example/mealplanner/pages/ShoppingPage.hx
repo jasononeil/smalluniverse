@@ -76,7 +76,7 @@ class ShoppingPage implements Page<
 		);
 		final selectShopBtn = Button(
 			Link(appRouter.uriForShopSelectorPage({})),
-			'Select Shops for Items.'
+			'Select Shops for Items'
 		);
 		return [
 			alertItemsWithNoShop,
