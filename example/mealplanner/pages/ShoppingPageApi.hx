@@ -59,6 +59,8 @@ class ShoppingPageApi implements PageApi<
 				return new Command(ShoppingListEventSource, TickItem(name));
 			case UntickItem(name):
 				return new Command(ShoppingListEventSource, UntickItem(name));
+			case ClearCompleted:
+				return new Command(ShoppingListEventSource, ClearCompleted);
 			case RefreshList:
 				return Command.DoNothing;
 		}

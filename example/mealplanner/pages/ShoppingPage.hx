@@ -1,7 +1,6 @@
 package mealplanner.pages;
 
-import smalluniverse.DOM.nothing;
-import smalluniverse.DOM.element;
+import smalluniverse.DOM;
 import mealplanner.ui.Paragraph;
 import mealplanner.App.appRouter;
 import smalluniverse.DOM.section;
@@ -19,6 +18,7 @@ enum ShoppingAction {
 	RefreshList;
 	TickItem(name:String);
 	UntickItem(name:String);
+	ClearCompleted;
 }
 
 typedef ShoppingData = {
@@ -61,19 +61,29 @@ class ShoppingPage implements Page<
 				) : UntickItem(i.ingredient)
 			}))]
 		)];
-		final alertItemsWithNoShop = (data.numberOfItemsWithoutShop > 0) ? element(
-			"strong",
-			[],
-			'${data.numberOfItemsWithoutShop} items without a shop set. '
-		) : nothing();
-		final linkToSelectShop = Paragraph([
-			alertItemsWithNoShop,
-			Button(
-				Link(appRouter.uriForShopSelectorPage({})),
-				'Select Shops for Items.'
+		final alertItemsWithNoShop = (data.numberOfItemsWithoutShop > 0) ? Paragraph(
+			element(
+				"strong",
+				[],
+				'${data.numberOfItemsWithoutShop} items without a shop set. '
 			)
-		]);
+		) : nothing();
+		final alertItemsWithNoShop = Paragraph(alertItemsWithNoShop);
 		final refreshBtn = Button(Action(RefreshList), "Refresh");
-		return [linkToSelectShop, refreshBtn, shopLists];
+		final clearBtn = Button(
+			Action(ClearCompleted),
+			"Clear Completed Items"
+		);
+		final selectShopBtn = Button(
+			Link(appRouter.uriForShopSelectorPage({})),
+			'Select Shops for Items.'
+		);
+		return [
+			alertItemsWithNoShop,
+			clearBtn,
+			refreshBtn,
+			selectShopBtn,
+			shopLists
+		];
 	}
 }

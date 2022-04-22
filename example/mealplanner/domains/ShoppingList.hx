@@ -14,6 +14,7 @@ enum ShoppingListEvent {
 	RemoveMealFromShoppingList(mealId:String);
 	TickItem(itemName:String);
 	UntickItem(itemName:String);
+	ClearCompleted;
 	AddShop(shopName:String);
 	SetShop(itemName:String, shopName:Option<String>);
 }
@@ -104,6 +105,8 @@ class ShoppingListEventSource extends JsonFileEventSource<
 						item.ticked = false;
 					}
 				}
+			case ClearCompleted:
+				clearCompleted(model);
 			case AddShop(shopName):
 				model.shops.push(shopName);
 			case SetShop(itemName, shopName):
@@ -184,6 +187,10 @@ class ShoppingListEventSource extends JsonFileEventSource<
 			item.meals = item.meals.filter(meal -> meal.mealId != mealId);
 		}
 		cleanUpItemsNotInAnyMeals(model);
+	}
+
+	function clearCompleted(model:ShoppingListModel) {
+		model.items = model.items.filter(i -> i.ticked == false);
 	}
 
 	/**
