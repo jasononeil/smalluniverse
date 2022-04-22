@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 set -e
 set -o nounset
@@ -22,6 +22,7 @@ rsync -a Dockerfile do:/var/www/mealplanner/
 rsync -a ./build do:/var/www/mealplanner/
 
 # Build, stop and restart docker
+OLD_CONTAINER=$(ssh do "docker ps -q --filter='ancestor=mealplanner'")
 ssh do "cd /var/www/mealplanner ; docker build . --tag mealplanner"
-ssh do 'cd /var/www/mealplanner ; docker stop `docker ps -q --filter="ancestor=mealplanner"`'
-ssh do "cd /var/www/mealplanner ; docker run -p 4723:4723 --volume /var/www/mealplanner/app-content/:/app/app-content  --rm --detach mealplanner"
+ssh do "docker stop '$OLD_CONTAINER'"
+ssh do "docker run -p 4723:4723 --volume /var/www/mealplanner/app-content/:/app/app-content  --rm --detach mealplanner"
