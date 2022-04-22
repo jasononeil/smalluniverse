@@ -16,6 +16,7 @@ using tink.CoreApi;
 typedef ShoppingParams = {}
 
 enum ShoppingAction {
+	RefreshList;
 	TickItem(name:String);
 	UntickItem(name:String);
 }
@@ -72,6 +73,7 @@ class ShoppingPage implements Page<
 				'Select Shops for Items.'
 			)
 		]);
-		return [linkToSelectShop, shopLists];
+		final refreshBtn = Button(Action(RefreshList), "Refresh");
+		return [linkToSelectShop, refreshBtn, shopLists];
 	}
 }

@@ -8,8 +8,10 @@ using tink.CoreApi;
 using mealplanner.helpers.NullHelper;
 
 class ShoppingPageApi implements PageApi<
-	ShoppingAction,
-	ShoppingParams,
+	ShoppingAction
+	,
+	ShoppingParams
+	,
 	ShoppingData
 	> {
 	public var relatedPage = ShoppingPage;
@@ -57,6 +59,8 @@ class ShoppingPageApi implements PageApi<
 				return new Command(ShoppingListEventSource, TickItem(name));
 			case UntickItem(name):
 				return new Command(ShoppingListEventSource, UntickItem(name));
+			case RefreshList:
+				return Command.DoNothing;
 		}
 	}
 }
