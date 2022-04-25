@@ -25,3 +25,17 @@ function onDestroy<Action>(
 ):HtmlAttribute<Action> {
 	return Hook(Destroy(callback));
 }
+
+/**
+	Cause a side effect when the element is created, with the opportunity to clean it up when the element is removed.
+**/
+function onInitAndDestroy<Action>(
+	callbackThatReturnsCleanup:InitHookArgs<Action>->(DestroyHookArgs<Action>->
+		Void)
+):HtmlAttribute<Action> {
+	var cleanup = (args:DestroyHookArgs<Action>) -> {};
+	return Multiple([
+		Hook(Init(args -> cleanup = callbackThatReturnsCleanup(args))),
+		Hook(Destroy(args -> cleanup(args)))
+	]);
+}
