@@ -2,7 +2,6 @@ package mealplanner.ui;
 
 import smalluniverse.SmallUniverse;
 import smalluniverse.DOM;
-import mealplanner.AppAction;
 
 final sourceSansVariableUrl = "https://cdn.jsdelivr.net/npm/source-sans-pro@3.6.0/source-sans-variable.css";
 
