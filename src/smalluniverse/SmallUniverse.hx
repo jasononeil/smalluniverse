@@ -433,6 +433,11 @@ enum HtmlAttribute<Action> {
 		See https://github.com/snabbdom/snabbdom#key--string--number
 	**/
 	Key(key:String);
+
+	/**
+		Support multiple attributes. Useful for composing helpers that require multiple attributes.
+	**/
+	Multiple(attributes:Array<HtmlAttribute<Action>>);
 }
 
 /**
@@ -642,5 +647,7 @@ function mapAttr<
 				});
 			case Key(key):
 				return Key(key);
+			case Multiple(attrs):
+				return Multiple([for (attr in attrs) mapAttr(attr, convert)]);
 		}
 }

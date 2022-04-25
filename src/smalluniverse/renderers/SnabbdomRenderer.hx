@@ -4,6 +4,7 @@ import smalluniverse.clients.Browser.triggerAction;
 import haxe.DynamicAccess;
 import haxe.extern.EitherType;
 import smalluniverse.SmallUniverse.Html;
+import smalluniverse.SmallUniverse.HtmlAttribute;
 import smalluniverse.SmallUniverse.HookType;
 import js.html.Node;
 import js.html.Element;
@@ -58,7 +59,7 @@ function htmlToVNode(html:Html<Dynamic>):VNode {
 				hook: null,
 				key: null,
 			};
-			for (attr in attrs) {
+			function processAttr(attr:HtmlAttribute<Dynamic>) {
 				switch attr {
 					case Attribute(name, value):
 						data.attrs[name] = value;
@@ -81,7 +82,14 @@ function htmlToVNode(html:Html<Dynamic>):VNode {
 						allHooks.push(hookType);
 					case Key(key):
 						data.key = key;
+					case Multiple(attrs):
+						for (attr in attrs) {
+							processAttr(attr);
+						}
 				}
+			}
+			for (attr in attrs) {
+				processAttr(attr);
 			}
 
 			data.hook = setupHooks(allHooks);

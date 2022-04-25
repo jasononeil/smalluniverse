@@ -4,6 +4,8 @@ import smalluniverse.SmallUniverse;
 import haxe.ds.Option;
 import StringBuf;
 
+using tink.CoreApi;
+
 final selfClosingTags = [
 	"area",
 	"base",
@@ -62,10 +64,13 @@ private function stringifyAttr(attr:HtmlAttribute<Dynamic>):Option<String> {
 			return Some('$name="$escapedValue"');
 		case BooleanAttribute(name, value):
 			return value ? Some('$name') : None;
-		case Property(name, value):
-			// we only stringify attributes
-			return None;
-		case Event(_, _), Key(_), Hook(_):
+		case Multiple(attrs):
+			final strings = attrs
+					.map(stringifyAttr)
+					.filter(option -> option.match(Some(_)))
+					.map(option -> option.sure());
+			return strings.length > 0 ? Some(strings.join(" ")) : None;
+		case Property(_, _), Event(_, _), Key(_), Hook(_):
 			// we only stringify attributes
 			return None;
 	}
