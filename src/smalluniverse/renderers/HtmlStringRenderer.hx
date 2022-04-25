@@ -65,7 +65,7 @@ private function stringifyAttr(attr:HtmlAttribute<Dynamic>):Option<String> {
 		case Property(name, value):
 			// we only stringify attributes
 			return None;
-		case Event(on, fn):
+		case Event(_, _), Key(_), Hook(_):
 			// we only stringify attributes
 			return None;
 	}

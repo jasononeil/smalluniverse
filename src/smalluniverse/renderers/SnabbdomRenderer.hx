@@ -4,7 +4,9 @@ import smalluniverse.clients.Browser.triggerAction;
 import haxe.DynamicAccess;
 import haxe.extern.EitherType;
 import smalluniverse.SmallUniverse.Html;
+import smalluniverse.SmallUniverse.HookType;
 import js.html.Node;
+import js.html.Element;
 import js.html.Event;
 import js.Lib.undefined;
 import Snabbdom;
@@ -48,10 +50,13 @@ class SnabbdomRenderer {
 function htmlToVNode(html:Html<Dynamic>):VNode {
 	switch html.type {
 		case Element(tag, attrs, children):
-			var data = {
+			final allHooks = [];
+			final data = {
 				attrs: new DynamicAccess(),
 				props: new DynamicAccess(),
 				on: new DynamicAccess(),
+				hook: null,
+				key: null,
 			};
 			for (attr in attrs) {
 				switch attr {
@@ -72,10 +77,14 @@ function htmlToVNode(html:Html<Dynamic>):VNode {
 								case None:
 							}
 						};
+					case Hook(hookType):
+						allHooks.push(hookType);
+					case Key(key):
+						data.key = key;
 				}
-				// TODO: hooks.
-				// TODO: key.
 			}
+
+			data.hook = setupHooks(allHooks);
 
 			var childVNodes = [];
 			for (child in children) {
@@ -143,4 +152,93 @@ function htmlToVNodeChild(html:Html<Dynamic>):Array<EitherType<VNode, String>> {
 			}
 			return vNodes;
 	}
+}
+
+function setupHooks<Action>(
+	allHooksForNode:Array<HookType<Action>>
+):SnabbdomModule {
+	final initHooks = [];
+	final insertHooks = [];
+	final removeHooks = [];
+	final destroyHooks = [];
+
+	for (hookType in allHooksForNode) {
+		switch hookType {
+			case Init(callback):
+				initHooks.push(callback);
+			case Insert(callback):
+				insertHooks.push(callback);
+			case Remove(callback):
+				removeHooks.push(callback);
+			case Destroy(callback):
+				destroyHooks.push(callback);
+		}
+	}
+
+	function combineHooks<T>(hooks:Array<Any>, runAllHooksFn:T):T {
+		if (hooks.length == 0) {
+			return js.Lib.undefined;
+		}
+		return runAllHooksFn;
+	}
+
+	return {
+		init: combineHooks(initHooks, (vNode:VNode) -> {
+			for (initHook in initHooks) {
+				initHook({
+					triggerAction: triggerAction
+				});
+			}
+		}),
+		insert: combineHooks(insertHooks, (vNode:VNode) -> {
+			for (insertHook in insertHooks) {
+				insertHook({
+					domElement: getDomElement(vNode),
+					triggerAction: triggerAction
+				});
+			}
+		}),
+		remove: combineHooks(
+			removeHooks,
+			(vNode:VNode, removeCallback:() -> Void) -> {
+				var hooksCompleted = 0;
+				function checkIfAllComplete() {
+					if (hooksCompleted == removeHooks.length) {
+						removeCallback();
+					}
+				}
+				checkIfAllComplete();
+				for (removeHook in removeHooks) {
+					removeHook({
+						domElement: getDomElement(vNode),
+						triggerAction: triggerAction,
+						removeCallback: () -> {
+							hooksCompleted++;
+							checkIfAllComplete();
+						}
+					});
+				}
+			}
+		),
+		destroy: combineHooks(destroyHooks, (vNode:VNode) -> {
+			for (destroyHook in destroyHooks) {
+				destroyHook({
+					domElement: getDomElement(vNode),
+					triggerAction: triggerAction
+				});
+			}
+		}),
+	}
+}
+
+private function getDomElement(vNode:VNode):Element {
+	final node = vNode.elm;
+	if (node == null) {
+		throw 'Expected vNode to have `.elm` property containing DOM Node, but was null';
+	}
+	final elm = @:nullSafety(Off) Std.downcast(node, js.html.Element);
+	if (elm == null) {
+		throw 'Expected vNode to have `.elm` property containing DOM Element, but was a different kind of node: ${node.nodeType}';
+	}
+	return elm;
 }

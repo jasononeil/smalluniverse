@@ -11,10 +11,10 @@ using tink.CoreApi;
 	Routing and Page views can be executed on both the client (as a Single Page Application / SPA) and the server (using Server Side Rendering / SSR).
 
 	You could consider these the "Front End" of your application, they're the parts a user interacts with.
-**/
-/**
+**/ /**
 	A Router takes a URI and returns a `ResolvedRoute` (a known page to display) if one exists.
 **/
+
 interface Router {
 	function uriToRoute(uri:String):Option<ResolvedRoute<Dynamic>>;
 }
@@ -81,9 +81,7 @@ interface PageApi<Action, PageParams, PageData> {
 	Will create an `IJsonEncoder<T>` instance with encode/decode function for the given type.
 
 	Uses tink_json under the hood.
-**/
-@:genericBuild(smalluniverse.macros.JsonEncoderMacros.build())
-class JsonEncoder<T> {}
+**/ @:genericBuild(smalluniverse.macros.JsonEncoderMacros.build()) class JsonEncoder<T> {}
 
 /**
 	A type safe JSON encoder/decoder for a given type.
@@ -117,12 +115,12 @@ interface IJsonEncoder<T> {
 		- As a multi-service architecture where each service can scale independently and they communicate across the network.
 
 	I don't intend to offer all of this up front, but want to design the API so it will be possible if ever needed.
-**/
-/**
+**/ /**
 	A unique identifier for a specific event. 
 
 	This could be a UUID or a Database ID, but is always typed as a String.
 **/
+
 abstract EventId(String) from String to String {}
 
 /**
@@ -282,14 +280,14 @@ enum ProjectionHandlerResult {
 	The Small Universe framework attempts to "orchestrate" the communication between these services so you don't have to.
 
 	There are multiple strategies you could use to orchestrate these, see implementations of `Orchestrator` for examples of what we've done so far.
-**/
-/**
+**/ /**
 	A Command is a request to add an Event to a particular EventSource.
 
 	Pages have "actions", and when these bubble up to the server the PageAPI turns it into a Command.
 
 	It is then used to add the Event to the EventSource.
 **/
+
 abstract Command<Event>(
 	// TODO: Perhaps instead of an Option, this should be an Array
 	// Empty array would still signify no command
@@ -422,7 +420,71 @@ enum HtmlAttribute<Action> {
 
 	/** Add an event listener. eg `Event("click", e -> Some(SendEmail))` will cause a SendEmail action to occur when the element is clicked. **/
 	Event(on:String, fn:(e:Event) -> Option<Action>);
+
+	/** Tap into the lifecycle hooks **/
+	Hook(hookType:HookType<Action>);
+
+	/**
+		An optional key to help our virtual DOM implementation (Snabbdom) match nodes we're about 
+		to render with existing nodes, and so avoid destroying and recreating them unnecessarily.
+
+		If provided, the key must be unique among sibling nodes.
+
+		See https://github.com/snabbdom/snabbdom#key--string--number
+	**/
+	Key(key:String);
 }
+
+/**
+	Lifecycle hooks for when elements are added to and removed from the DOM.
+
+	See https://github.com/snabbdom/snabbdom#hooks
+
+	Notes:
+	- If you use `triggerAction` asynchronously, and the page has changed since your callback fired, the behaviour is unspecified. If you have ideas on what we should specify the behviour to be, let me know.
+	- While Snabbdom allows hooks on any node, we're only allowing them on elements for now, as it means our hook callbacks can supply a `js.html.Element` rather than just a `js.html.Node`, which will usually be more convenient.
+	- I haven't copied the full range of Snabbdom hooks yet, as I'm not sure if they'll all be useful enough for us.
+	- I've chosen not to supply the VDOM nodes (`Html<T>`) in the callbacks, because it it problematic for our `mapHtml()` and `mapAttr()` attributes, and I'm not sure if it's that useful.
+**/
+enum HookType<Action> {
+	/** When a new node is about to be created. **/
+	Init(callback:InitHookArgs<Action>->Void);
+
+	/** When a new node has been inserted into the DOM (or hydrated after server-side-rendering). **/
+	Insert(callback:InsertHookArgs<Action>->Void);
+
+	/**
+		Before a node is removed.
+		Allows you to delay the removal to do things like animations, and use a callback to time the actual removal of the node.
+		Note: this only runs on nodes that are removed directly, it does not run when a node is removed because a parent node was removed.
+	**/
+	Remove(callback:RemoveHookArgs<Action>->Void);
+
+	/**
+		When a node is removed, even indirectly (meaning a parent node was removed, so this is too).
+	**/
+	Destroy(callback:DestroyHookArgs<Action>->Void);
+}
+
+typedef InitHookArgs<Action> = {
+	triggerAction:Action->Void
+};
+
+typedef InsertHookArgs<Action> = {
+	triggerAction:Action->Void,
+	domElement:js.html.Element
+};
+
+typedef RemoveHookArgs<Action> = {
+	triggerAction:Action->Void,
+	domElement:js.html.Element,
+	removeCallback:Void->Void
+};
+
+typedef DestroyHookArgs<Action> = {
+	triggerAction:Action->Void,
+	domElement:js.html.Element,
+};
 
 /**
 	A convient way to generate HtmlType values for our views.
@@ -535,5 +597,50 @@ function mapAttr<
 					}
 				}
 				return Event(on, outerFn);
+			case Hook(hookValue):
+				function triggerOuterAction(
+					trigger:OuterAction->Void,
+					innerAction:InnerAction
+				) {
+					switch convert(innerAction) {
+						case Some(outerAction):
+							trigger(outerAction);
+						case None:
+					}
+				}
+				return Hook(switch hookValue {
+					case Init(callback):
+						Init((args:InitHookArgs<OuterAction>) -> callback({
+							triggerAction: triggerOuterAction.bind(
+								args.triggerAction
+							)
+						}));
+					case Insert(callback):
+						Insert((args:InsertHookArgs<OuterAction>) -> callback({
+							triggerAction: triggerOuterAction.bind(
+								args.triggerAction
+							),
+							domElement: args.domElement
+						}));
+					case Remove(callback):
+						Remove((args:RemoveHookArgs<OuterAction>) -> callback({
+							triggerAction: triggerOuterAction.bind(
+								args.triggerAction
+							),
+							domElement: args.domElement,
+							removeCallback: args.removeCallback
+						}));
+					case Destroy(callback):
+						Destroy(
+							(args:DestroyHookArgs<OuterAction>) -> callback({
+								triggerAction: triggerOuterAction.bind(
+									args.triggerAction
+								),
+								domElement: args.domElement
+							})
+						);
+				});
+			case Key(key):
+				return Key(key);
 		}
 }
