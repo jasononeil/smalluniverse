@@ -54,10 +54,16 @@ class SnabbdomRendererTest {
 	}
 
 	public function testEmptyString()
-		return assert(getRenderedHtml("") == "<!---->", "should render an empty comment");
+		return assert(
+			getRenderedHtml("") == "<!---->",
+			"should render an empty comment"
+		);
 
 	public function testEmptyArray()
-		return assert(getRenderedHtml([]) == "<!---->", "should render an empty comment");
+		return assert(
+			getRenderedHtml([]) == "<!---->",
+			"should render an empty comment"
+		);
 
 	public function testText()
 		return assert(getRenderedHtml(text("Hello!")) == "Hello!");
@@ -72,8 +78,14 @@ class SnabbdomRendererTest {
 		final container = getRenderedContainer(comment("Look! -->"));
 		final asserts = new AssertionBuffer();
 		asserts.assert(container.childNodes.length == 1, "there is one child");
-		asserts.assert(container.childNodes.item(0).nodeType == 8, "it is a comment node (type==8)");
-		asserts.assert(container.childNodes.item(0).textContent == "Look! -->", "It has the correct text");
+		asserts.assert(
+			container.childNodes.item(0).nodeType == 8,
+			"it is a comment node (type==8)"
+		);
+		asserts.assert(
+			container.childNodes.item(0).textContent == "Look! -->",
+			"It has the correct text"
+		);
 		return asserts.done();
 	}
 
@@ -84,14 +96,22 @@ class SnabbdomRendererTest {
 		return assert(getRenderedHtml(element("div", [], [])) == "<div></div>");
 
 	public function testEmptyElementWithAttrs()
-		return assert(getRenderedHtml(element("hr", [Attribute("class", "divider")], [])) == "<hr class=\"divider\">");
+		return assert(getRenderedHtml(element("hr", [
+			Attribute("class", "divider")
+		], [])) == "<hr class=\"divider\">");
 
 	public function testMultipleAttrs()
-		return assert(getRenderedHtml(element("p", [Attribute("class", "lede"), Attribute("id", "intro")], [])) == "<p class=\"lede\" id=\"intro\"></p>");
+		return assert(getRenderedHtml(element("p", [
+			Attribute("class", "lede"),
+			Attribute("id", "intro")
+		], [])) == "<p class=\"lede\" id=\"intro\"></p>");
 
 	public function testAttrsWithHtml() {
 		final asserts = new AssertionBuffer();
-		final container = getRenderedContainer(element("p", [Attribute("class", 'lede">Hack'), Attribute("id", "intro'>Hack")], []));
+		final container = getRenderedContainer(element("p", [
+			Attribute("class", 'lede">Hack'),
+			Attribute("id", "intro'>Hack")
+		], []));
 		asserts.assert(container.childNodes.length == 1);
 		final elm = container.firstElementChild;
 		asserts.assert(elm.nodeName.toLowerCase() == "p");
@@ -103,15 +123,21 @@ class SnabbdomRendererTest {
 	public function testBooleanAttrTrue() {
 		// Note: Snabbdom seems to only work creating `disabled="somevalue"` rather than `disabled`.
 		// This is different to our HTML String renderer but shouldn't be different in practice.
-		return assert(getRenderedHtml(element("button", [BooleanAttribute("disabled", true)], [])) == '<button disabled="disabled"></button>');
+		return assert(getRenderedHtml(element("button", [
+			BooleanAttribute("disabled", true)
+		], [])) == '<button disabled="disabled"></button>');
 	}
 
 	public function testBooleanAttrFalse()
-		return assert(getRenderedHtml(element("button", [BooleanAttribute("disabled", false)], [])) == "<button></button>");
+		return assert(getRenderedHtml(element("button", [
+			BooleanAttribute("disabled", false)
+		], [])) == "<button></button>");
 
 	public function testPropertiesThatAreAttributes() {
-		return assert(getRenderedHtml(element("p", [Property("className", "lede"), Property("title", "Welcome Paragraph")],
-			[])) == '<p class="lede" title="Welcome Paragraph"></p>');
+		return assert(getRenderedHtml(element("p", [
+			Property("className", "lede"),
+			Property("title", "Welcome Paragraph")
+		], [])) == '<p class="lede" title="Welcome Paragraph"></p>');
 	}
 
 	public function testPropertiesThatAreNotAttributes() {
@@ -131,12 +157,10 @@ class SnabbdomRendererTest {
 		final asserts = new AssertionBuffer();
 
 		var called = 0;
-		final btn = element("button", [
-			Event("click", (e) -> {
-				called++;
-				return None;
-			})
-		], ["My button"]);
+		final btn = element("button", [Event("click", (e) -> {
+			called++;
+			return None;
+		})], ["My button"]);
 		final container = getRenderedContainer(btn);
 		final renderedBtn = getByText(container, "My button");
 
@@ -164,16 +188,28 @@ class SnabbdomRendererTest {
 	}
 
 	public function testChildren()
-		return assert(getRenderedHtml(element("p", [], [text("Hello"), comment("Cruel"), text("World")])) == "<p>Hello<!--Cruel-->World</p>");
+		return assert(getRenderedHtml(element("p", [], [
+			text("Hello"),
+			comment("Cruel"),
+			text("World")
+		])) == "<p>Hello<!--Cruel-->World</p>");
 
 	public function testRecursion()
-		return assert(getRenderedHtml(element("p", [],
-			[text("Hello "), element("span", [], [text("Kind")]), text(" World")])) == "<p>Hello <span>Kind</span> World</p>");
+		return assert(getRenderedHtml(element("p", [], [
+			text("Hello "),
+			element("span", [], [
+				text("Kind")
+			]),
+			text(" World")
+		])) == "<p>Hello <span>Kind</span> World</p>");
 
 	public function testFragment() {
 		// Snabbdom can't render a fragment as the top level, so we wrap it in a div.
-		return assert(getRenderedHtml(["Kind Regards,", element("br", [],
-			[]), "Jason"]) == "<div><!--This div wrapper added by SmallUniverse because Snabbdom requires a single element (not multiple nodes) at the top of the virtual dom tree.-->Kind Regards,<br>Jason</div>");
+		return assert(getRenderedHtml([
+			"Kind Regards,",
+			element("br", [], []),
+			"Jason"
+		]) == "<div><!--This div wrapper added by SmallUniverse because Snabbdom requires a single element (not multiple nodes) at the top of the virtual dom tree.-->Kind Regards,<br>Jason</div>");
 	}
 
 	// AND THEN, WE SHOULD PROBABLY CONSIDER SOME SNABBDOM SPECIFIC TESTS

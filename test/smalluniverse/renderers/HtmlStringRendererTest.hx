@@ -25,7 +25,9 @@ class HtmlStringRendererTest {
 		return assert(stringifyHtml(comment("Hello!")) == "<!--Hello!-->");
 
 	public function testCommentWithHtml()
-		return assert(stringifyHtml(comment("Look! -->")) == "<!--Look! --&gt;-->");
+		return assert(
+			stringifyHtml(comment("Look! -->")) == "<!--Look! --&gt;-->"
+		);
 
 	public function testEmptyBrElement()
 		return assert(stringifyHtml(element("br", [], [])) == "<br>");
@@ -34,26 +36,41 @@ class HtmlStringRendererTest {
 		return assert(stringifyHtml(element("div", [], [])) == "<div></div>");
 
 	public function testEmptyElementWithAttrs()
-		return assert(stringifyHtml(element("hr", [Attribute("class", "divider")], [])) == "<hr class=\"divider\">");
+		return assert(stringifyHtml(element("hr", [
+			Attribute("class", "divider")
+		], [])) == "<hr class=\"divider\">");
 
 	public function testMultipleAttrs()
-		return assert(stringifyHtml(element("p", [Attribute("class", "lede"), Attribute("id", "intro")], [])) == "<p class=\"lede\" id=\"intro\"></p>");
+		return assert(stringifyHtml(element("p", [
+			Attribute("class", "lede"),
+			Attribute("id", "intro")
+		], [])) == "<p class=\"lede\" id=\"intro\"></p>");
 
 	public function testAttrsWithHtml()
-		return assert(stringifyHtml(element("p", [Attribute("class", 'lede">Hack'), Attribute("id", "intro'>Hack")],
-			[])) == '<p class="lede&quot;&gt;Hack" id="intro&#039;&gt;Hack"></p>');
+		return assert(stringifyHtml(element("p", [
+			Attribute("class", 'lede">Hack'),
+			Attribute("id", "intro'>Hack")
+		], [])) == '<p class="lede&quot;&gt;Hack" id="intro&#039;&gt;Hack"></p>');
 
 	public function testBooleanAttrTrue()
-		return assert(stringifyHtml(element("button", [BooleanAttribute("disabled", true)], [])) == "<button disabled></button>");
+		return assert(stringifyHtml(element("button", [
+			BooleanAttribute("disabled", true)
+		], [])) == "<button disabled></button>");
 
 	public function testBooleanAttrFalse()
-		return assert(stringifyHtml(element("button", [BooleanAttribute("disabled", false)], [])) == "<button></button>");
+		return assert(stringifyHtml(element("button", [
+			BooleanAttribute("disabled", false)
+		], [])) == "<button></button>");
 
 	public function testPropertiesDoNotRender()
-		return assert(stringifyHtml(element("p", [Property("className", "lede")], [])) == "<p></p>");
+		return assert(stringifyHtml(element("p", [
+			Property("className", "lede")
+		], [])) == "<p></p>");
 
 	public function testEventsDoNotRender()
-		return assert(stringifyHtml(element("p", [Event("click", (e) -> None)], [])) == "<p></p>");
+		return assert(stringifyHtml(element("p", [
+			Event("click", (e) -> None)
+		], [])) == "<p></p>");
 
 	public function testMultipleAttrTypes()
 		return assert(stringifyHtml(element("button", [
@@ -66,12 +83,25 @@ class HtmlStringRendererTest {
 		], [])) == '<button class="primary" active id="cta"></button>');
 
 	public function testChildren()
-		return assert(stringifyHtml(element("p", [], [text("Hello"), comment("Cruel"), text("World")])) == "<p>Hello<!--Cruel-->World</p>");
+		return assert(stringifyHtml(element("p", [], [
+			text("Hello"),
+			comment("Cruel"),
+			text("World")
+		])) == "<p>Hello<!--Cruel-->World</p>");
 
 	public function testRecursion()
-		return assert(stringifyHtml(element("p", [],
-			[text("Hello "), element("span", [], [text("Kind")]), text(" World")])) == "<p>Hello <span>Kind</span> World</p>");
+		return assert(stringifyHtml(element("p", [], [
+			text("Hello "),
+			element("span", [], [
+				text("Kind")
+			]),
+			text(" World")
+		])) == "<p>Hello <span>Kind</span> World</p>");
 
 	public function testFragment()
-		return assert(stringifyHtml(["Kind Regards,", element("br", [], []), "Jason"]) == "Kind Regards,<br>Jason");
+		return assert(stringifyHtml([
+			"Kind Regards,",
+			element("br", [], []),
+			"Jason"
+		]) == "Kind Regards,<br>Jason");
 }
