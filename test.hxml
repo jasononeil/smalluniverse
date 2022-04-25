@@ -9,4 +9,4 @@
 --main Main
 --macro nullSafety("smalluniverse", Strict)
 -js build/test.js
--cmd yarn -s esbuild --bundle build/test.js --platform=node --outfile=build/test.bundle.js
+-cmd yarn -s esbuild --bundle build/test.js --platform=node --external:jsdom --outfile=build/test.bundle.js
