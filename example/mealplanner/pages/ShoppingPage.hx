@@ -4,6 +4,7 @@ import smalluniverse.DOM;
 import mealplanner.ui.Paragraph;
 import mealplanner.App.appRouter;
 import smalluniverse.DOM.section;
+import smalluniverse.Hooks;
 import smalluniverse.SmallUniverse;
 import mealplanner.ui.Layout;
 import mealplanner.ui.SiteHeader;
@@ -32,6 +33,9 @@ typedef IngredientToBuy = {
 	meals:Array<{name:String, id:String}>
 }
 
+// TODO: find a better way to hold state between renders than this.
+var refreshInterval:Null<Int> = null;
+
 class ShoppingPage implements Page<
 	ShoppingAction
 	,
@@ -45,7 +49,15 @@ class ShoppingPage implements Page<
 	public function new() {}
 
 	public function render(data:ShoppingData) {
-		return Layout(SiteHeader('Shopping List'), renderLists(data));
+		return Layout(SiteHeader('Shopping List'), renderLists(data), [
+			onInitAndDestroy(initArgs -> {
+				final interval = js.Browser.window.setInterval(() -> {
+					initArgs.triggerAction(RefreshList);
+				}, 3000);
+				return destroyArgs -> js.Browser.window.clearInterval(interval);
+			}),
+			Key("shopping-list-page")
+		]);
 	}
 
 	function renderLists(data:ShoppingData):Html<ShoppingAction> {
@@ -69,7 +81,6 @@ class ShoppingPage implements Page<
 			)
 		) : nothing();
 		final alertItemsWithNoShop = Paragraph(alertItemsWithNoShop);
-		final refreshBtn = Button(Action(RefreshList), "Refresh");
 		final clearBtn = Button(
 			Action(ClearCompleted),
 			"Clear Completed Items"
@@ -78,12 +89,6 @@ class ShoppingPage implements Page<
 			Link(appRouter.uriForShopSelectorPage({})),
 			'Select Shops for Items'
 		);
-		return [
-			alertItemsWithNoShop,
-			clearBtn,
-			refreshBtn,
-			selectShopBtn,
-			shopLists
-		];
+		return [alertItemsWithNoShop, clearBtn, selectShopBtn, shopLists];
 	}
 }
