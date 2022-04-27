@@ -23,11 +23,11 @@
     "snabbdom": "^2.1.0"
   },
   "devDependencies": {
+    "@testing-library/dom": "^8.13.0",
     "esbuild": "^0.8.34",
-    "jsdom": "^16.4.0",
-    "jsdom-global": "^3.0.2",
+    "global-jsdom": "^8.4.0",
+    "jsdom": "^19.0.0",
     "lix": "^15.11.4",
-    "nodemon": "^2.0.7",
-    "snabbdom-testing-library": "^0.0.1"
+    "nodemon": "^2.0.7"
   }
 }

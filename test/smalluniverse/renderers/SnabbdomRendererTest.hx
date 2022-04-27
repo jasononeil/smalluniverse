@@ -1,56 +1,44 @@
 package smalluniverse.renderers;
 
+import js.Browser.document;
+import js.html.FormElement;
+import js.html.InputElement;
 import js.html.VideoElement;
-import smalluniverse.renderers.SnabbdomRenderer.htmlToVNode;
-import Snabbdom.VNode;
-import tink.unit.Assert;
 import smalluniverse.DOM.comment;
 import smalluniverse.DOM.element;
 import smalluniverse.DOM.text;
 import smalluniverse.SmallUniverse;
 import tink.unit.Assert.*;
 import tink.unit.AssertionBuffer;
-import js.html.Element;
-import smalluniverse.testing.SnabbdomTestingLibrary;
-import smalluniverse.testing.SnabbdomTestingLibrary.getByText;
-import smalluniverse.testing.SnabbdomTestingLibrary.fireEvent;
+import smalluniverse.testing.DomTestingLibrary;
+import smalluniverse.testing.DomTestingLibrary.getByText;
+import smalluniverse.testing.DomTestingLibrary.getByTestId;
+import smalluniverse.testing.DomTestingLibrary.fireEvent;
 
 using tink.CoreApi;
 
-final jsdomGlobal = js.Lib.require("jsdom-global");
+function render(htmlVNodes:Html<Dynamic>) {
+	final container = document.createElement("main");
+	final initial = document.createElement("div");
+	container.appendChild(initial);
 
-function render(vNode:VNode) {
-	function doRender() {
-		final renderer = new SnabbdomRenderer();
-		final container = js.Browser.document.createElement("div");
-		renderer.init(container);
-		final patchFn = @:privateAccess renderer.patch;
-		if (patchFn == null) {
-			throw "patch function was null";
-		}
-		final renderFn = SnabbdomTestingLibrary.makeRender({patch: patchFn})();
-		return renderFn(vNode);
-	}
-
-	if (js.Lib.typeof(js.Browser.window) == "undefined") {
-		final jsdomCleanup = jsdomGlobal();
-		final result = doRender();
-		jsdomCleanup();
-		return result;
-	} else {
-		return doRender();
-	}
+	final renderer = new SnabbdomRenderer();
+	renderer.init(initial);
+	renderer.update(htmlVNodes);
+	return container;
 }
 
 class SnabbdomRendererTest {
 	public function new() {}
 
-	function getRenderedHtml(html:Html<Dynamic>):String {
-		return getRenderedContainer(html).innerHTML;
+	@:setup
+	public function setup() {
+		DomTestingLibrary.setupJsdom();
+		return tink.core.Promise.NOISE;
 	}
 
-	function getRenderedContainer(html:Html<Dynamic>):Element {
-		return render(htmlToVNode(html)).container;
+	function getRenderedHtml(html:Html<Dynamic>):String {
+		return render(html).innerHTML;
 	}
 
 	public function testEmptyString()
@@ -75,7 +63,7 @@ class SnabbdomRendererTest {
 		return assert(getRenderedHtml(comment("Hello!")) == "<!--Hello!-->");
 
 	public function testCommentWithHtml() {
-		final container = getRenderedContainer(comment("Look! -->"));
+		final container = render(comment("Look! -->"));
 		final asserts = new AssertionBuffer();
 		asserts.assert(container.childNodes.length == 1, "there is one child");
 		asserts.assert(
@@ -108,7 +96,7 @@ class SnabbdomRendererTest {
 
 	public function testAttrsWithHtml() {
 		final asserts = new AssertionBuffer();
-		final container = getRenderedContainer(element("p", [
+		final container = render(element("p", [
 			Attribute("class", 'lede">Hack'),
 			Attribute("id", "intro'>Hack")
 		], []));
@@ -143,7 +131,7 @@ class SnabbdomRendererTest {
 	public function testPropertiesThatAreNotAttributes() {
 		final asserts = new AssertionBuffer();
 		final video = element("video", [Property("currentTime", 35)], []);
-		final container = getRenderedContainer(video);
+		final container = render(video);
 		asserts.assert(getRenderedHtml(video) == '<video></video>');
 		asserts.assert(container.childNodes.length == 1);
 		asserts.assert(container.firstChild.nodeName.toLowerCase() == "video");
@@ -161,7 +149,7 @@ class SnabbdomRendererTest {
 			called++;
 			return None;
 		})], ["My button"]);
-		final container = getRenderedContainer(btn);
+		final container = render(btn);
 		final renderedBtn = getByText(container, "My button");
 
 		fireEvent.click(renderedBtn);

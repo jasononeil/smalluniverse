@@ -6,11 +6,12 @@ import js.lib.Promise;
 import haxe.extern.EitherType;
 import Snabbdom;
 
-@:jsRequire("snabbdom-testing-library")
-extern class SnabbdomTestingLibrary {
-	public static function makeRender(
-		options:{patch:PatchFunction}
-	):Void->RenderFunction;
+@:jsRequire("@testing-library/dom")
+extern class DomTestingLibrary {
+	/** Calling this before using other features of this class is required. **/
+	public inline static function setupJsdom():Void {
+		js.Lib.require("global-jsdom/register");
+	}
 
 	// ===============================
 	// Queries Accessible to Everyone
