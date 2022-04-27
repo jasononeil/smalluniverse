@@ -1,7 +1,7 @@
 package smalluniverse.renderers;
 
+import js.html.Element;
 import js.Browser.document;
-import js.html.FormElement;
 import js.html.InputElement;
 import js.html.VideoElement;
 import smalluniverse.DOM.comment;
@@ -13,18 +13,29 @@ import tink.unit.AssertionBuffer;
 import smalluniverse.testing.DomTestingLibrary;
 import smalluniverse.testing.DomTestingLibrary.getByText;
 import smalluniverse.testing.DomTestingLibrary.getByTestId;
+import smalluniverse.testing.DomTestingLibrary.queryAllByText;
 import smalluniverse.testing.DomTestingLibrary.fireEvent;
 
 using tink.CoreApi;
 
-function render(htmlVNodes:Html<Dynamic>) {
+function getRenderer() {
 	final container = document.createElement("main");
 	final initial = document.createElement("div");
 	container.appendChild(initial);
 
 	final renderer = new SnabbdomRenderer();
 	renderer.init(initial);
-	renderer.update(htmlVNodes);
+	return {
+		container: container,
+		render: renderer.update
+	}
+}
+
+function render(htmlVNodes:Html<Dynamic>) {
+	final result = getRenderer();
+	final container = result.container;
+	final render = result.render;
+	render(htmlVNodes);
 	return container;
 }
 
@@ -158,6 +169,154 @@ class SnabbdomRendererTest {
 		fireEvent.click(renderedBtn);
 		asserts.assert(called == 2);
 
+		return asserts.done();
+	}
+
+	public function testsHook() {
+		final asserts = new AssertionBuffer();
+
+		final result = getRenderer();
+		final container = result.container;
+		final render = result.render;
+
+		final hookCalls = [];
+		final removeTrigger = Future.trigger();
+
+		function createSpan(name:String) {
+			return element("span", [
+				Hook(Init(args -> hookCalls.push('$name init'))),
+				Hook(Insert(args -> hookCalls.push('$name insert'))),
+				Hook(Remove(args -> {
+					args.removeCallback();
+					hookCalls.push('$name remove');
+				})),
+				Hook(Destroy(args -> hookCalls.push('$name destroy'))),
+			], name);
+		}
+		function createDiv(children:Html<Any>) {
+			return element("div", [
+				Hook(Init(args -> hookCalls.push("div init"))),
+				Hook(Insert(args -> hookCalls.push("div insert"))),
+				Hook(Remove(args -> {
+					removeTrigger.asFuture().handle(_ -> args.removeCallback());
+					hookCalls.push("div remove");
+				})),
+				Hook(Destroy(args -> hookCalls.push("div destroy"))),
+			], [
+				children
+			]);
+		}
+
+		render(createDiv([createSpan("span1"), createSpan("span2")]));
+
+		asserts.assert(hookCalls.length == 6);
+		asserts.assert(hookCalls[0] == "div init");
+		asserts.assert(hookCalls[1] == "span1 init");
+		asserts.assert(hookCalls[2] == "span2 init");
+		asserts.assert(hookCalls[3] == "span1 insert");
+		asserts.assert(hookCalls[4] == "span2 insert");
+		asserts.assert(hookCalls[5] == "div insert");
+
+		render(createDiv([createSpan("span1")]));
+
+		asserts.assert(hookCalls.length == 8);
+		asserts.assert(hookCalls[6] == "span2 destroy");
+		asserts.assert(hookCalls[7] == "span2 remove");
+		asserts.assert(queryAllByText(container, "span1").length == 1);
+		asserts.assert(queryAllByText(container, "span2").length == 0);
+
+		render(element("span", [], "replacement"));
+
+		asserts.assert(hookCalls.length == 11);
+
+		// the destroy and remove hooks are called
+		asserts.assert(hookCalls[8] == "div destroy");
+		asserts.assert(hookCalls[9] == "span1 destroy");
+		asserts.assert(hookCalls[10] == "div remove");
+		// and both the new element and old element are visible
+		asserts.assert(queryAllByText(container, "span1").length == 1);
+		asserts.assert(queryAllByText(container, "span2").length == 0);
+		asserts.assert(queryAllByText(container, "replacement").length == 1);
+
+		// until we trigger our removeCallback
+		removeTrigger.trigger(Noise);
+		asserts.assert(queryAllByText(container, "span1").length == 0);
+		asserts.assert(queryAllByText(container, "span2").length == 0);
+		asserts.assert(queryAllByText(container, "replacement").length == 1);
+
+		// Other things it would be good to test:
+		// Multiple "remove" hooks wait for all to trigger
+		// "init" and "insert" hook are called even when hydrating a server rendered view
+
+		return asserts.done();
+	}
+
+	public function testKey() {
+		// To test this, lets create two inputs.
+		// Emulate typing into one of them (or at least setting a value).
+		// Then reorder them and see if the value is preserved.
+		// This demonstrates that the node was not recreated even when the order changed.
+
+		final asserts = new AssertionBuffer();
+
+		final result = getRenderer();
+		final container = result.container;
+		final render = result.render;
+
+		final input1Html = element("input", [Key("1")], []);
+		final input2Html = element("input", [Key("2")], []);
+
+		final form = element("form", [Attribute("data-testid", "form")], [
+			input1Html,
+			input2Html
+		]);
+		render(form);
+
+		var form = getByTestId(container, "form");
+		var input1:InputElement = cast form.children[0];
+		var input2:InputElement = cast form.children[1];
+
+		input1.value = "typing...";
+		asserts.assert(input1.value == "typing...");
+		asserts.assert(input2.value == "");
+
+		final formWithReorderedInputs = element("form", [
+			Attribute("data-testid", "form")
+		], [
+			input2Html,
+			input1Html
+		]);
+		render(formWithReorderedInputs);
+
+		form = getByTestId(container, "form");
+		input1 = cast form.children[0];
+		input2 = cast form.children[1];
+
+		asserts.assert(input1.value == "");
+		asserts.assert(input2.value == "typing...");
+
+		return asserts.done();
+	}
+
+	public function testMultiple() {
+		final asserts = new AssertionBuffer();
+		final video = element("video", [
+			BooleanAttribute("disabled", true),
+			Multiple([
+				Attribute("class", "my-css-class"),
+				Attribute("id", "my-btn"),
+				Property("currentTime", 35)
+			])
+		], []);
+		final container = render(video);
+
+		asserts.assert(
+			getRenderedHtml(
+				video
+			) == '<video disabled="disabled" class="my-css-class" id="my-btn"></video>'
+		);
+		final videoElement:VideoElement = cast container.firstChild;
+		asserts.assert(videoElement.currentTime == 35);
 		return asserts.done();
 	}
 

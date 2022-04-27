@@ -62,9 +62,26 @@ class HtmlStringRendererTest {
 			BooleanAttribute("disabled", false)
 		], [])) == "<button></button>");
 
+	public function testMultipleAttr()
+		return assert(stringifyHtml(element("button", [Multiple([
+			Attribute("id", "cta"),
+			BooleanAttribute("disabled", true),
+			Key("key-only-matters-on-client")
+		])], [])) == '<button id="cta" disabled></button>');
+
 	public function testPropertiesDoNotRender()
 		return assert(stringifyHtml(element("p", [
 			Property("className", "lede")
+		], [])) == "<p></p>");
+
+	public function testHooksDoNotRender()
+		return assert(stringifyHtml(element("p", [
+			Hook(Init(_ -> {}))
+		], [])) == "<p></p>");
+
+	public function testKeyDoesNotRender()
+		return assert(stringifyHtml(element("p", [
+			Key("test")
 		], [])) == "<p></p>");
 
 	public function testEventsDoNotRender()
@@ -77,10 +94,15 @@ class HtmlStringRendererTest {
 			Attribute("class", "primary"),
 			BooleanAttribute("disabled", false),
 			BooleanAttribute("active", true),
-			Attribute("id", "cta"),
+			Multiple([
+				Attribute("id", "cta"),
+				Attribute("data-testId", "my-cta"),
+			]),
 			Property("className", "primary-2"),
-			Event("click", (e) -> None)
-		], [])) == '<button class="primary" active id="cta"></button>');
+			Event("click", (e) -> None),
+			Hook(Init(_ -> {})),
+			Key("my-key")
+		], [])) == '<button class="primary" active id="cta" data-testId="my-cta"></button>');
 
 	public function testChildren()
 		return assert(stringifyHtml(element("p", [], [
