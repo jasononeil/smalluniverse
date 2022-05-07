@@ -19,7 +19,9 @@ function Layout<Action>(
 			rel("stylesheet"),
 			href(sourceSansVariableUrl)
 		]),
-		css(CompileTime.readFile("node_modules/normalize.css/normalize.css")),
+		css(
+			CompileTime.readFile("../node_modules/normalize.css/normalize.css")
+		),
 		div([
 			className("Layout__Container")
 		], [
