@@ -33,9 +33,6 @@ typedef IngredientToBuy = {
 	meals:Array<{name:String, id:String}>
 }
 
-// TODO: find a better way to hold state between renders than this.
-var refreshInterval:Null<Int> = null;
-
 class ShoppingPage implements Page<
 	ShoppingAction
 	,
