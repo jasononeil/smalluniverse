@@ -5,16 +5,16 @@ import smalluniverse.SmallUniverse;
 using tink.CoreApi;
 using Lambda;
 
-typedef Subscription = {
-	source:EventSource<Any>,
-	projections:Array<ProjectionSubscriptions<Any>>
-};
-
 typedef SynchronousOrchestratorConfig = {
 	eventSources:Array<EventSource<Any>>,
 	projections:Array<Projection>,
 	pageApis:Array<PageApi<Any, Any, Any>>
 }
+
+typedef SubscriptionsToEventSource = {
+	source:EventSource<Any>,
+	projections:Array<ProjectionSubscriptions<Any>>
+};
 
 /**
 	An Orchestrator that attempts to update projections during the same HTTP Request as the Event Source.
@@ -32,20 +32,27 @@ typedef SynchronousOrchestratorConfig = {
 	This would allow projections to fail, fall behind, and catch up in a resilient way.
 **/
 class SynchronousOrchestrator implements Orchestrator {
-	var subscriptions:Array<Subscription> = [];
+	/** A map of the pageApis we know of, with the name of the related page as the key. **/
 	var pageApis:Map<String, PageApi<Any, Any, Any>>;
 
+	/** A list of the event sources and the projections that are subscribed to them. **/
+	var subscriptionsToEventSources:Array<SubscriptionsToEventSource> = [];
+
 	public function new(setup:SynchronousOrchestratorConfig) {
-		this.subscriptions = [for (eventSource in setup.eventSources) {
-			source: eventSource,
-			projections: []
-		}];
 		this.pageApis = [for (api in setup.pageApis) Type.getClassName(
 			api.relatedPage
 		) => api];
+
+		this.subscriptionsToEventSources = [
+			for (eventSource in setup.eventSources)
+				{
+					source: eventSource,
+					projections: []
+				}
+		];
 		for (projection in setup.projections) {
 			for (projectionSubscription in projection.subscriptions) {
-				final subscription = getSubscription(
+				final subscription = getSubscriptionsToEventSource(
 					projectionSubscription.source
 				);
 				if (subscription == null) {
@@ -66,7 +73,9 @@ class SynchronousOrchestrator implements Orchestrator {
 	public function handleCommand(command:Command<Any>):Promise<Noise> {
 		switch command {
 			case Some({eventSourceClass: eventSourceClass, event: event}):
-				final subscription = getSubscription(eventSourceClass);
+				final subscription = getSubscriptionsToEventSource(
+					eventSourceClass
+				);
 				if (subscription == null) {
 					// It would be nice to make this state impossible, but it's hard to imagine a clean API for doing so.
 					// One option could be to do a macro-powered compile time check that all calls to `new Command()` are for Event Sources we have registered.
@@ -133,7 +142,7 @@ class SynchronousOrchestrator implements Orchestrator {
 
 	public function bringProjectionsUpToDate():Promise<Noise> {
 		final projectionUpdates = [];
-		for (subscription in subscriptions) {
+		for (subscription in subscriptionsToEventSources) {
 			final eventSource = subscription.source;
 			for (projectionSubscription in subscription.projections) {
 				projectionUpdates.push(
@@ -155,10 +164,10 @@ class SynchronousOrchestrator implements Orchestrator {
 		return Promise.inParallel(projectionUpdates).noise();
 	}
 
-	function getSubscription(
+	function getSubscriptionsToEventSource(
 		eventSourceClass:Class<EventSource<Any>>
-	):Null<Subscription> {
-		return this.subscriptions.find(
+	):Null<SubscriptionsToEventSource> {
+		return subscriptionsToEventSources.find(
 			item -> Type.getClass(item.source) == eventSourceClass
 		);
 	}
