@@ -161,10 +161,11 @@ interface EventStore<Event> {
 **/
 interface EventSource<Event> {
 	/**
-		Handle a new event - including validation logic, updating a write model if needed, and adding to the event log.
-		If the event should be rejected, return a rejected promise.
+		Handle a command - an attempt to create a new event, subject to validation logic, updating a write model if needed, and adding to the event log.
+		If the event should be rejected, reject the returned Promise.
+		If the event is created successfully, the returned Promise should contain the EventId.
 	**/
-	function handleEvent(event:Event):Promise<EventId>;
+	function handleCommand(event:Event):Promise<EventId>;
 
 	/** Get the latest event ID, to compare against bookmarks in projections. **/
 	function getLatestEvent():Promise<Option<EventId>>;
@@ -177,15 +178,6 @@ interface EventSource<Event> {
 		id:EventId,
 		payload:Event
 		}>>;
-
-	// Q: Should an EventSource have a ProjectionStatus?
-	// In theory, it should never be processing a backlog - if an event isn't processed it doesn't yet exist.
-	// One edge case might be when creating a new EventSource projection / write model for an existing event log.
-	// For this use case, I guess you could create a new `EventSource` class over the same `EventLog` and transition from one to the other.
-	// For now, I'm going to not have a "status" funtion on EventSource.
-	// It will be worth thinking about how we can rebuild an EventSource model (or build a fresh one from an existing event log).
-	// addEventsFromExisting(newEventSource<T>, existingEventStore<T>)
-	// transposeEventsFromExisting(newEventSource<A>, existingEventStore<B>, transform:A->B)
 }
 
 /**
@@ -200,7 +192,7 @@ class BasicEventSource<Event> implements EventSource<Event> {
 		this.store = eventStore;
 	}
 
-	public function handleEvent(event)
+	public function handleCommand(event)
 		return this.store.publish(event);
 
 	public function getLatestEvent()
@@ -213,41 +205,45 @@ class BasicEventSource<Event> implements EventSource<Event> {
 /**
 	A Projection is a data model that is built up based on Events that have happened.
 
-	It processes all the events from one or more event sources and saves data that can be used on pages.
+	It processes all the events from a single EventSource and uses it to build up a useful view of the data.
+
+	You can have many different projections for the same EventSource, each having a unique view of the current state after processing the same events.
 
 	Generally, projections store the data in a way that is "optimised for fast reads" - stored in a structure close to how it is consumed on pages so that those pages can load without doing heavy processing.
 
-	Often you might have multiple projections to display the same data in different ways.
+	Often you might have multiple projections that each create a unique view of the current state after processing the same EventSource.
 	For example, the same stream of events about a task list could derive different views/projections: "Task List", "Task Completion History" and "Task Dashboard" etc.
 
 	Note: this can also be a "reactor" that reacts to the events without necessarily building up a data model.
 	For example, you might respond to a "SendInvitation" event by sending an email without needing to update a data model.
 
-	Also known as "Read Model", "Query Model", "Reactor".
+	Projections are similar to other concepts from event sourcing / CQRS: "Read Models", "Query Models", "Reactors".
 **/
-interface Projection {
-	/** Declare the event sources we are subscribing to, and how handle them. **/
-	var subscriptions(default, never):Iterable<ProjectionSubscriptions<Any>>;
-}
+interface Projection<Event> extends InternalOrExternalProjection<Event> {
+	/**
+		The event source that is used to build this projection.
+		If you want a projection build from multiple events, use a Stream Combiner.
+	**/
+	var source(default, never):Class<EventSource<Event>>;
 
-/**
-	A ProjectionSubscription describes how a `Projection` subscribes to a particular `EventSource`.
-
-	A projection can have multiple ProjectionSubscriptions.
-**/
-typedef ProjectionSubscriptions<Event> = {
-	/** The name of the projection subscription, for use in logging. **/
-	name:String,
-
-	/** The event source we are subscribing to. **/
-	source:Class<EventSource<Event>>,
+	/** Process the next event in the stream. **/
+	function handleEvent(
+		id:EventId,
+		payload:Event
+	):Promise<ProjectionHandlerResult>;
 
 	/** Get the `EventId` of the last successfully processed event. **/
-	// TODO: consider if having "bookmarks" be part of the Orchestrator implementation makes sense so apps don't have to worry about it.
-	getBookmark:Void->Promise<Option<EventId>>,
+	function getBookmark():Promise<Option<EventId>>;
+}
 
-	/** Process an event. **/
-	handler:{id:EventId, payload:Event}->Promise<ProjectionHandlerResult>,
+/** This is the same as `Projection` but without the `source`. Therefore it can also be used for `EventSourceWithProjection` **/
+interface InternalOrExternalProjection<Event> {
+	function handleEvent(
+		id:EventId,
+		payload:Event
+	):Promise<ProjectionHandlerResult>;
+
+	function getBookmark():Promise<Option<EventId>>;
 }
 
 /** 
@@ -266,10 +262,29 @@ enum ProjectionHandlerResult {
 
 	/** TODO: decide if we allow specifying retry options (like maxAttempts, maxRetryDuration), or if we just have sensible defaults. **/
 	Retry;
+}
 
 	// We may also want a "WaitForOtherStream(source:EventSource)" or similar, for when you're reading from multiple streams and the messages are interdependent.
 	// See https://stackoverflow.com/questions/47482906/cqrs-read-side-multiple-event-stream-topics-concurrency-race-conditions
 }
+
+/**
+	An `EventSourceWithProjection` is an `EventSource` that contains an internal `Projection` - often useful for validating commands or providing a default view of the current state.
+
+	This allows building up an internal model for validating events, and re-creating that model based on the existing EventLog if the processing logic changes.
+
+	For processing events:
+	- `handleCommand` will be called when a new Command is given. At this point the command can still be rejected. If the command is accepted, an Event should be added to the eventLog and return a Promise<Option<EventId>>
+	- `handleEvent` will be called when rebuilding the internal projection. At this point the event is known to have occured and been valid, and so if an error occurs handling it, the EventSource is left in a blocked state, where its own internal model is not up-to-date, so new commands will be rejected.
+	- When issuing new commands, we always call `handleCommand` only. `handleEvent` is only used when rebuilding the internal projection.
+
+	For bookmarks:
+	- `getBookmark()` and `getLatestEvent()` both return the latest EventId with a slight difference.
+	- If the internal projection is up to date, they should return the same value. If the internal projection is in the process of being rebuilt, then the values may vary.
+	- `getLatestEvent()` should return the ID of the last event that has occured
+	- `getBookmark()` should return the ID of the last event that was processed when building the internal projection
+**/
+interface EventSourceWtihProjection<Event> extends EventSource<Event> extends InternalOrExternalProjection<Event> {}
 
 /**
 	Orchestrators
@@ -280,14 +295,16 @@ enum ProjectionHandlerResult {
 	The Small Universe framework attempts to "orchestrate" the communication between these services so you don't have to.
 
 	There are multiple strategies you could use to orchestrate these, see implementations of `Orchestrator` for examples of what we've done so far.
-**/ /**
+**/
+//
+
+/**
 	A Command is a request to add an Event to a particular EventSource.
 
 	Pages have "actions", and when these bubble up to the server the PageAPI turns it into a Command.
 
 	It is then used to add the Event to the EventSource.
 **/
-
 abstract Command<Event>(
 	// TODO: Perhaps instead of an Option, this should be an Array
 	// Empty array would still signify no command
