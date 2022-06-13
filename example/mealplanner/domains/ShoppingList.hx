@@ -27,7 +27,8 @@ enum CopyOfOption<T> {
 
 typedef ShoppingListModel = {
 	items:Array<ShoppingListItem>,
-	shops:Array<String>
+	shops:Array<String>,
+	shopsForItems:Map<String, String>
 }
 
 typedef ShoppingListItem = {
@@ -124,6 +125,12 @@ class ShoppingListEventSource extends JsonFileEventSource<
 						};
 					}
 				}
+				switch shopName {
+					case Some(shop):
+						model.shopsForItems.set(itemName, shop);
+					case None:
+						model.shopsForItems.remove(itemName);
+				}
 		}
 		return model;
 	}
@@ -147,6 +154,9 @@ class ShoppingListEventSource extends JsonFileEventSource<
 	}
 
 	function addOrUpdateItem(model:ShoppingListModel, item:ShoppingListItem) {
+		if (item.shop == null && model.shopsForItems.exists(item.itemName)) {
+			item.shop = model.shopsForItems.get(item.itemName);
+		}
 		final existing = model.items.find(i -> i.itemName == item.itemName);
 		if (existing != null) {
 			// Merge "shop", "ticked" and "meals" fields with existing item in a sensible way.
