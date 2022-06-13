@@ -16,7 +16,13 @@ enum ShoppingListEvent {
 	UntickItem(itemName:String);
 	ClearCompleted;
 	AddShop(shopName:String);
-	SetShop(itemName:String, shopName:Option<String>);
+	SetShop(itemName:String, shopName:CopyOfOption<String>);
+}
+
+// Workaround for tink_json roundtrip issue with Option - https://github.com/haxetink/tink_json/issues/94
+enum CopyOfOption<T> {
+	Some(v:T);
+	None;
 }
 
 typedef ShoppingListModel = {
@@ -112,7 +118,10 @@ class ShoppingListEventSource extends JsonFileEventSource<
 			case SetShop(itemName, shopName):
 				for (item in model.items) {
 					if (item.itemName == itemName) {
-						item.shop = shopName.orNull();
+						item.shop = switch shopName {
+							case Some(v): v;
+							case None: null;
+						};
 					}
 				}
 		}
