@@ -264,8 +264,17 @@ enum ProjectionHandlerResult {
 	Retry;
 }
 
-	// We may also want a "WaitForOtherStream(source:EventSource)" or similar, for when you're reading from multiple streams and the messages are interdependent.
-	// See https://stackoverflow.com/questions/47482906/cqrs-read-side-multiple-event-stream-topics-concurrency-race-conditions
+/**
+	A manager projections can use if they don't want to manage their own bookmarks.
+
+	Managing bookmarks is the sort of repetitive code we'd like to not have to worry about, but occasionally want control over.
+**/
+interface BookmarkManager {
+	function updateBookmark(
+		bookmarkName:String,
+		bookmark:EventId
+	):Promise<Noise>;
+	function getBookmark(bookmarkName:String):Promise<Option<EventId>>;
 }
 
 /**
