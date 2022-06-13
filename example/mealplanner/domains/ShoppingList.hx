@@ -51,13 +51,15 @@ class ShoppingListEventSource extends JsonFileEventSource<
 	> {
 	public function new(
 		eventStore:EventStore<ShoppingListEvent>,
-		writeModelJsonFile:String
+		writeModelJsonFile:String,
+		bookmarkManager:BookmarkManager
 	) {
 		super(
 			eventStore,
 			writeModelJsonFile,
 			new JsonEncoder<ShoppingListModel>(),
-			update
+			update,
+			bookmarkManager
 		);
 	}
 

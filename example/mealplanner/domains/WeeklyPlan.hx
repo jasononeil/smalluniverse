@@ -23,18 +23,21 @@ typedef PlanForDate = {
 }
 
 class WeeklyPlanEventSource extends JsonFileEventSource<
-	WeeklyPlanEvent,
+	WeeklyPlanEvent
+	,
 	WeeklyPlanModel
 	> {
 	public function new(
 		eventStore:EventStore<WeeklyPlanEvent>,
-		writeModelJsonFile:String
+		writeModelJsonFile:String,
+		bookmarkManager:BookmarkManager
 	) {
 		super(
 			eventStore,
 			writeModelJsonFile,
 			new JsonEncoder<WeeklyPlanModel>(),
-			update
+			update,
+			bookmarkManager
 		);
 	}
 

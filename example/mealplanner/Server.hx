@@ -1,5 +1,6 @@
 package mealplanner;
 
+import smalluniverse.bookmarks.JsonBookmarkManager;
 import mealplanner.pages.*;
 import mealplanner.App;
 import smalluniverse.servers.NodeJs;
@@ -9,14 +10,18 @@ import mealplanner.domains.Meals;
 import mealplanner.domains.WeeklyPlan;
 import mealplanner.domains.ShoppingList;
 import smalluniverse.orchestrators.SynchronousOrchestrator;
-import js.node.Fs;
+
+final bookmarkManager = new JsonBookmarkManager(
+	"./app-content/write-models/bookmarks.json"
+);
 
 final mealsEventSource = new MealsEventSource(
 	new TSVEventStore(
 		"./app-content/event-stores/events-meals.tsv",
 		new JsonEncoder<MealsEvent>()
 	),
-	"./app-content/write-models/MealsEventSource.json"
+	"./app-content/write-models/MealsEventSource.json",
+	bookmarkManager
 );
 
 final weeklyPlanEventSource = new WeeklyPlanEventSource(
@@ -24,7 +29,8 @@ final weeklyPlanEventSource = new WeeklyPlanEventSource(
 		"./app-content/event-stores/events-weekly-plan.tsv",
 		new JsonEncoder<WeeklyPlanEvent>()
 	),
-	"./app-content/write-models/WeeklyPlanEventSource.json"
+	"./app-content/write-models/WeeklyPlanEventSource.json",
+	bookmarkManager
 );
 
 final shoppingListEventSource = new ShoppingListEventSource(
@@ -32,7 +38,8 @@ final shoppingListEventSource = new ShoppingListEventSource(
 		"./app-content/event-stores/events-shopping-list.tsv",
 		new JsonEncoder<ShoppingListEvent>()
 	),
-	"./app-content/write-models/ShoppingListEventSource.json"
+	"./app-content/write-models/ShoppingListEventSource.json",
+	bookmarkManager
 );
 
 final appOrchestrator = new SynchronousOrchestrator({

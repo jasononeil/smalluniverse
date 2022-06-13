@@ -1,85 +1,86 @@
 package smalluniverse.eventsources;
 
 import smalluniverse.SmallUniverse;
-import js.node.Fs;
+import smalluniverse.util.JsonFiles;
 
 using tink.CoreApi;
 using Lambda;
 
-enum ShoppingListEvent {}
-typedef ShoppingListModel = {}
-
-class JsonFileEventSource<Event, Model> extends BasicEventSource<Event> {
+class JsonFileEventSource<
+	Event
+	,
+	Model
+	> extends BasicEventSource<Event>
+		implements EventSourceWtihProjection<Event> {
 	var writeModelJsonFile:String;
 	var modelJsonEncoder:IJsonEncoder<Model>;
 	var updateModelForEvent:Model->Event->Promise<Model>;
+	var bookmarkManager:BookmarkManager;
+	var bookmarkId:String;
 
 	public function new(
 		eventStore:EventStore<Event>,
 		writeModelJsonFile:String,
 		modelJsonEncoder:IJsonEncoder<Model>,
-		updateModelForEvent:Model->Event->Promise<Model>
+		updateModelForEvent:Model->Event->Promise<Model>,
+		bookmarkManager:BookmarkManager
 	) {
 		super(eventStore);
 		this.writeModelJsonFile = writeModelJsonFile;
 		this.modelJsonEncoder = modelJsonEncoder;
 		this.updateModelForEvent = updateModelForEvent;
+		this.bookmarkManager = bookmarkManager;
+		this.bookmarkId = 'JsonFileEventSource $writeModelJsonFile';
 	}
 
-	override public function handleEvent(event:Event):Promise<EventId> {
+	/** When a command is being attempted for the first time (and may be rejected before publishing as an Event). **/
+	override public function handleCommand(event:Event):Promise<EventId> {
 		return readModel()
 				.next(model -> updateModelForEvent(model, event))
-				.next(model -> writeModel(model))
-				.next(_ -> this.store.publish(event));
+				.next(
+				updatedModel -> this.store
+						.publish(event)
+						.next(
+						eventId -> writeModel(
+							updatedModel
+						)
+								.next(
+								_ -> bookmarkManager.updateBookmark(
+									bookmarkId,
+									eventId
+								)
+							)
+								.next(_ -> eventId)
+					)
+			);
+	}
+
+	/** When a prior event is being replayed because we are rebuilding the projection. **/
+	public function handleEvent(
+		eventId:EventId,
+		event:Event
+	):Promise<ProjectionHandlerResult> {
+		return readModel()
+				.next(model -> updateModelForEvent(model, event))
+				.next(updatedModel -> writeModel(updatedModel))
+				.next(
+				modelWithBookmark -> bookmarkManager.updateBookmark(
+					bookmarkId,
+					eventId
+				)
+			)
+				.next(_ -> ProjectionHandlerResult.Success);
+	}
+
+	public function getBookmark() {
+		return bookmarkManager.getBookmark(bookmarkId);
 	}
 
 	function readModel():Promise<Model> {
-		final trigger = Promise.trigger();
-		Fs.readFile(
-			writeModelJsonFile,
-			{encoding: "utf8"},
-			(err, jsonContent) -> {
-				if (err != null) {
-					trigger.reject(Error.ofJsError(err));
-				} else {
-					try {
-						final model:Model = modelJsonEncoder.decode(
-							jsonContent
-						);
-						trigger.resolve(model);
-					} catch (e) {
-						final className = @:nullSafety(Off) Type.getClassName(
-							Type.getClass(this)
-						);
-						trigger.reject(
-							Error.withData(
-								501,
-								'Failed to parse ${writeModelJsonFile} as valid data for our model in ${className}: ${e}',
-								e
-							)
-						);
-					}
-				}
-			}
-		);
-		return trigger.asPromise();
+		return readJson(writeModelJsonFile, modelJsonEncoder);
 	}
 
-	function writeModel(model:Model):Promise<Noise> {
-		final trigger = Promise.trigger();
-		final jsonContent = modelJsonEncoder.encode(model);
-		Fs.writeFile(
-			writeModelJsonFile,
-			jsonContent,
-			{encoding: "utf8"},
-			(err) -> {
-				if (err != null) {
-					trigger.reject(Error.ofJsError(err));
-				} else {
-					trigger.resolve(Noise);
-				}
-			}
-		);
-		return trigger.asPromise();
+	function writeModel(model:Model):Promise<Model> {
+		return writeJson(writeModelJsonFile, model, modelJsonEncoder);
 	}
 }

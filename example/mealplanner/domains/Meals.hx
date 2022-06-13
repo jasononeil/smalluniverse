@@ -27,13 +27,15 @@ typedef Meal = {
 class MealsEventSource extends JsonFileEventSource<MealsEvent, MealsModel> {
 	public function new(
 		eventStore:EventStore<MealsEvent>,
-		writeModelJsonFile:String
+		writeModelJsonFile:String,
+		bookmarkManager:BookmarkManager
 	) {
 		super(
 			eventStore,
 			writeModelJsonFile,
 			new JsonEncoder<MealsModel>(),
-			update
+			update,
+			bookmarkManager
 		);
 	}
 
