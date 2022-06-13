@@ -1,5 +1,6 @@
 package smalluniverse.orchestrators;
 
+import smalluniverse.util.LogUtils.getClassName;
 import smalluniverse.SmallUniverse;
 
 using tink.CoreApi;
@@ -7,13 +8,13 @@ using Lambda;
 
 typedef SynchronousOrchestratorConfig = {
 	eventSources:Array<EventSource<Any>>,
-	projections:Array<Projection>,
+	projections:Array<Projection<Any>>,
 	pageApis:Array<PageApi<Any, Any, Any>>
 }
 
 typedef SubscriptionsToEventSource = {
 	source:EventSource<Any>,
-	projections:Array<ProjectionSubscriptions<Any>>
+	projections:Array<Projection<Any>>
 };
 
 /**
@@ -36,14 +37,14 @@ class SynchronousOrchestrator implements Orchestrator {
 	var pageApis:Map<String, PageApi<Any, Any, Any>>;
 
 	/** A list of the event sources and the projections that are subscribed to them. **/
-	var subscriptionsToEventSources:Array<SubscriptionsToEventSource> = [];
+	var eventSourcesAndSubscriptions:Array<SubscriptionsToEventSource> = [];
 
 	public function new(setup:SynchronousOrchestratorConfig) {
 		this.pageApis = [for (api in setup.pageApis) Type.getClassName(
 			api.relatedPage
 		) => api];
 
-		this.subscriptionsToEventSources = [
+		this.eventSourcesAndSubscriptions = [
 			for (eventSource in setup.eventSources)
 				{
 					source: eventSource,
@@ -51,23 +52,22 @@ class SynchronousOrchestrator implements Orchestrator {
 				}
 		];
 		for (projection in setup.projections) {
-			for (projectionSubscription in projection.subscriptions) {
-				final subscription = getSubscriptionsToEventSource(
-					projectionSubscription.source
+			final subscription = getSubscriptionsToEventSource(
+				projection.source
+			);
+			if (subscription == null) {
+				throw new Error(
+					501,
+					'Projection "${getClassName(projection)}" is subscribed to an EventSource "${Type.getClassName(projection.source)}" which we do not have registered'
 				);
-				if (subscription == null) {
-					throw new Error(
-						501,
-						'Projection "${projectionSubscription.name}" is subscribed to an EventSource "${Type.getClassName(projectionSubscription.source)}" we do not have registered'
-					);
-				}
-				subscription.projections.push(projectionSubscription);
 			}
+			subscription.projections.push(projection);
 		}
 	}
 
 	public function setup():Promise<Noise> {
-		return bringProjectionsUpToDate();
+		return bringEventSourceProjectionsUpToDate()
+				.next(_ -> bringProjectionsUpToDate());
 	}
 
 	public function handleCommand(command:Command<Any>):Promise<Noise> {
@@ -87,13 +87,13 @@ class SynchronousOrchestrator implements Orchestrator {
 				final eventSource = subscription.source;
 
 				// Attempt the event on the eventSource and wait for it to either accept or reject.
-				final eventSourceResult = eventSource.handleEvent(event);
+				final eventSourceResult = eventSource.handleCommand(event);
 
 				// Here is the naive implementation for this "synchronous" orchestrator.
 				// If the eventSource was updated successfully, update all subscribed projections
 				// One limitation here that may lead to bugs: new events will be processed even if a backlog is still underway, leading to events being processed out of order.
 
-				final projectionSubscriptions = subscription.projections;
+				final projections = subscription.projections;
 				final projectionsResult = eventSourceResult.next((eventId) -> {
 					// Trigger all projections in parallel, wait for all to complete, and log (then ignore) failures.
 					// TODO: It my also be desirable for some projections to explicitly label themselves as async (and we never wait for them)
@@ -101,17 +101,27 @@ class SynchronousOrchestrator implements Orchestrator {
 							.inParallel(
 							// TODO: we should check the projection is up-to-date before we start here to avoid out-of-order events.
 							// If it's not, we can just ignore it and leave it for the next processBacklog()
-							// ...or we can implement a queue system for a small number of events.4
-							projectionSubscriptions.map(
-								sub -> return updateSubscription(
-									sub,
-									event
-								).recover(err -> {
-									trace(
-										'Error updating subscription ${sub.name}',
-										err.toString()
-									);
-									return Noise;
+							// ...or we can implement a queue system for a small number of events.
+							projections.map(
+								projection -> isProjectionUpToDate(
+									eventSource,
+									projection
+								).next(upToDate -> switch upToDate {
+									case true:
+										return updateSubscription(
+											projection,
+											event
+										).recover(err -> {
+											trace(
+												'Error updating projection ${getClassName(projection)}',
+												err.toString()
+											);
+											return Noise;
+										})
+									case false:
+										// The projection isn't up-to-date, so lets not add this event, or things will arrive out of order.
+										// This projection will now be behind the EventSource until the next time `processBacklog()` is called.
+										return Noise;
 								})
 							)
 						)
@@ -126,10 +136,7 @@ class SynchronousOrchestrator implements Orchestrator {
 	public function teardown() {}
 
 	public function apiForPage(page:Page<Any, Any, Any>) {
-		// For some reason Haxe's null safety checks are refusing to play nicely with Type.getClass and Type.getClassName.
-		// I'm just going to disable it for now, we know the page is non null, and is a class instance, so it will have a class name.
-		final pageClassName = @:nullSafety(Off)
-			Type.getClassName(Type.getClass(page));
+		final pageClassName = getClassName(page);
 		final api = this.pageApis[pageClassName];
 		if (api == null) {
 			throw new Error(
@@ -140,25 +147,63 @@ class SynchronousOrchestrator implements Orchestrator {
 		return api;
 	}
 
+	public function bringEventSourceProjectionsUpToDate():Promise<Noise> {
+		final projectionUpdates = [];
+		for (subscription in eventSourcesAndSubscriptions) {
+			final eventSource = subscription.source;
+			final eventSourceProjection = @:nullSafety(Off) Std.downcast(
+				eventSource,
+				EventSourceWtihProjection
+			);
+			if (eventSourceProjection != null) {
+				final projectionUpdatedPromise = isProjectionUpToDate(
+					eventSource,
+					eventSourceProjection
+				).next(isUpToDate -> {
+					if (isUpToDate) {
+						return Promise.resolve(Noise);
+					}
+					return processBacklog(eventSource, eventSourceProjection);
+				});
+				final name = getClassName(eventSource);
+				projectionUpdatedPromise.handle(outcome -> switch outcome {
+					case Success(_):
+						trace('EventSourceProjection ${name} is up to date');
+					case Failure(err):
+						trace(
+							'Failed to bring EventSourceProjection ${name} up to date.\n--> $err'
+						);
+				});
+				projectionUpdates.push(projectionUpdatedPromise);
+			}
+		}
+		return Promise.inParallel(projectionUpdates).noise();
+	}
+
 	public function bringProjectionsUpToDate():Promise<Noise> {
 		final projectionUpdates = [];
-		for (subscription in subscriptionsToEventSources) {
+		for (subscription in eventSourcesAndSubscriptions) {
 			final eventSource = subscription.source;
 			for (projectionSubscription in subscription.projections) {
-				projectionUpdates.push(
-					isProjectionUpToDate(
-						eventSource,
-						projectionSubscription
-					).next(isUpToDate -> {
-						if (isUpToDate) {
-							return Promise.resolve(Noise);
-						}
-						return processBacklog(
-							eventSource,
-							projectionSubscription
+				final projectionUpdatedPromise = isProjectionUpToDate(
+					eventSource,
+					projectionSubscription
+				).next(isUpToDate -> {
+					if (isUpToDate) {
+						return Promise.resolve(Noise);
+					}
+					return processBacklog(eventSource, projectionSubscription);
+				});
+				final name = getClassName(name);
+				projectionUpdatedPromise.handle(outcome -> switch outcome {
+					case Success(_):
+						trace('Projection ${name} is up to date');
+					case Failure(err):
+						trace(
+							'Failed to bring Projection ${name} up to date.\n--> $err'
 						);
-					})
-				);
+				});
+				projectionUpdates.push(projectionUpdatedPromise);
 			}
 		}
 		return Promise.inParallel(projectionUpdates).noise();
@@ -167,7 +212,7 @@ class SynchronousOrchestrator implements Orchestrator {
 	function getSubscriptionsToEventSource(
 		eventSourceClass:Class<EventSource<Any>>
 	):Null<SubscriptionsToEventSource> {
-		return subscriptionsToEventSources.find(
+		return eventSourcesAndSubscriptions.find(
 			item -> Type.getClass(item.source) == eventSourceClass
 		);
 	}
@@ -175,10 +220,10 @@ class SynchronousOrchestrator implements Orchestrator {
 
 function isProjectionUpToDate<Event>(
 	eventSource:EventSource<Event>,
-	projectionSubscription:ProjectionSubscriptions<Event>
+	projection:InternalOrExternalProjection<Event>
 ):Promise<Bool> {
 	return Promise.inParallel([
-		projectionSubscription.getBookmark(),
+		projection.getBookmark(),
 		eventSource.getLatestEvent()
 	]).next(bookmarks -> {
 		if (bookmarks[0] == bookmarks[1]) {
@@ -192,15 +237,15 @@ function isProjectionUpToDate<Event>(
 /** Process the backlog of events for a specific projection/eventSource subscription. **/
 function processBacklog<Event>(
 	eventSource:EventSource<Event>,
-	projectionSubscription:ProjectionSubscriptions<Event>
+	projection:InternalOrExternalProjection<Event>
 ):Promise<Noise> {
 	final pageSize = 20;
-	return projectionSubscription
+	return projection
 			.getBookmark()
 			.next(
 			startAfter -> readEvents(
 				eventSource,
-				projectionSubscription,
+				projection,
 				pageSize,
 				// TODO: is there a bug here where startFrom != startAfter?
 				startAfter
@@ -211,7 +256,7 @@ function processBacklog<Event>(
 /** Read events from an event source and process them in a projection, one page at a time. **/
 function readEvents<Event>(
 	eventSource:EventSource<Event>,
-	projectionSubscription:ProjectionSubscriptions<Event>,
+	projectionSubscription:InternalOrExternalProjection<Event>,
 	pageSize:Int,
 	startFrom:Option<EventId>
 ):Promise<Noise> {
@@ -230,12 +275,12 @@ function readEvents<Event>(
 				)
 					.next(_ -> {
 					// Read the next page, or return "Noise" if we're all done
-					final lastEventId = events[events.length - 1].id;
 					if (events.length < pageSize) {
 						// We're up to date!
 						// TODO: should we compare `eventSource.getLatestEvent()` instead?
 						return Noise;
 					}
+					final lastEventId = events[events.length - 1].id;
 					return readEvents(
 						eventSource,
 						projectionSubscription,
@@ -248,15 +293,15 @@ function readEvents<Event>(
 
 /** Attempt to process a single event on a single projection, including retries. **/
 function updateSubscription<Event>(
-	projectionSubscription:ProjectionSubscriptions<Event>,
+	projection:InternalOrExternalProjection<Event>,
 	event:{
 		id:EventId,
 		payload:Event
 	},
 	retryAttempt:Int = 0
 ):Promise<Noise> {
-	return projectionSubscription
-			.handler(event)
+	return projection
+			.handleEvent(event.id, event.payload)
 			.next(function(result) switch result {
 			case Success:
 				return Noise;
@@ -264,7 +309,7 @@ function updateSubscription<Event>(
 				return Promise.reject(err);
 			case SkippedEvent(reason):
 				trace(
-					'Skipping event ${event.id} for ${projectionSubscription.name}'
+					'Skipping event ${event.id} for ${getClassName(projection)})'
 				);
 				return Noise;
 			case Retry:
@@ -272,7 +317,7 @@ function updateSubscription<Event>(
 				if (retryAttempt > MAX_RETRIES) {
 					return Promise.reject(
 						new Error(
-							'Max retries reached for event ${event.id} on ${projectionSubscription.name}'
+							'Max retries reached for event ${event.id} on ${getClassName(projection)}'
 						)
 					);
 				}
@@ -280,7 +325,7 @@ function updateSubscription<Event>(
 						.delay(1000 * retryAttempt, Noise)
 						.flatMap(
 						_ -> updateSubscription(
-							projectionSubscription,
+							projection,
 							event,
 							retryAttempt + 1
 						)

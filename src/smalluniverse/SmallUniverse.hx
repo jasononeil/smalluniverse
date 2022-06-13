@@ -1,5 +1,6 @@
 package smalluniverse;
 
+import smalluniverse.util.LogUtils.getClassName;
 import js.html.Event;
 
 using tink.CoreApi;
@@ -333,9 +334,7 @@ abstract Command<Event>(
 	public function toString():String {
 		switch this {
 			case Some(value):
-				final eventSourceName = Type.getClassName(
-					value.eventSourceClass
-				);
+				final eventSourceName = getClassName(value.eventSourceClass);
 				return 'On ${eventSourceName} attempt ${value.event}';
 			case None:
 				return "DoNothing";
