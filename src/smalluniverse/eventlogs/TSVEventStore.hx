@@ -71,15 +71,22 @@ class TSVEventStore<Event> implements EventStore<Event> {
 		payload:Event
 		}>> {
 		return readFile().next(content -> {
-			final eventIdFragment = '\n${startingFrom}\t';
-			final startOfLastEvent = content.indexOf(eventIdFragment);
-			if (startOfLastEvent == -1) {
-				// TODO... this and other weird edge cases. Need some tests
+			final startOfNextEvent = switch startingFrom {
+				case Some(eventId):
+					final eventIdFragment = '\n${eventId}\t';
+					final startOfLastEvent = content.indexOf(eventIdFragment);
+					if (startOfLastEvent == -1) {
+						return new Error(
+							'Error: startFrom event "${eventId}" was not found, behaviour undefined'
+						);
+					}
+					content.indexOf(
+						"\n",
+						startOfLastEvent + eventIdFragment.length
+					);
+				case None:
+					0;
 			}
-			final startOfNextEvent = content.indexOf(
-				"\n",
-				startOfLastEvent + eventIdFragment.length
-			);
 			final remainingContent = content.substr(startOfNextEvent);
 
 			final rows = remainingContent
@@ -88,13 +95,23 @@ class TSVEventStore<Event> implements EventStore<Event> {
 					.filter(line -> line != "")
 					.slice(0, numberToRead);
 
-			return rows.map(row -> {
-				final parts = row.split('\t');
-				return {
-					id: parts[0],
-					payload: encoder.decode(parts[1])
-				}
-			});
+			try {
+				return rows.map(row -> {
+					final parts = row.split('\t');
+					return {
+						id: parts[0],
+						payload: try {
+							encoder.decode(parts[1]);
+						} catch (err:Any) {
+							throw 'Failed to decode event: ${parts[0]} ${parts[1]}.\n--> $err';
+						}
+					}
+				});
+			} catch (err:Any) {
+				return new Error(
+					'Error while reading events from $file.\n--> $err'
+				);
+			}
 		});
 		}
 
