@@ -1,0 +1,29 @@
+.CalendarGrid {
+  display: grid;
+  grid-template-columns: repeat(7, auto);
+  gap: var(--space-m);
+}
+
+.CalendarGrid__DaySquare {
+}
+.CalendarGrid__DaySquare--Day_0 {
+  grid-column: 1;
+}
+.CalendarGrid__DaySquare--Day_1 {
+  grid-column: 2;
+}
+.CalendarGrid__DaySquare--Day_2 {
+  grid-column: 3;
+}
+.CalendarGrid__DaySquare--Day_3 {
+  grid-column: 4;
+}
+.CalendarGrid__DaySquare--Day_4 {
+  grid-column: 5;
+}
+.CalendarGrid__DaySquare--Day_5 {
+  grid-column: 6;
+}
+.CalendarGrid__DaySquare--Day_6 {
+  grid-column: 7;
+}

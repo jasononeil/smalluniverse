@@ -1,0 +1,6 @@
+.Paragraph {
+  font-family: var(--type-family);
+  font-size: var(--type-body);
+  font-weight: var(--type-medium);
+  margin-bottom: var(--space-m);
+}

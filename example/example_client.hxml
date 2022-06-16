@@ -1,0 +1,15 @@
+-cp ./
+-cp ../src
+-lib compiletime
+-lib tink_core
+-lib tink_macro
+-lib tink_json
+-lib jsImport
+-lib uuid
+-lib datetime
+--dce full
+--macro nullSafety("smalluniverse", Strict)
+--macro nullSafety("mealplanner", Strict)
+-js build/client.js
+--main mealplanner.Client
+-cmd yarn -s esbuild --bundle build/client.js --outfile=build/client.bundle.js

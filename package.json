@@ -6,10 +6,28 @@
   "repository": "https://github.com/jasononeil/smalluniverse",
   "author": "Jason O'Neil",
   "license": "MIT",
+  "private": true,
+  "workspaces": [
+    "example"
+  ],
   "scripts": {
-    "build": "haxe build.hxml"
+    "postinstall": "lix download",
+    "formatter": "node `(yarn -s haxelib path formatter | sed 1q)`/../run.js",
+    "format": "yarn -s formatter -s src && yarn -s formatter -s example",
+    "test": "yarn -s test:build && yarn -s test:run",
+    "test:build": "haxe test.hxml",
+    "test:run": "node build/test.bundle.js",
+    "mealplanner": "yarn -s workspace mealplanner"
   },
   "dependencies": {
-    "lix": "^15.9.1"
+    "snabbdom": "^2.1.0"
+  },
+  "devDependencies": {
+    "@testing-library/dom": "^8.13.0",
+    "esbuild": "^0.8.34",
+    "global-jsdom": "^8.4.0",
+    "jsdom": "^19.0.0",
+    "lix": "^15.11.4",
+    "nodemon": "^2.0.7"
   }
 }

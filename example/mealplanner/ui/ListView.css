@@ -1,0 +1,70 @@
+.ListView__List {
+  font-family: var(--type-family);
+  font-size: var(--type-body);
+  font-weight: var(--type-medium);
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  border: var(--border);
+  border-radius: var(--border-radius);
+}
+
+.ListView__Item {
+  border-bottom: var(--border);
+}
+
+.ListView__Item:last-child {
+  border-bottom: 0;
+}
+
+.ListView__Content {
+  padding: var(--space-m);
+  font-weight: var(--font-medium);
+  display: block;
+  text-decoration: none;
+  user-select: none;
+}
+
+a.ListView__Content {
+  text-decoration: none;
+}
+
+button.ListView__Content {
+  font-family: inherit;
+  font-size: 100%;
+  line-height: 1.15;
+  margin: 0;
+  overflow: visible;
+  text-transform: none;
+  -webkit-appearance: button;
+  background: transparent;
+  border: 0;
+  text-align: left;
+}
+
+.ListView__FormWrapper {
+  margin: 0;
+  display: flex;
+}
+
+input.ListView__Content {
+  border: 0;
+  flex-grow: 1;
+}
+
+.ListView__Content:hover {
+  background: var(--color-highlight);
+}
+
+/* Screen Reader Only */
+.ListView__SROnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}

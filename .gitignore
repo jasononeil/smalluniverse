@@ -1,1 +1,5 @@
 node_modules
+build
+.DS_Store
+TASKS.md
+example/app-content/

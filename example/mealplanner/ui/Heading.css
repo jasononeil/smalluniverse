@@ -1,0 +1,18 @@
+.Heading {
+  font-family: var(--type-family);
+}
+
+.Heading--H1 {
+  font-size: var(--type-h1);
+  font-weight: var(--type-bold);
+}
+
+.Heading--H2 {
+  font-size: var(--type-h2);
+  font-weight: var(--type-bold);
+}
+
+.Heading--H3 {
+  font-size: var(--type-h3);
+  font-weight: var(--type-bold);
+}

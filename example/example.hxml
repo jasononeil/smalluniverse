@@ -1,0 +1,15 @@
+-cp ./
+-cp ../src
+-lib hxnodejs
+-lib compiletime
+-lib tink_core
+-lib tink_macro
+-lib tink_json
+-lib jsImport
+-lib datetime
+-lib uuid
+--macro nullSafety("smalluniverse", Strict)
+--macro nullSafety("mealplanner", Strict)
+--main mealplanner.Server
+-js build/server.js
+-cmd yarn -s esbuild --bundle build/server.js --platform=node --outfile=build/server.bundle.js

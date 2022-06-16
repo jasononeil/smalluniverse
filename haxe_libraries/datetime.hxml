@@ -1,0 +1,4 @@
+# @install: lix --silent download "haxelib:/datetime#3.1.4" into datetime/3.1.4/haxelib
+# @run: haxelib run-dir datetime "${HAXE_LIBCACHE}/datetime/3.1.4/haxelib"
+-cp ${HAXE_LIBCACHE}/datetime/3.1.4/haxelib/src
+-D datetime=3.1.4

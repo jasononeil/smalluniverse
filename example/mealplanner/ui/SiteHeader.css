@@ -1,0 +1,24 @@
+.SiteHeader {
+  font-family: var(--type-family);
+}
+
+.SiteHeader nav ul {
+  font-size: var(--type-body);
+  font-weight: var(--type-medium);
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: row;
+  border: var(--border);
+  border-radius: var(--border-radius);
+}
+
+.SiteHeader nav a {
+  display: inline-block;
+  text-decoration: none;
+  padding: var(--space-m);
+}
+
+.SiteHeader nav a:hover {
+  background: var(--color-highlight);
+}

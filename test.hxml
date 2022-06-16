@@ -1,0 +1,12 @@
+-cp src
+-cp test
+-lib tink_unittest
+-lib hxnodejs
+-lib compiletime
+-lib tink_core
+-lib jsImport
+-lib uuid
+--main Main
+--macro nullSafety("smalluniverse", Strict)
+-js build/test.js
+-cmd yarn -s esbuild --bundle build/test.js --platform=node --external:jsdom --external:global-jsdom --outfile=build/test.bundle.js
