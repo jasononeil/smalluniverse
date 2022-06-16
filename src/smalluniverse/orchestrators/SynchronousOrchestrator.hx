@@ -117,7 +117,7 @@ class SynchronousOrchestrator implements Orchestrator {
 												err.toString()
 											);
 											return Noise;
-										})
+										});
 									case false:
 										// The projection isn't up-to-date, so lets not add this event, or things will arrive out of order.
 										// This projection will now be behind the EventSource until the next time `processBacklog()` is called.
@@ -184,17 +184,17 @@ class SynchronousOrchestrator implements Orchestrator {
 		final projectionUpdates = [];
 		for (subscription in eventSourcesAndSubscriptions) {
 			final eventSource = subscription.source;
-			for (projectionSubscription in subscription.projections) {
+			for (projection in subscription.projections) {
 				final projectionUpdatedPromise = isProjectionUpToDate(
 					eventSource,
-					projectionSubscription
+					projection
 				).next(isUpToDate -> {
 					if (isUpToDate) {
 						return Promise.resolve(Noise);
 					}
-					return processBacklog(eventSource, projectionSubscription);
+					return processBacklog(eventSource, projection);
 				});
-				final name = getClassName(name);
+				final name = getClassName(projection);
 				projectionUpdatedPromise.handle(outcome -> switch outcome {
 					case Success(_):
 						trace('Projection ${name} is up to date');
