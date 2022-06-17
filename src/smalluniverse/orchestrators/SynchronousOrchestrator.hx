@@ -40,7 +40,7 @@ class SynchronousOrchestrator implements Orchestrator {
 	var eventSourcesAndSubscriptions:Array<SubscriptionsToEventSource> = [];
 
 	public function new(setup:SynchronousOrchestratorConfig) {
-		this.pageApis = [for (api in setup.pageApis) getClassName(
+		this.pageApis = [for (api in setup.pageApis) Type.getClassName(
 			api.relatedPage
 		) => api];
 
@@ -58,7 +58,7 @@ class SynchronousOrchestrator implements Orchestrator {
 			if (subscription == null) {
 				throw new Error(
 					501,
-					'Projection "${getClassName(projection)}" is subscribed to an EventSource "${getClassName(projection.source)}" which we do not have registered'
+					'Projection "${getClassName(projection)}" is subscribed to an EventSource "${Type.getClassName(projection.source)}" which we do not have registered'
 				);
 			}
 			subscription.projections.push(projection);
@@ -81,7 +81,7 @@ class SynchronousOrchestrator implements Orchestrator {
 					// One option could be to do a macro-powered compile time check that all calls to `new Command()` are for Event Sources we have registered.
 					throw new Error(
 						501,
-						'A command was called for EventSource "${getClassName(eventSourceClass)}" but no EventSource of this type was registered'
+						'A command was called for EventSource "${Type.getClassName(eventSourceClass)}" but no EventSource of this type was registered'
 					);
 				}
 				final eventSource = subscription.source;
