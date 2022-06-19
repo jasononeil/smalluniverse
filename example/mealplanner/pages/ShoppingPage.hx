@@ -25,6 +25,8 @@ enum ShoppingAction {
 typedef ShoppingData = {
 	list:Map<String, Array<IngredientToBuy>>,
 	numberOfItemsWithoutShop:Int,
+	numberOfItemsTotal:Int,
+	numberOfItemsUnticked:Int,
 };
 
 typedef IngredientToBuy = {
@@ -70,6 +72,9 @@ class ShoppingPage implements Page<
 				) : UntickItem(i.ingredient)
 			}))]
 		)];
+		final shoppingListCount = Paragraph(
+			'${data.numberOfItemsUnticked} / ${data.numberOfItemsTotal} items remaining'
+		);
 		final alertItemsWithNoShop = (data.numberOfItemsWithoutShop > 0) ? Paragraph(
 			element(
 				"strong",
@@ -86,6 +91,12 @@ class ShoppingPage implements Page<
 			Link(appRouter.uriForShopSelectorPage({})),
 			'Select Shops for Items'
 		);
-		return [alertItemsWithNoShop, clearBtn, selectShopBtn, shopLists];
+		return [
+			alertItemsWithNoShop,
+			clearBtn,
+			selectShopBtn,
+			shoppingListCount,
+			shopLists
+		];
 	}
 }

@@ -48,6 +48,8 @@ class ShoppingPageApi implements PageApi<
 				}
 				return {
 					numberOfItemsWithoutShop: itemsWithoutShop,
+					numberOfItemsTotal: items.length,
+					numberOfItemsUnticked: items.filter(i -> !i.ticked).length,
 					list: list
 				};
 			});
