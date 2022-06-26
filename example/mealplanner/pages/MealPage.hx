@@ -36,7 +36,7 @@ class MealPage implements Page<MealAction, MealParams, MealData> {
 
 	public function render(data:MealData) {
 		return Layout(SiteHeader(data.mealName), [
-			Button(Action(AddToShoppingList), "Add to shopping list"),
+			Button(Action(AddToShoppingList), "Untick all"),
 			IngredientList("Ingredients", data.ingredients.map(i -> {
 				ingredient: i.name,
 				ticked: i.ticked,
