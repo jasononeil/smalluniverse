@@ -1,0 +1,43 @@
+.ActionMenu__label {
+  /* Shape */
+  border: var(--border);
+  border-radius: var(--border-radius);
+  padding: var(--space-m);
+  appearance: none;
+  display: inline-block;
+  /* Typography */
+  font-family: var(--type-family);
+  font-size: var(--type-body);
+  font-weight: var(--type-medium);
+  text-decoration: none;
+  line-height: 1;
+  /* Color */
+  background: transparent;
+  border-color: var(--color-highlight);
+  color: var(--color-text);
+
+  /* Allow positioning of select */
+  position: relative;
+}
+.ActionMenu__select {
+  /* Reset */
+  appearance: none;
+
+  /* Cover entire label */
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+
+  /* Shame shape as label */
+  border: var(--border);
+  border-radius: var(--border-radius);
+  padding: var(--space-m);
+  display: inline-block;
+
+  /* Not visible */
+  background: rgba(255, 255, 255, 0);
+  color: rgba(0, 0, 0, 0);
+}
