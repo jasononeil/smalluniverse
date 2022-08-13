@@ -10,8 +10,11 @@ using Lambda;
 
 enum MealsEvent {
 	NewMeal(name:String);
+	RenameMeal(oldId:String, newName:String);
+	DeleteMeal(mealId:String);
 	AddIngredient(meal:String, ingredient:String);
 	RenameIngredient(meal:String, oldIngredient:String, newIngredient:String);
+	DeleteIngredient(meal:String, ingredient:String);
 }
 
 typedef MealsModel = {
@@ -66,6 +69,34 @@ class MealsEventSource extends JsonFileEventSource<MealsEvent, MealsModel> {
 					slug: getSlugFromName(name),
 					ingredients: []
 				});
+			case RenameMeal(oldId, newName):
+				final newSlug = getSlugFromName(newName);
+				if (newName == "" || newSlug == "") {
+					return Promise.reject(
+						new Error(BadRequest, 'The new meal name was blank')
+					);
+				}
+				final matchingMeal = model.meals.find(m -> m.slug == oldId);
+				if (matchingMeal == null) {
+					final err = new Error(
+						BadRequest,
+						'Old meal with name "${oldId}" not found.'
+					);
+					return Promise.reject(err);
+				}
+				matchingMeal.name = newName;
+				matchingMeal.slug = newSlug;
+			case DeleteMeal(name):
+				final slug = getSlugFromName(name);
+				if (name == "" || slug == "") {
+					return Promise.reject(
+						new Error(
+							BadRequest,
+							'Cannot delete a meal with no name'
+						)
+					);
+				}
+				model.meals = model.meals.filter(meal -> meal.slug != slug);
 			case AddIngredient(mealSlug, ingredient):
 				final matchingMeal = model.meals.find(m -> m.slug == mealSlug);
 				if (matchingMeal == null) {
@@ -76,12 +107,12 @@ class MealsEventSource extends JsonFileEventSource<MealsEvent, MealsModel> {
 					return Promise.reject(err);
 				}
 				matchingMeal.ingredients.push({name: ingredient});
-			case RenameIngredient(mealSlug, oldIngredient, newIngredient):
-				final matchingMeal = model.meals.find(m -> m.slug == mealSlug);
+			case RenameIngredient(mealId, oldIngredient, newIngredient):
+				final matchingMeal = model.meals.find(m -> m.slug == mealId);
 				if (matchingMeal == null) {
 					final err = new Error(
 						BadRequest,
-						'Meal with id "${mealSlug}" not found.'
+						'Meal with id "${mealId}" not found.'
 					);
 					return Promise.reject(err);
 				}
@@ -92,6 +123,18 @@ class MealsEventSource extends JsonFileEventSource<MealsEvent, MealsModel> {
 					}
 					return i;
 				});
+			case DeleteIngredient(mealId, ingredient):
+				final matchingMeal = model.meals.find(m -> m.slug == mealId);
+				if (matchingMeal == null) {
+					final err = new Error(
+						BadRequest,
+						'Meal with id "${mealId}" not found.'
+					);
+					return Promise.reject(err);
+				}
+				matchingMeal.ingredients = matchingMeal.ingredients.filter(
+					i -> i.name != ingredient
+				);
 		}
 		return model;
 	}

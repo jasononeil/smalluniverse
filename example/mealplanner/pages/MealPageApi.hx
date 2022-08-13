@@ -94,6 +94,29 @@ class MealPageApi implements PageApi<MealAction, MealParams, MealData> {
 							})
 						)
 					);
+			case DeleteIngredient(ingredient):
+				// TODO: make this also delete from ShoppingListEventSource
+				return new Command(
+					MealsEventSource,
+					DeleteIngredient(params.mealId, ingredient)
+				);
+			case EditIngredientName(oldName, newName):
+				// TODO make this also rename on ShoppingListEventSource
+				return new Command(
+					MealsEventSource,
+					RenameIngredient(params.mealId, oldName, newName)
+				);
+			case RenameMeal(newName):
+				// TODO: also change the name on ShoppingListEventSource
+				// TODO: we're going to need a redirect here (to the new meal URL)
+				return new Command(
+					MealsEventSource,
+					RenameMeal(params.mealId, newName)
+				);
+			case DeleteMeal:
+				// TODO: also remove any items on ShoppingListEventSource
+				// TODO: we're going to need a new redirect here (to the meal list page)
+				return new Command(MealsEventSource, DeleteMeal(params.mealId));
 		}
 	}
 }

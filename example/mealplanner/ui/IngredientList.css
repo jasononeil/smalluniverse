@@ -17,9 +17,12 @@
   content: ")";
 }
 
+.IngredientList__FlexRow {
+  display: flex;
+}
+
 .IngredientList__Label {
-  display: block;
-  width: 100%;
+  flex-grow: 1;
 }
 
 .IngredientList__Checkbox.IngredientList__Checkbox {

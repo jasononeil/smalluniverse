@@ -63,11 +63,11 @@ class ShoppingPage implements Page<
 		final shopLists = [for (storeName =>
 			itemsForStore in data.list) section(
 			[],
-			[IngredientList(storeName, itemsForStore.map(i -> {
+			[ShoppingList(storeName, itemsForStore.map(i -> {
 				ingredient: i.ingredient,
 				ticked: i.ticked,
 				info: i.meals.map(m -> m.name).join(", "),
-				onChange: ticked -> ticked ? TickItem(
+				onTickedChange: ticked -> ticked ? TickItem(
 					i.ingredient
 				) : UntickItem(i.ingredient)
 			}))]
