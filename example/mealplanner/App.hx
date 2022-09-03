@@ -6,7 +6,6 @@ import mealplanner.pages.ShoppingPage;
 import mealplanner.pages.ShopSelectorPage;
 import mealplanner.pages.WeeklyPlanPage;
 import mealplanner.pages.MealsListPage;
-import mealplanner.pages.IngredientPage;
 import haxe.ds.Option;
 
 // function getMockData() {
@@ -24,10 +23,6 @@ class AppRoutes implements Router {
 
 	public function uriForMealPage(params:MealParams):String {
 		return '/meal/${params.mealId}';
-	}
-
-	public function uriForIngredientPage(params:IngredientParams):String {
-		return '/ingredient/${params.ingredient}';
 	}
 
 	public function uriForWeeklyPlanPage(params:WeeklyPlanParams):String {
@@ -50,10 +45,6 @@ class AppRoutes implements Router {
 				return Some(Page(new MealsListPage(), {}));
 			case ["meal", mealId]:
 				return Some(Page(new MealPage(), {mealId: mealId}));
-			case ["ingredient", ingredientName]:
-				return Some(Page(new IngredientPage(), {
-					ingredient: StringTools.urlDecode(ingredientName)
-				}));
 			case ["weekly-plan"]:
 				return Some(Page(new WeeklyPlanPage(), {}));
 			case ["shopping", "select-shop"]:
