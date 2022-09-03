@@ -52,7 +52,7 @@ function handleRequest(
 	req:IncomingMessage,
 	res:ServerResponse
 ) {
-	trace('Request: ${req.url}');
+	trace('Request: ${req.method} ${req.url}');
 
 	if (req.url == "/js/client.bundle.js") {
 		return loadClientScript(res);
@@ -96,6 +96,7 @@ function handlePage<
 				return Noise;
 			}
 			return readRequestBody(req).next(body -> {
+				trace('Received JSON', body);
 				final action = page.actionEncoder.decode(body);
 				trace('Received action', action);
 				return api.actionToCommand(params, action).next(command -> {
