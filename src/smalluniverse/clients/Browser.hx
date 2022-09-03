@@ -83,6 +83,14 @@ function triggerNavigation(url:String) {
 }
 
 /**
+	Trigger a URL change using the history API, using `replaceState` to avoid a new item in history, and render the new page.
+**/
+function triggerReplaceState(url:String) {
+	window.history.replaceState({}, "", url);
+	changeUrlTrigger.trigger(Noise);
+}
+
+/**
 	Post an action to the API.
 	For internal use only - you should be posting actions by triggering events from the DOM and trusting the framework to call this function.
 **/
