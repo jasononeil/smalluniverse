@@ -54,7 +54,8 @@ final appOrchestrator = new SynchronousOrchestrator({
 		new MealsListPageApi(mealsEventSource),
 		new ShoppingPageApi(shoppingListEventSource),
 		new ShopSelectorPageApi(shoppingListEventSource),
-		new WeeklyPlanPageApi(weeklyPlanEventSource, mealsEventSource)
+		new WeeklyPlanPageApi(weeklyPlanEventSource, mealsEventSource),
+		new QuickAddPageApi(mealsEventSource, shoppingListEventSource),
 	]
 });
 

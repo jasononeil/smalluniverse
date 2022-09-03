@@ -161,6 +161,18 @@ class MealsEventSource extends JsonFileEventSource<MealsEvent, MealsModel> {
 			});
 	}
 
+	public function getAllIngredients():Promise<Array<{name:String, meal:{id:String, name:String}}>> {
+		return readModel().next(model -> {
+			model.meals.map(meal -> meal.ingredients.map(i -> {
+				name: i.name,
+				meal: {
+					id: meal.slug,
+					name: meal.name
+				}
+			})).flatten();
+		});
+	}
+
 	function getSlugFromName(name:String):String {
 		return ~/[^a-zA-Z]/g.replace(name.toLowerCase(), "-");
 	}

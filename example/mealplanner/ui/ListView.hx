@@ -32,8 +32,10 @@ function ListItemLink<Action>(content:Html<Action>, url:String) {
 }
 
 function ListItemButton<Action>(content:Html<Action>, action:Action) {
-	// TODO: onClick Action
-	return button([className("ListView__Content")], content);
+	return button([
+		className("ListView__Content"),
+		on("click", _ -> Some(action))
+	], content);
 }
 
 function ListItemInput<Action>(

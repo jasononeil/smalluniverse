@@ -16,6 +16,9 @@ function SiteHeader<Action>(title:String):Html<Action> {
 				MenuItem("Meals", appRouter.uriForMealsListPage({})),
 				MenuItem("Weekly Plan", appRouter.uriForWeeklyPlanPage({})),
 				MenuItem("Shopping List", appRouter.uriForShoppingPage({})),
+				MenuItem("Quick Add", appRouter.uriForQuickAdd({
+					input: ""
+				})),
 			])
 		]),
 		Heading2(title)
