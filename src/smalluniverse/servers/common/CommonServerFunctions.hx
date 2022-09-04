@@ -225,6 +225,7 @@ private function renderResponse(
 					// Note: the client browser will automatically redirect this fetch call.
 					// That means the client will see a (hopefully) `200` response with the JSON data for the page we're redirecting too.
 					// In the client, we need to check the fetch response for `res.redirected=true`, and use the `res.url` to display the corect page.
+					// See Browser.postAction()
 					redirectResponse(url);
 				case ResponseError(error):
 					final errorJson = tink.Json.stringify({
