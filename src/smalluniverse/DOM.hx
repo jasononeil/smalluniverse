@@ -226,7 +226,7 @@ inline function id<Action>(id:String):HtmlAttribute<Action>
 
 function className<Action>(
 	?single:String,
-	?multiple:Array<String>,
+	?multiple:Array<Null<String>>,
 	?toggles:Map<String, Bool>
 ):HtmlAttribute<Action> {
 	final attributeList = [];
@@ -235,7 +235,9 @@ function className<Action>(
 	}
 	if (multiple != null) {
 		for (cls in multiple) {
-			attributeList.push(cls);
+			if (cls != null) {
+				attributeList.push(cls);
+			}
 		}
 	}
 	if (toggles != null) {

@@ -32,8 +32,10 @@ function ListItemLink<Action>(content:Html<Action>, url:String) {
 }
 
 function ListItemButton<Action>(content:Html<Action>, action:Action) {
-	// TODO: onClick Action
-	return button([className("ListView__Content")], content);
+	return button([
+		className("ListView__Content"),
+		on("click", _ -> Some(action))
+	], content);
 }
 
 function ListItemInput<Action>(
@@ -49,10 +51,13 @@ function ListItemInput<Action>(
 		}
 
 		final input = cast(form.elements.namedItem(uniqueId), InputElement);
+		final value = input.value;
+
+		input.value = "";
 
 		e.preventDefault();
 
-		return onChange(input.value);
+		return onChange(value);
 	})], [label([
 		className("ListView__SROnly"),
 		htmlFor(uniqueId)

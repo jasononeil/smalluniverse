@@ -6,7 +6,7 @@ import mealplanner.pages.ShoppingPage;
 import mealplanner.pages.ShopSelectorPage;
 import mealplanner.pages.WeeklyPlanPage;
 import mealplanner.pages.MealsListPage;
-import mealplanner.pages.IngredientPage;
+import mealplanner.pages.QuickAddPage;
 import haxe.ds.Option;
 
 // function getMockData() {
@@ -26,10 +26,6 @@ class AppRoutes implements Router {
 		return '/meal/${params.mealId}';
 	}
 
-	public function uriForIngredientPage(params:IngredientParams):String {
-		return '/ingredient/${params.ingredient}';
-	}
-
 	public function uriForWeeklyPlanPage(params:WeeklyPlanParams):String {
 		return '/weekly-plan';
 	}
@@ -42,6 +38,10 @@ class AppRoutes implements Router {
 		return '/shopping/select-shop';
 	}
 
+	public function uriForQuickAdd(params:QuickAddParams):String {
+		return params.input == "" ? '/quick-add' : '/quick-add/${params.input}';
+	}
+
 	public function uriToRoute(uri:String):Option<ResolvedRoute<Dynamic>> {
 		final path = uri.split("?")[0];
 		final parts = path.split("/").filter(s -> s != "");
@@ -50,16 +50,16 @@ class AppRoutes implements Router {
 				return Some(Page(new MealsListPage(), {}));
 			case ["meal", mealId]:
 				return Some(Page(new MealPage(), {mealId: mealId}));
-			case ["ingredient", ingredientName]:
-				return Some(Page(new IngredientPage(), {
-					ingredient: StringTools.urlDecode(ingredientName)
-				}));
 			case ["weekly-plan"]:
 				return Some(Page(new WeeklyPlanPage(), {}));
 			case ["shopping", "select-shop"]:
 				return Some(Page(new ShopSelectorPage(), {}));
 			case ["shopping"]:
 				return Some(Page(new ShoppingPage(), {}));
+			case ["quick-add"]:
+				return Some(Page(new QuickAddPage(), {input: ""}));
+			case ["quick-add", input]:
+				return Some(Page(new QuickAddPage(), {input: input}));
 			default:
 				return None;
 		}

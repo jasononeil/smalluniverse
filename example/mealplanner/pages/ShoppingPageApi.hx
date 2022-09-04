@@ -29,10 +29,10 @@ class ShoppingPageApi implements PageApi<
 				var itemsWithoutShop = 0;
 				final list = new Map<String, Array<IngredientToBuy>>();
 				for (i in items) {
-					final shopName = i.shop;
+					var shopName = i.shop;
 					if (shopName == null) {
 						itemsWithoutShop++;
-						continue;
+						shopName = "No shop set";
 					}
 					final shopList = list[shopName].orGet(() -> list[
 						shopName
