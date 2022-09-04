@@ -1,13 +1,13 @@
 package smalluniverse.servers;
 
 import smalluniverse.SmallUniverse;
+import smalluniverse.servers.common.CommonServerFunctions;
 import js.Node;
 import js.node.Path;
 import js.node.http.ServerResponse;
 import js.node.http.IncomingMessage;
 import js.node.Http;
 import js.node.Fs;
-import smalluniverse.renderers.HtmlStringRenderer;
 
 using Lambda;
 using StringTools;
@@ -58,88 +58,25 @@ function handleRequest(
 		return loadClientScript(res);
 	}
 
-	try {
-		switch router.uriToRoute(req.url) {
-			case Some(Page(page, params)):
-				handlePage(req, res, orchestrator, page, params);
-			case None:
-				printError(res, new Error(NotFound, "Page not found"));
-		}
-	} catch (err) {
-		printError(
-			res,
-			new Error(InternalError, 'Internal server error: $err')
-		);
-	}
-}
+	final contentType = req.headers["accept"];
+	final responseFormat =
+		contentType != null &&
+		contentType.startsWith("application/json") ? Json : Html;
 
-// This function signature would be way less ugly if `Page` was an object and not an enum instance, then we could pass that in.
-function handlePage<
-	Action
-	,
-	PageParams
-	,
-	PageData
-	>(
-		req:IncomingMessage,
-		res:ServerResponse,
-		orchestrator:Orchestrator,
-		page:Page<Action, PageParams, PageData>,
-		params:PageParams
-	):Promise<Noise> {
-		final api = orchestrator.apiForPage(page);
-		return Promise.NOISE.next((_) -> {
-			// Handle POST Action if there is one.
-			final jsonRequest = req.headers["content-type"] == "application/json";
-			final isAction = req.method == "POST" && jsonRequest;
-			if (!isAction) {
-				return Noise;
-			}
-			return readRequestBody(req).next(body -> {
-				trace('Received JSON', body);
-				final action = page.actionEncoder.decode(body);
-				trace('Received action', action);
-				return api.actionToCommand(params, action).next(command -> {
-					trace('Command', command.toString());
-					orchestrator.handleCommand(command);
-				});
-			});
-		}).next((_) -> {
-			// Get Page Data
-			return api.getPageData(params);
-		}).next((pageData) -> {
-			// Render response
-			final pageDataJson = page.dataEncoder.encode(pageData);
-			switch (req.headers["accept"]) {
-				case "application/json":
-					// This is a request from our client JS. Return the data.
-					res.statusCode = 200;
-					res.setHeader(
-						"Content-Type",
-						"application/json; charset=UTF-8"
-					);
-					res.write(pageDataJson);
-					res.end();
-				default:
-					// Render the page as HTML
-					final viewHtml = stringifyHtml(page.render(pageData));
-					final html = wrapHtml(viewHtml, pageDataJson);
-					res.statusCode = 200;
-					res.setHeader("Content-Type", "text/html; charset=UTF-8");
-					res.write(html);
-					res.end();
-			}
-			return Noise;
-		}).recover(err -> {
-			printError(res, err);
-			return Noise;
-		}).eager();
-}
-
-function printError(res:ServerResponse, err:Error) {
-	res.write(err.toString());
-	res.statusCode = err.code;
-	res.end();
+	handleSmallUniverseRequest({
+		url: req.url,
+		isAction: req.method == "POST",
+		responseFormat: responseFormat,
+		readRequestBody: () -> readRequestBody(req),
+		printResponse: (
+			type,
+			status,
+			content
+		) -> printResponse(res, type, status, content),
+		redirectResponse: (url) -> redirectResponse(res, url),
+		router: router,
+		orchestrator: orchestrator,
+	});
 }
 
 function readRequestBody(req:IncomingMessage):Promise<String> {
@@ -150,8 +87,25 @@ function readRequestBody(req:IncomingMessage):Promise<String> {
 	return trigger.asPromise();
 }
 
-function wrapHtml(bodyContent:String, pageDataJson:String) {
-	return CompileTime.interpolateFile("smalluniverse/template.html");
+function printResponse(
+	res:ServerResponse,
+	contentType:ResponseFormat,
+	status:Int,
+	content:String
+) {
+	res.statusCode = status;
+	res.setHeader("Content-Type", switch contentType {
+		case Html: "text/html; charset=UTF-8";
+		case Json: "application/json; charset=UTF-8";
+	});
+	res.write(content);
+	res.end();
+}
+
+function redirectResponse(res:ServerResponse, url:String) {
+	res.setHeader("Location", url);
+	res.statusCode = 301;
+	res.end();
 }
 
 function loadClientScript(res:ServerResponse) {
