@@ -1,5 +1,6 @@
 package mealplanner.pages;
 
+import mealplanner.App.appRouter;
 import smalluniverse.SmallUniverse;
 import mealplanner.pages.QuickAddPage;
 import mealplanner.domains.Meals;
@@ -66,7 +67,7 @@ class QuickAddPageApi implements PageApi<
 							default: [];
 						}
 					})
-				);
+				).redirectIfSuccessful(appRouter.uriForQuickAdd({input: ""}));
 		}
 	}
 }
