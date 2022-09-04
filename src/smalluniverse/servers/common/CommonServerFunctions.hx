@@ -146,7 +146,16 @@ private function handleRequestForPage<Action, PageParams, PageData>(props:{
 					props.page,
 					pageApi,
 					props.params
-				)
+				).next(postCommandTrigger -> {
+					switch postCommandTrigger {
+						case UpdatePageOnClient:
+							// For now, we're returning PageData in the HttpResponse that goes back with the HttpRequest the action came in on.
+							// If we switch to a more asynchronous flow in future (eg pushing new data over websockets) we may want to leave it to the platform code (eg smalluniverse.servers.NodeJs) to decide whether or not to query data immediately after an action.
+							return doQuery(props.page, pageApi, props.params);
+						case RedirectClientTo(url):
+							return ResponseRedirect(url);
+					}
+				})
 			);
 	}
 	return doQuery(props.page, pageApi, props.params);
@@ -154,11 +163,6 @@ private function handleRequestForPage<Action, PageParams, PageData>(props:{
 
 /**
 	Process a POST request body into a PageAction, ask the page to turn it into a Command, and attempt to handle the Command.
-
-	If successful, and the Command did not request a redirect, then this will continue on to call `doQuery()`.
-			  
-	(Note: this is baking in the assumption that a POST request to send a command should include updated PageData in its response.
-	If we switch to a more asynchronous flow in future (eg pushing new data over websockets) this assumption may break.)
 **/
 private function doCommand<
 	Action
@@ -172,18 +176,14 @@ private function doCommand<
 		page:Page<Action, PageParams, PageData>,
 		pageApi:PageApi<Action, PageParams, PageData>,
 		params:PageParams
-	):Promise<ResponseContent<Any>> {
+	):Promise<PostCommandTrigger> {
 		final action = page.actionEncoder.decode(reqBody);
 		trace('Received Action', action);
 		return pageApi.actionToCommand(params, action).next(command -> {
 			trace('Command', command.toString());
-			orchestrator.handleCommand(command);
-			switch command.postCommand {
-				case UpdatePageOnClient:
-					return doQuery(page, pageApi, params);
-				case RedirectClientTo(url):
-					return ResponseRedirect(url);
-			}
+			return orchestrator
+					.handleCommand(command)
+					.next(_ -> command.postCommand);
 		});
 }
 

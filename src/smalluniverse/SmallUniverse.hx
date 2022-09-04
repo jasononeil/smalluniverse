@@ -381,7 +381,7 @@ private typedef CommandData<Event> = {
 }
 
 /** What effect to trigger on a client browser if this command is successful. **/
-private enum PostCommandTrigger {
+enum PostCommandTrigger {
 	UpdatePageOnClient;
 	RedirectClientTo(url:String);
 }
