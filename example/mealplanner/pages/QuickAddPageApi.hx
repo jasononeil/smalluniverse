@@ -32,6 +32,12 @@ class QuickAddPageApi implements PageApi<
 	}
 
 	public function getPageData(params:QuickAddParams):Promise<QuickAddData> {
+		if (params.input == "") {
+			return {
+				input: "",
+				existingItems: []
+			};
+		}
 		return mealsModel.getAllIngredients().next(ingredients -> {
 			input: params.input,
 			existingItems: ingredients.map(ingredient -> {
@@ -41,10 +47,8 @@ class QuickAddPageApi implements PageApi<
 					listName: ingredient.meal.name
 				}
 			}).filter(
-				item -> item.itemName
-						.toLowerCase()
-						.contains(params.input.toLowerCase())
-			)
+				item -> new EReg('\\b${params.input}', "i").match(item.itemName)
+			).slice(0, 10)
 		});
 	}
 
@@ -67,7 +71,7 @@ class QuickAddPageApi implements PageApi<
 							default: [];
 						}
 					})
-				).redirectIfSuccessful(appRouter.uriForQuickAdd({input: ""}));
+				).redirectIfSuccessful(appRouter.uriForShoppingPage({}));
 		}
 	}
 }
