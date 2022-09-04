@@ -373,7 +373,13 @@ interface Orchestrator {
 	/**
 		Get the PageApi for the current page.
 	**/
-	public function apiForPage(page:Page<Any, Any, Any>):PageApi<Any, Any, Any>;
+	public function apiForPage<
+		Action
+		,
+		Params
+		,
+		Data
+		>(page:Page<Action, Params, Data>):PageApi<Action, Params, Data>;
 
 	// Should the Orchestrator also be responsible for handling pages?
 	// The code for these in NodeJS isn't much, but it's also not platform specific and could be shared.

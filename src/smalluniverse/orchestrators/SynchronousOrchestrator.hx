@@ -135,7 +135,13 @@ class SynchronousOrchestrator implements Orchestrator {
 
 	public function teardown() {}
 
-	public function apiForPage(page:Page<Any, Any, Any>) {
+	public function apiForPage<
+		Action
+		,
+		Params
+		,
+		Data
+		>(page:Page<Action, Params, Data>):PageApi<Action, Params, Data> {
 		final pageClassName = getClassName(page);
 		final api = this.pageApis[pageClassName];
 		if (api == null) {
@@ -144,7 +150,7 @@ class SynchronousOrchestrator implements Orchestrator {
 				'Page ${pageClassName} does not have a corresponding PageApi added to your SynchronousOrchestrator'
 			);
 		}
-		return api;
+		return cast api;
 	}
 
 	public function bringEventSourceProjectionsUpToDate():Promise<Noise> {
