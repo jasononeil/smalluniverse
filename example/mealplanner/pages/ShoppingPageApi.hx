@@ -64,7 +64,7 @@ class ShoppingPageApi implements PageApi<
 			case ClearCompleted:
 				return new Command(ShoppingListEventSource, ClearCompleted);
 			case RefreshList:
-				return Command.DoNothing;
+				return Command.doNothing();
 		}
 	}
 }

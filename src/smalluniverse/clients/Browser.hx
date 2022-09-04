@@ -117,6 +117,16 @@ private function postAction<Action>(
 		}
 	}).then((result) -> {
 		result.text().then(pageDataJson -> {
+			// If the action resulted in a command that requested a redirect when successful, then:
+			// - The server will issue a 302 redirect
+			// - The browser will follow this redirect (again, requesting a JSON response)
+			// - The server will respond with the PageData for the new page.
+			// In the client, we can check for this redirect, and update our browser URL to match.
+			// The Router will then locate the page we're redirecting to, and we already have the data to render it.
+			// See CommonServerFunctions.renderResponse()
+			if (result.redirected) {
+				window.history.pushState({}, "", result.url);
+			}
 			renderPage(router, renderer, pageDataJson);
 		});
 	});
