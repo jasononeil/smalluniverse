@@ -6,6 +6,7 @@ import smalluniverse.SmallUniverse;
 import mealplanner.ui.Layout;
 import mealplanner.ui.SiteHeader;
 import mealplanner.ui.TypeAheadList;
+import smalluniverse.DOM;
 
 using tink.CoreApi;
 
@@ -42,9 +43,12 @@ class QuickAddPage implements Page<
 	public function render(data:QuickAddData) {
 		return Layout(SiteHeader("Quick Add"), TypeAheadList({
 			label: "Add an item",
-			renderItemLabel: (
-				item:Item
-			) -> '➡️ ${item.itemName} (${item.list.listName})',
+			renderItemLabel: (item:Item) -> [
+				'${item.itemName} ',
+				element("small", [], [
+					'(${item.list.listName})'
+				])
+			],
 			items: data.existingItems,
 			input: data.input,
 			onInput: input -> triggerReplaceState(appRouter.uriForQuickAdd({

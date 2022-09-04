@@ -1,5 +1,6 @@
 package mealplanner.ui;
 
+import smalluniverse.SmallUniverse;
 import smalluniverse.DOM;
 import mealplanner.ui.ListView;
 
@@ -7,7 +8,7 @@ typedef TypeAheadListProps<ItemData, Action> = {
 	label:String,
 	input:String,
 	items:Array<ItemData>,
-	renderItemLabel:ItemData->String,
+	renderItemLabel:ItemData->Html<Action>,
 	onInput:String->Void,
 	onClickExistingItem:ItemData->Action,
 	onNewItem:String->Action,
