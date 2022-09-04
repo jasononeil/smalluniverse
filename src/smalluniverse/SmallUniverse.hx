@@ -1,9 +1,9 @@
 package smalluniverse;
 
-import smalluniverse.util.LogUtils.getClassName;
 import js.html.Event;
 
 using tink.CoreApi;
+using StringTools;
 
 /**
 	Routes and Pages
@@ -315,35 +315,75 @@ interface EventSourceWtihProjection<Event> extends EventSource<Event> extends In
 
 	It is then used to add the Event to the EventSource.
 **/
-abstract Command<Event>(
-	// TODO: Perhaps instead of an Option, this should be an Array
-	// Empty array would still signify no command
-	// But it would also allow us to have a page action specify _multiple_ commands
-	// This would be nice for things like writing to TodoListEventSourceV1 and TodoListEventSourceV2 simultaneously during a handover.
-	// It would raise gnarly questions about what to do if one event source accepts it, and one rejects it though.
-	Option<{eventSourceClass:Class<EventSource<Event>>, event:Event}>
-) from Option<{eventSourceClass:Class<EventSource<Event>>, event:Event}> {
+@:forward
+abstract Command<Event>(CommandData<Event>) from CommandData<Event> {
 	public function new(
 		eventSourceClass:Class<EventSource<Event>>,
 		event:Event
 	) {
-		this = Some({eventSourceClass: eventSourceClass, event: event});
+		this = {
+			eventsToAttempt: [{
+				eventSourceClass: eventSourceClass,
+				event: event
+			}],
+			postCommand: UpdatePageOnClient,
+		};
+	}
+
+	/**
+		If the command is successful, redirect the client to a new page rather than reload the data on the current page.
+
+		If this command was not triggered by a client side browser, then this will have no effect.
+
+		This method returns the same Command object, to allow method chaining.
+	**/
+	public function redirectIfSuccessful(url:String):Command<Event> {
+		this.postCommand = RedirectClientTo(url);
+		return this;
 	}
 
 	/** Return a log-friendly string representing the command. **/
 	public function toString():String {
-		switch this {
-			case Some(value):
-				final eventSourceName = Type.getClassName(
-					value.eventSourceClass
-				);
-				return 'On ${eventSourceName} attempt ${value.event}';
-			case None:
-				return "DoNothing";
-		}
+		final attemptedEvents = [for (attempt in this.eventsToAttempt) {
+			final eventSourceName = Type.getClassName(attempt.eventSourceClass);
+			'On ${eventSourceName} attempt ${attempt.event}.';
+		}];
+		return
+			'${attemptedEvents.join(" ")} If successful then ${this.postCommand}'.trim();
 	}
 
-	public static var DoNothing:Command<Any> = None;
+	/** Do nothing - don't attempt any events in our event stores. **/
+	public static function doNothing<Event>():Command<Event> {
+		return {
+			eventsToAttempt: [],
+			postCommand: UpdatePageOnClient,
+		};
+	}
+
+	/**
+		Attempt multiple events in our event stores.
+		Note that these aren't guaranteed to run as a transaction - it is possible some may succeed and some may fail.
+	**/
+	public static function doMultiple(
+		eventsToAttempt:Array<{eventSourceClass:Class<EventSource<Event>>, event:Event}>
+	):Command<Event> {
+		return {
+			eventsToAttempt: eventsToAttempt,
+			postCommand: UpdatePageOnClient
+		}
+	}
+}
+
+/** The internal data structure for a Command. **/
+private typedef CommandData<Event> = {
+	eventsToAttempt:Array<{eventSourceClass:Class<EventSource<Event>>, event:Event}>,
+	postCommand:PostCommandTrigger
+}
+
+/** What effect to trigger on a client browser if this command is successful. **/
+private enum PostCommandTrigger {
+	UpdatePageOnClient;
+	RedirectClientTo(url:String);
 }
 
 /**

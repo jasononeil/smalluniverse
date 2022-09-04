@@ -71,66 +71,62 @@ class SynchronousOrchestrator implements Orchestrator {
 	}
 
 	public function handleCommand(command:Command<Any>):Promise<Noise> {
-		switch command {
-			case Some({eventSourceClass: eventSourceClass, event: event}):
-				final subscription = getSubscriptionsToEventSource(
-					eventSourceClass
+		final handleEventPromises = command.eventsToAttempt.map(attempt -> {
+			final eventSourceClass = attempt.eventSourceClass;
+			final event = attempt.event;
+			final subscription = getSubscriptionsToEventSource(
+				eventSourceClass
+			);
+			if (subscription == null) {
+				// It would be nice to make this state impossible, but it's hard to imagine a clean API for doing so.
+				// One option could be to do a macro-powered compile time check that all calls to `new Command()` are for Event Sources we have registered.
+				throw new Error(
+					501,
+					'A command was called for EventSource "${Type.getClassName(eventSourceClass)}" but no EventSource of this type was registered'
 				);
-				if (subscription == null) {
-					// It would be nice to make this state impossible, but it's hard to imagine a clean API for doing so.
-					// One option could be to do a macro-powered compile time check that all calls to `new Command()` are for Event Sources we have registered.
-					throw new Error(
-						501,
-						'A command was called for EventSource "${Type.getClassName(eventSourceClass)}" but no EventSource of this type was registered'
-					);
-				}
-				final eventSource = subscription.source;
+			}
+			final eventSource = subscription.source;
 
-				// Attempt the event on the eventSource and wait for it to either accept or reject.
-				final eventSourceResult = eventSource.handleCommand(event);
+			// Attempt the event on the eventSource and wait for it to either accept or reject.
+			final eventSourceResult = eventSource.handleCommand(event);
 
-				// Here is the naive implementation for this "synchronous" orchestrator.
-				// If the eventSource was updated successfully, update all subscribed projections
-				// One limitation here that may lead to bugs: new events will be processed even if a backlog is still underway, leading to events being processed out of order.
+			// Here is the naive implementation for this "synchronous" orchestrator.
+			// If the eventSource was updated successfully, update all subscribed projections that are up-to-date, and ignore any that are already behind.
 
-				final projections = subscription.projections;
-				final projectionsResult = eventSourceResult.next((eventId) -> {
-					// Trigger all projections in parallel, wait for all to complete, and log (then ignore) failures.
-					// TODO: It my also be desirable for some projections to explicitly label themselves as async (and we never wait for them)
-					return Future
-							.inParallel(
-							// TODO: we should check the projection is up-to-date before we start here to avoid out-of-order events.
-							// If it's not, we can just ignore it and leave it for the next processBacklog()
-							// ...or we can implement a queue system for a small number of events.
-							projections.map(
-								projection -> isProjectionUpToDate(
-									eventSource,
-									projection
-								).next(upToDate -> switch upToDate {
-									case true:
-										return updateSubscription(
-											projection,
-											event
-										).recover(err -> {
-											trace(
-												'Error updating projection ${getClassName(projection)}',
-												err.toString()
-											);
-											return Noise;
-										});
-									case false:
-										// The projection isn't up-to-date, so lets not add this event, or things will arrive out of order.
-										// This projection will now be behind the EventSource until the next time `processBacklog()` is called.
+			final projections = subscription.projections;
+			final projectionsResult = eventSourceResult.next((eventId) -> {
+				// Trigger all projections in parallel, wait for all to complete, and log (then ignore) failures.
+				// TODO: It my also be desirable for some projections to explicitly label themselves as async (and we never wait for them)
+				return Promise
+						.inParallel(
+						projections.map(
+							projection -> isProjectionUpToDate(
+								eventSource,
+								projection
+							).next(upToDate -> switch upToDate {
+								case true:
+									return updateSubscription(
+										projection,
+										event
+									).recover(err -> {
+										trace(
+											'Error updating projection ${getClassName(projection)}',
+											err.toString()
+										);
 										return Noise;
-								})
-							)
+									});
+								case false:
+									// The projection isn't up-to-date, so lets not add this event, or things will arrive out of order.
+									// This projection will now be behind the EventSource until the next time `processBacklog()` is called.
+									return Noise;
+							})
 						)
-							.noise();
-				});
-				return projectionsResult;
-			case None:
-				return Promise.resolve(Noise);
-		}
+					)
+						.noise();
+			});
+			return projectionsResult.eager();
+		});
+		return Promise.inParallel(handleEventPromises).noise();
 	}
 
 	public function teardown() {}
