@@ -21,10 +21,11 @@ function TypeAheadList<
 	return ListView([div([on("input", (e) -> {
 		props.onInput(untyped e.target.value);
 		return None;
-	})], ListItemInput(props.label, "", itemName -> {
-		trace(itemName, props.onNewItem(itemName));
-		Some(props.onNewItem(itemName));
-	}))].concat(TypeAheadListItems(props)));
+	})], ListItemInput(
+		props.label,
+		"",
+		itemName -> Some(props.onNewItem(itemName))
+	))].concat(TypeAheadListItems(props)));
 }
 
 function TypeAheadListItems<
