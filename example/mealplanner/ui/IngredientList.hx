@@ -82,6 +82,7 @@ function ShoppingList<Action>(name:String, ingredients:Array<{
 		], info) : "";
 		final itemLabel = label([className("IngredientList__Label")], [
 			checkbox([
+				Key('checkbox__${name}__${i.ingredient}'),
 				on("change", (e) -> {
 					final inputElement:Null<InputElement> = Std.downcast(
 						e.currentTarget,

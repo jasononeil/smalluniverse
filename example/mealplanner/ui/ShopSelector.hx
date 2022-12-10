@@ -98,6 +98,7 @@ function renderShopList<Action>(
 	// TODO: use form onSubmit instead of select onChange
 	return form([className("ShopSelector__form")], [itemName, select([
 		name("shopName"),
+		Key('ShopSelect__${itemName}'),
 		on("change", (event) -> {
 			final select = cast(event.target, SelectElement);
 			return Some(actionForShop(select.value));
