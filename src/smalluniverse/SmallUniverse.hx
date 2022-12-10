@@ -525,8 +525,11 @@ enum HtmlAttribute<Action> {
 	- I've chosen not to supply the VDOM nodes (`Html<T>`) in the callbacks, because it it problematic for our `mapHtml()` and `mapAttr()` attributes, and I'm not sure if it's that useful.
 **/
 enum HookType<Action> {
-	/** When a new node is about to be created. **/
-	Init(callback:InitHookArgs<Action>->Void);
+	/**
+		When a new node is about to be created.
+		The callback returns an optional cleanup function that is called during Destroy.
+	**/
+	Init(callback:InitHookArgs<Action>->Option<Void->Void>);
 
 	/** When a new node has been inserted into the DOM (or hydrated after server-side-rendering). **/
 	Insert(callback:InsertHookArgs<Action>->Void);
@@ -539,7 +542,7 @@ enum HookType<Action> {
 	Remove(callback:RemoveHookArgs<Action>->Void);
 
 	/**
-		When a node is removed, even indirectly (meaning a parent node was removed, so this is too).
+		When a node is removed, even indirectly (this includes if a parent node was removed, causing this node to be removed too).
 	**/
 	Destroy(callback:DestroyHookArgs<Action>->Void);
 }

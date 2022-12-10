@@ -183,22 +183,28 @@ function setupHooks<Action>(
 		}
 	}
 
-	function combineHooks<T>(hooks:Array<Any>, runAllHooksFn:T):T {
-		if (hooks.length == 0) {
+	function combineHooks<T>(numHooks:Int, runAllHooksFn:T):T {
+		if (numHooks == 0) {
 			return js.Lib.undefined;
 		}
 		return runAllHooksFn;
 	}
 
 	return {
-		init: combineHooks(initHooks, (vNode:VNode) -> {
+		init: combineHooks(initHooks.length, (vNode:VNode) -> {
+			final privateState = getOrSetupPrivateSmallUniverseState(vNode);
 			for (initHook in initHooks) {
-				initHook({
+				final cleanupOption = initHook({
 					triggerAction: triggerAction
 				});
+				switch cleanupOption {
+					case Some(cleanupFn):
+						privateState.initCleanupCallbacks.push(cleanupFn);
+					case None:
+				}
 			}
 		}),
-		insert: combineHooks(insertHooks, (vNode:VNode) -> {
+		insert: combineHooks(insertHooks.length, (vNode:VNode) -> {
 			for (insertHook in insertHooks) {
 				insertHook({
 					domElement: getDomElement(vNode),
@@ -206,8 +212,13 @@ function setupHooks<Action>(
 				});
 			}
 		}),
+		update: (oldNode:VNode, newNode:VNode) -> {
+			// Persist private state between renders.
+			// Idea taken from https://github.com/alfonsogarciacaro/Feliz.Snabbdom/blob/7b28ccbceebcc9b66a8cb67aab89b7ae9576dbfb/src/Feliz.Snabbdom/Feliz.Snabbdom.fs#L141-L157
+			copyPrivateSmallUniverseStateDuringPatch(oldNode, newNode);
+		},
 		remove: combineHooks(
-			removeHooks,
+			removeHooks.length,
 			(vNode:VNode, removeCallback:() -> Void) -> {
 				var hooksCompleted = 0;
 				function checkIfAllComplete() {
@@ -228,14 +239,21 @@ function setupHooks<Action>(
 				}
 			}
 		),
-		destroy: combineHooks(destroyHooks, (vNode:VNode) -> {
-			for (destroyHook in destroyHooks) {
-				destroyHook({
-					domElement: getDomElement(vNode),
-					triggerAction: triggerAction
-				});
+		destroy: combineHooks(
+			destroyHooks.length + initHooks.length,
+			(vNode:VNode) -> {
+				final privateState = getOrSetupPrivateSmallUniverseState(vNode);
+				for (initHookCleanup in privateState.initCleanupCallbacks) {
+					initHookCleanup();
+				}
+				for (destroyHook in destroyHooks) {
+					destroyHook({
+						domElement: getDomElement(vNode),
+						triggerAction: triggerAction
+					});
+				}
 			}
-		}),
+		),
 	}
 }
 
@@ -249,4 +267,56 @@ private function getDomElement(vNode:VNode):Element {
 		throw 'Expected vNode to have `.elm` property containing DOM Element, but was a different kind of node: ${node.nodeType}';
 	}
 	return elm;
+}
+
+/**
+	For internal SmallUniverse use: private state that is attached to specific nodes.
+	To have any data or state related to a specific VNode persist between renders, we need to attach it to the `vNode.data` object.
+	This type describes the types of state we allow to persist.
+	We don't expose `vNode.data` (or even `vNode`) in our SmallUniverse APIs.
+**/
+private typedef PrivateSmallUniverseNodeState<Action> = {
+	/** An array of cleanup callbacks resulting from `Init` hooks **/
+	initCleanupCallbacks:Array<Void->Void>
+}
+
+/**
+	Get a `vNode.data.__SmallUniverse` (or set one up if none exists).
+**/
+private function getOrSetupPrivateSmallUniverseState<Action>(vNode:VNode) {
+	if (vNode.data == null) {
+		vNode.data = {};
+	}
+
+	var state:PrivateSmallUniverseNodeState<Action>;
+	if (vNode.data.__SmallUniverse == null) {
+		state = {
+			initCleanupCallbacks: []
+		}
+		vNode.data.__SmallUniverse = state;
+	} else {
+		state = vNode.data.__SmallUniverse;
+	}
+
+	return state;
+}
+
+/**
+	Copy `vNode.data.__SmallUniverse` state from the old vNode to the new vNode to allow it to persist between renders.
+**/
+private function copyPrivateSmallUniverseStateDuringPatch(
+	oldNode:VNode,
+	newNode:VNode
+) {
+	var oldNodeData = oldNode.data;
+	var newNodeData = newNode.data;
+	if (oldNodeData != null) {
+		if (newNodeData != null) {
+			newNodeData.__SmallUniverse = oldNodeData.__SmallUniverse;
+		} else {
+			newNode.data = {
+				__SmallUniverse: oldNodeData.__SmallUniverse
+			};
+		}
+	}
 }

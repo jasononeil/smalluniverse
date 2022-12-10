@@ -49,11 +49,13 @@ class ShoppingPage implements Page<
 
 	public function render(data:ShoppingData) {
 		return Layout(SiteHeader('Shopping List'), renderLists(data), [
-			onInitAndDestroy(initArgs -> {
+			onInit(initArgs -> {
 				final interval = js.Browser.window.setInterval(() -> {
 					initArgs.triggerAction(RefreshList);
 				}, 3000);
-				return destroyArgs -> js.Browser.window.clearInterval(interval);
+				return Some(() -> {
+					js.Browser.window.clearInterval(interval);
+				});
 			}),
 			Key("shopping-list-page")
 		]);

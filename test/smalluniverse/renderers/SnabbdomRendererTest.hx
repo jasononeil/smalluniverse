@@ -183,28 +183,30 @@ class SnabbdomRendererTest {
 		final removeTrigger = Future.trigger();
 
 		function createSpan(name:String) {
-			return element("span", [
-				Hook(Init(args -> hookCalls.push('$name init'))),
-				Hook(Insert(args -> hookCalls.push('$name insert'))),
-				Hook(Remove(args -> {
-					args.removeCallback();
-					hookCalls.push('$name remove');
-				})),
-				Hook(Destroy(args -> hookCalls.push('$name destroy'))),
-			], name);
+			return element("span", [Hook(Init(args -> {
+				hookCalls.push('$name init');
+				return None;
+			})), Hook(
+				Insert(args -> hookCalls.push('$name insert'))
+			), Hook(Remove(args -> {
+				args.removeCallback();
+				hookCalls.push('$name remove');
+				})), Hook(
+				Destroy(args -> hookCalls.push('$name destroy'))
+				),], name);
 		}
 		function createDiv(children:Html<Any>) {
-			return element("div", [
-				Hook(Init(args -> hookCalls.push("div init"))),
-				Hook(Insert(args -> hookCalls.push("div insert"))),
-				Hook(Remove(args -> {
-					removeTrigger.asFuture().handle(_ -> args.removeCallback());
-					hookCalls.push("div remove");
-				})),
-				Hook(Destroy(args -> hookCalls.push("div destroy"))),
-			], [
+			return element("div", [Hook(Init(args -> {
+				hookCalls.push("div init");
+				return Some(() -> hookCalls.push("div init cleanup"));
+			})), Hook(
+				Insert(args -> hookCalls.push("div insert"))
+			), Hook(Remove(args -> {
+				removeTrigger.asFuture().handle(_ -> args.removeCallback());
+				hookCalls.push("div remove");
+				})), Hook(Destroy(args -> hookCalls.push("div destroy"))),], [
 				children
-			]);
+				]);
 		}
 
 		render(createDiv([createSpan("span1"), createSpan("span2")]));
@@ -227,12 +229,14 @@ class SnabbdomRendererTest {
 
 		render(element("span", [], "replacement"));
 
-		asserts.assert(hookCalls.length == 11);
+		asserts.assert(hookCalls.length == 12);
 
 		// the destroy and remove hooks are called
-		asserts.assert(hookCalls[8] == "div destroy");
-		asserts.assert(hookCalls[9] == "span1 destroy");
-		asserts.assert(hookCalls[10] == "div remove");
+		asserts.assert(hookCalls[8] == "div init cleanup");
+		asserts.assert(hookCalls[9] == "div destroy");
+		asserts.assert(hookCalls[10] == "span1 destroy");
+		asserts.assert(hookCalls[11] == "div remove");
+
 		// and both the new element and old element are visible
 		asserts.assert(queryAllByText(container, "span1").length == 1);
 		asserts.assert(queryAllByText(container, "span2").length == 0);

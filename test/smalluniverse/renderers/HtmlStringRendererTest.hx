@@ -76,7 +76,7 @@ class HtmlStringRendererTest {
 
 	public function testHooksDoNotRender()
 		return assert(stringifyHtml(element("p", [
-			Hook(Init(_ -> {}))
+			Hook(Init(_ -> None))
 		], [])) == "<p></p>");
 
 	public function testKeyDoesNotRender()
@@ -100,7 +100,7 @@ class HtmlStringRendererTest {
 			]),
 			Property("className", "primary-2"),
 			Event("click", (e) -> None),
-			Hook(Init(_ -> {})),
+			Hook(Init(_ -> None)),
 			Key("my-key")
 		], [])) == '<button class="primary" active id="cta" data-testId="my-cta"></button>');
 
