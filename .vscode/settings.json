@@ -11,6 +11,7 @@
       "args": ["--cwd", "example", "example_client.hxml"]
     }
   ],
+  "editor.inlayHints.enabled": "offUnlessPressed",
   "editor.useTabStops": true,
   "[haxe]": {
     "editor.defaultFormatter": "nadako.vshaxe"
