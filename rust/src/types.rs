@@ -17,6 +17,7 @@ pub enum Error {
     UuidError(uuid::Error, String),
     JsonSerialiseError(serde_json::Error, String),
     MissingTabError(String),
+    SqliteError(rusqlite::Error, String),
 }
 
 impl Display for Error {
@@ -26,6 +27,7 @@ impl Display for Error {
             Self::JsonSerialiseError(inner, msg) => write!(f, "{msg}. ({inner})"),
             Self::UuidError(inner, msg) => write!(f, "{msg}. ({inner})"),
             Self::MissingTabError(msg) => write!(f, "{msg}"),
+            Self::SqliteError(inner, msg) => write!(f, "{msg}. ({inner})"),
         }
     }
 }

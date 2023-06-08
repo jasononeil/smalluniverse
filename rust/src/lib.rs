@@ -2,6 +2,7 @@ pub mod event_store;
 pub mod meal_planner;
 pub mod types;
 
+pub use event_store::sqlite_event_store;
 pub use event_store::tsv_event_store;
 pub use event_store::EventStore;
 pub use meal_planner::meals_event::MealsEvent;

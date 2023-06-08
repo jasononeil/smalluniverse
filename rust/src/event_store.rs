@@ -1,5 +1,6 @@
 use super::types::{Error, EventId, KnownEvent};
 
+pub mod sqlite_event_store;
 pub mod tsv_event_store;
 
 /// An EventStore is for storing a stream of Events and recalling them in batches.
