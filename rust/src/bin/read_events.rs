@@ -1,34 +1,7 @@
-use serde::{Deserialize, Serialize};
+use smalluniverse::meal_planner::meals_event::MealsEvent;
+use smalluniverse::tsv_event_store::TSVEventStore;
 use smalluniverse::types::KnownEvent;
-use smalluniverse::{tsv_event_store::TSVEventStore, EventStore};
-
-#[derive(Debug, Serialize, Deserialize)]
-#[allow(non_snake_case)]
-enum MealsEvent {
-    NewMeal {
-        name: String,
-    },
-    RenameMeal {
-        oldId: String,
-        newName: String,
-    },
-    DeleteMeal {
-        mealId: String,
-    },
-    AddIngredient {
-        meal: String,
-        ingredient: String,
-    },
-    RenameIngredient {
-        meal: String,
-        oldIngredient: String,
-        newIngredient: String,
-    },
-    DeleteIngredient {
-        meal: String,
-        ingredient: String,
-    },
-}
+use smalluniverse::EventStore;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let tsv_event_store = TSVEventStore::<MealsEvent>::new(
