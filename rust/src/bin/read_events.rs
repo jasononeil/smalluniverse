@@ -3,6 +3,8 @@ use smalluniverse::tsv_event_store::TSVEventStore;
 use smalluniverse::types::KnownEvent;
 use smalluniverse::EventStore;
 
+/// Attempt to read all events from an EventStore.
+/// Counts the number of events read successfully and those which had errors
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let tsv_event_store = TSVEventStore::<MealsEvent>::new(
         "../example/app-content/prod/event-stores/events-meals.tsv",
@@ -31,7 +33,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         "Complete. {} errors. Read {} events. Last event {}",
         error_count,
         events_read_successfully,
-        last_event.is_some()
+        last_event
+            .map(|x| format!("{:?}", x))
+            .unwrap_or(String::from("No event"))
     );
 
     Ok(())
