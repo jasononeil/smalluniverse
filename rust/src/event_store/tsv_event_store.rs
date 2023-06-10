@@ -42,7 +42,7 @@ impl<Event> EventStore<Event> for TSVEventStore<Event>
 where
     Event: Serialize + DeserializeOwned + Debug,
 {
-    fn publish(&self, event: Event) -> Result<EventId, Error> {
+    fn publish(&self, uuid: Uuid, event: Event) -> Result<EventId, Error> {
         let already_exists = Path::new(&self.file).exists();
 
         let mut file = fs::File::options()
@@ -69,7 +69,6 @@ where
             }
         }
 
-        let uuid = Uuid::new_v4();
         let json = serde_json::to_string(&event).map_err(|err| {
             Error::JsonSerialiseError(err, "Failed to serialize JSON".to_string())
         })?;
@@ -235,7 +234,7 @@ mod tests {
     #[test]
     fn publish_file_directory_does_not_exist() {
         let tsv_store = TSVEventStore::<TestEvent>::new("/path/that/does/not/exist");
-        let result = tsv_store.publish(TestEvent::EmptyEvent);
+        let result = tsv_store.publish(Uuid::new_v4(), TestEvent::EmptyEvent);
 
         assert!(result.is_err());
     }
@@ -250,7 +249,9 @@ mod tests {
         let temp_file = format!("{temp_dir}/file.tsv");
         let tsv_store = TSVEventStore::<TestEvent>::new(&temp_file);
 
-        let event_id = tsv_store.publish(TestEvent::EmptyEvent)?;
+        let event_id = Uuid::new_v4();
+
+        tsv_store.publish(event_id, TestEvent::EmptyEvent)?;
 
         let content = std::fs::read_to_string(&temp_file)?;
 
@@ -264,7 +265,8 @@ mod tests {
         let tsv_content = String::from("0000\t\"EmptyEvent\"\n");
         let (tmp_file, tsv_store) = setup_test_tsv(tsv_content)?;
 
-        let event_id = tsv_store.publish(TestEvent::EmptyEvent)?;
+        let event_id = Uuid::new_v4();
+        tsv_store.publish(event_id, TestEvent::EmptyEvent)?;
 
         let content = std::fs::read_to_string(&tmp_file.path())?;
 
@@ -281,7 +283,8 @@ mod tests {
         let tsv_content = String::from("0000\t\"EmptyEvent\"");
         let (tmp_file, tsv_store) = setup_test_tsv(tsv_content)?;
 
-        let event_id = tsv_store.publish(TestEvent::EmptyEvent)?;
+        let event_id = Uuid::new_v4();
+        tsv_store.publish(event_id, TestEvent::EmptyEvent)?;
 
         let content = std::fs::read_to_string(&tmp_file.path())?;
 

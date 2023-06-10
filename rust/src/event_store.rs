@@ -1,3 +1,5 @@
+use uuid::Uuid;
+
 use super::types::{Error, EventId, KnownEvent};
 
 pub mod sqlite_event_store;
@@ -9,7 +11,7 @@ pub mod tsv_event_store;
 pub trait EventStore<Event> {
     /// Publish the event to this EventStore.
     // It might be nice to track the event origin (eg Page(page,params,action) or Cli(command) or something...).
-    fn publish(&self, event: Event) -> Result<EventId, Error>;
+    fn publish(&self, event_id: Uuid, event: Event) -> Result<EventId, Error>;
 
     /// Get the ID of the latest event, or "None" if there is no events.
     fn get_latest_event(&self) -> Result<Option<EventId>, Error>;

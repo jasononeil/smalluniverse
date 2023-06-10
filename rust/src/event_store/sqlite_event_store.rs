@@ -64,8 +64,7 @@ impl<Event> EventStore<Event> for SqliteEventStore<Event>
 where
     Event: Serialize + DeserializeOwned + Debug,
 {
-    fn publish(&self, event: Event) -> Result<EventId, Error> {
-        let uuid = Uuid::new_v4();
+    fn publish(&self, uuid: Uuid, event: Event) -> Result<EventId, Error> {
         let json = serde_json::to_string(&event).map_err(|err| {
             Error::JsonSerialiseError(
                 err,
