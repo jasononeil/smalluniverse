@@ -4,6 +4,7 @@ use rusqlite::{params, Connection, Error as SqliteError, OptionalExtension};
 use serde::{de::DeserializeOwned, Serialize};
 use std::fmt::Debug;
 use std::marker::PhantomData;
+use std::str::FromStr;
 use uuid::Uuid;
 
 /// Events will be stored in a Sqlite database found at `file`, in a table named `table`.
@@ -74,7 +75,7 @@ where
         self.get_conn()
             .and_then(|conn| {
                 conn.execute(
-                    &format!("INSERT INTO {} (id, event) VALUES (?, ?)", &self.table),
+                    &format!("INSERT INTO {} (uuid, payload) VALUES (?, ?)", &self.table),
                     params![uuid.to_string(), json],
                 )
             })
@@ -98,10 +99,20 @@ where
                     "SELECT uuid FROM {} ORDER BY id DESC LIMIT 1",
                     &self.table
                 ))?
-                .query_row([], |row| row.get::<_, Uuid>("uuid"))
+                .query_row([], |row| row.get::<_, String>("uuid"))
                 .optional()
             })
             .map_err(from_sqlite_error)
+            .and_then(|option| match option {
+                Some(str) => match Uuid::from_str(&str) {
+                    Ok(uuid) => Ok(Some(uuid)),
+                    Err(err) => Err(Error::UuidError(
+                        err,
+                        String::from("Failed to parse UUID in get_latest_event"),
+                    )),
+                },
+                None => Ok(None),
+            })
     }
 
     fn read_events<'a>(
@@ -137,10 +148,10 @@ where
 
         let statement = match starting_from {
             Some(_uuid) => conn.prepare(&format!(
-                "SELECT id, uuid, event FROM {} WHERE id >= ? ORDER BY id",
+                "SELECT id, uuid, payload FROM {} WHERE id >= ? ORDER BY id",
                 &self.table
             )),
-            None => conn.prepare(&format!("SELECT id, uuid, event FROM {}", &self.table)),
+            None => conn.prepare(&format!("SELECT id, uuid, payload FROM {}", &self.table)),
         };
 
         let mut statement = match statement {
