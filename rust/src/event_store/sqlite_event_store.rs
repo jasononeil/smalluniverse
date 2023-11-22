@@ -4,7 +4,6 @@ use rusqlite::{params, Connection, Error as SqliteError, OptionalExtension};
 use serde::{de::DeserializeOwned, Serialize};
 use std::fmt::Debug;
 use std::marker::PhantomData;
-use std::str::FromStr;
 use uuid::Uuid;
 
 /// Events will be stored in a Sqlite database found at `file`, in a table named `table`.
@@ -41,8 +40,8 @@ impl<Event> SqliteEventStore<Event> {
         let conn = &self.get_conn()?;
         let create_table_query = format!(
             "CREATE TABLE IF NOT EXISTS {} (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          uuid TEXT UNIQUE NOT NULL,
+          id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+          uuid BLOB CHECK(length(uuid) = 16) UNIQUE NOT NULL,
           payload TEXT NOT NULL
       )",
             &self.table
@@ -76,7 +75,7 @@ where
             .and_then(|conn| {
                 conn.execute(
                     &format!("INSERT INTO {} (uuid, payload) VALUES (?, ?)", &self.table),
-                    params![uuid.to_string(), json],
+                    params![uuid, json],
                 )
             })
             .map_err(|err| {
@@ -99,20 +98,10 @@ where
                     "SELECT uuid FROM {} ORDER BY id DESC LIMIT 1",
                     &self.table
                 ))?
-                .query_row([], |row| row.get::<_, String>("uuid"))
+                .query_row([], |row| row.get::<_, Uuid>("uuid"))
                 .optional()
             })
             .map_err(from_sqlite_error)
-            .and_then(|option| match option {
-                Some(str) => match Uuid::from_str(&str) {
-                    Ok(uuid) => Ok(Some(uuid)),
-                    Err(err) => Err(Error::UuidError(
-                        err,
-                        String::from("Failed to parse UUID in get_latest_event"),
-                    )),
-                },
-                None => Ok(None),
-            })
     }
 
     fn read_events<'a>(
