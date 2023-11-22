@@ -198,3 +198,203 @@ where
         Box::new(events.into_iter())
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use rusqlite::Connection;
+    use serde::{Deserialize, Serialize};
+    use tempfile::tempdir;
+    use uuid::Uuid;
+
+    #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
+    struct TestEvent {
+        data: String,
+    }
+
+    #[test]
+    fn test_publish_and_read_events() {
+        let dir = tempdir().unwrap();
+        let file_path = dir.path().join("test.db");
+        let file = file_path.to_str().unwrap();
+        let table = "events";
+        let store = SqliteEventStore::<TestEvent>::new(file, table).unwrap();
+
+        let uuid = Uuid::new_v4();
+        let event = TestEvent {
+            data: "test".to_string(),
+        };
+
+        // Test publish method
+        store.publish(uuid, event.clone()).unwrap();
+
+        // Test read_events method
+        let events = store
+            .read_events(None)
+            .collect::<Result<Vec<_>, _>>()
+            .unwrap();
+        assert_eq!(events.len(), 1);
+        assert_eq!(events[0].uuid, uuid);
+        assert_eq!(events[0].payload, event);
+    }
+
+    // TEST read_events from certain offset
+
+    #[test]
+    fn test_get_latest_event() {
+        let dir = tempdir().unwrap();
+        let file_path = dir.path().join("test.db");
+        let file = file_path.to_str().unwrap();
+        let table = "events";
+        let store = SqliteEventStore::<TestEvent>::new(file, table).unwrap();
+
+        let uuid1 = Uuid::new_v4();
+        let event1 = TestEvent {
+            data: "test1".to_string(),
+        };
+        store.publish(uuid1, event1).unwrap();
+
+        let uuid2 = Uuid::new_v4();
+        let event2 = TestEvent {
+            data: "test2".to_string(),
+        };
+        store.publish(uuid2, event2).unwrap();
+
+        // Test get_latest_event method
+        let latest_uuid = store
+            .get_latest_event()
+            .expect("get_latest_event_worked")
+            .expect("event existed");
+        assert_eq!(latest_uuid, uuid2);
+    }
+
+    #[test]
+    fn test_get_latest_event_none() {
+        let dir = tempdir().unwrap();
+        let file_path = dir.path().join("test.db");
+        let file = file_path.to_str().unwrap();
+        let table = "events";
+        let store = SqliteEventStore::<TestEvent>::new(file, table).unwrap();
+        let latest_uuid = store.get_latest_event().expect("get_latest_event worked");
+        assert!(
+            latest_uuid.is_none(),
+            "It should return None because no events exist yet"
+        )
+    }
+
+    struct ColumnInfo {
+        name: String,
+        sql_type: String,
+        not_null: bool,
+        in_primary_key: bool,
+    }
+
+    #[test]
+    fn test_table_creation() {
+        let dir = tempdir().unwrap();
+        let file_path = dir.path().join("test.db");
+        let file = file_path.to_str().unwrap();
+        let table = "events";
+
+        // Test new method
+        let _ = SqliteEventStore::<TestEvent>::new(file, table).unwrap();
+
+        let conn = Connection::open(file).unwrap();
+        let mut statement = conn
+            .prepare(format!("PRAGMA table_info({})", table).as_str())
+            .unwrap();
+        let mut rows = statement
+            .query_map((), |row| {
+                Ok(ColumnInfo {
+                    name: row.get("name").unwrap(),
+                    sql_type: row.get("type").unwrap(),
+                    not_null: row.get("notnull").unwrap(),
+                    in_primary_key: row.get("pk").unwrap(),
+                })
+            })
+            .unwrap();
+
+        let first_column = rows
+            .next()
+            .expect("The first column exists")
+            .expect("And it's valid");
+
+        assert_eq!(first_column.name, "id", "First colum is called `id`");
+        assert_eq!(first_column.sql_type, "INTEGER", "First colum is TEXT");
+        assert_eq!(first_column.not_null, true, "First colum is not nullable");
+        assert_eq!(
+            first_column.in_primary_key, true,
+            "First colum is the primary key"
+        );
+
+        let second_column = rows
+            .next()
+            .expect("The first column exists")
+            .expect("And it's valid");
+
+        assert_eq!(second_column.name, "uuid", "Second colum is called `id`");
+        assert_eq!(second_column.sql_type, "BLOB", "Second colum is BLOB");
+        assert_eq!(second_column.not_null, true, "Second colum is not nullable");
+        assert_eq!(
+            second_column.in_primary_key, false,
+            "Second colum is not the primary key"
+        );
+
+        let third_column = rows
+            .next()
+            .expect("The first column exists")
+            .expect("And it's valid");
+
+        assert_eq!(third_column.name, "payload", "Third colum is called `id`");
+        assert_eq!(third_column.sql_type, "TEXT", "Third colum is TEXT");
+        assert_eq!(third_column.not_null, true, "Third colum is not nullable");
+        assert_eq!(
+            third_column.in_primary_key, false,
+            "Third colum is not the primary key"
+        );
+
+        assert!(
+            rows.next().is_none(),
+            "There shouldn't be more than three columns"
+        );
+
+        ()
+    }
+
+    #[test]
+    fn test_table_creation_doesnt_override() {
+        let dir = tempdir().unwrap();
+        let file_path = dir.path().join("test.db");
+        let file = file_path.to_str().unwrap();
+        let table = "events";
+        let test_uuid = Uuid::new_v4();
+
+        // Create one first
+        let first_event_store = SqliteEventStore::<TestEvent>::new(file, table).unwrap();
+        first_event_store
+            .publish(
+                test_uuid,
+                TestEvent {
+                    data: "Hello".to_string(),
+                },
+            )
+            .expect("Publish should work");
+
+        let uuid1 = first_event_store
+            .get_latest_event()
+            .expect("get_latest_worked()")
+            .expect("Event exists");
+        assert_eq!(uuid1, test_uuid, "The first event store has the right UUID");
+
+        // When we start a second event store, it shouldn't overwrite the first table
+        let second_event_store = SqliteEventStore::<TestEvent>::new(file, table).unwrap();
+        let uuid2 = second_event_store
+            .get_latest_event()
+            .expect("get_latest_worked()")
+            .expect("Event exists");
+        assert_eq!(
+            uuid2, test_uuid,
+            "The second event store also has the right UUID"
+        );
+    }
+}
