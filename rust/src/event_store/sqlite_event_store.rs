@@ -238,7 +238,43 @@ mod tests {
         assert_eq!(events[0].payload, event);
     }
 
-    // TEST read_events from certain offset
+    #[test]
+    fn test_read_events_from_specific_uuid() {
+        let dir = tempdir().unwrap();
+        let file_path = dir.path().join("test.db");
+        let file = file_path.to_str().unwrap();
+        let table = "events";
+        let store = SqliteEventStore::<TestEvent>::new(file, table).unwrap();
+
+        let uuid1 = Uuid::new_v4();
+        let event1 = TestEvent {
+            data: "test1".to_string(),
+        };
+        store.publish(uuid1, event1.clone()).unwrap();
+
+        let uuid2 = Uuid::new_v4();
+        let event2 = TestEvent {
+            data: "test2".to_string(),
+        };
+        store.publish(uuid2, event2.clone()).unwrap();
+
+        let uuid3 = Uuid::new_v4();
+        let event3 = TestEvent {
+            data: "test3".to_string(),
+        };
+        store.publish(uuid3, event3.clone()).unwrap();
+
+        // Test read_events method reading from specific UUID
+        let events = store
+            .read_events(Some(uuid2))
+            .collect::<Result<Vec<_>, _>>()
+            .unwrap();
+        assert_eq!(events.len(), 2);
+        assert_eq!(events[0].uuid, uuid2);
+        assert_eq!(events[0].payload, event2);
+        assert_eq!(events[1].uuid, uuid3);
+        assert_eq!(events[1].payload, event3);
+    }
 
     #[test]
     fn test_get_latest_event() {
