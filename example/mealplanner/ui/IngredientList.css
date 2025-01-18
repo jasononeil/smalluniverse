@@ -28,3 +28,20 @@
 .IngredientList__Checkbox.IngredientList__Checkbox {
   margin: var(--space-s);
 }
+
+.ShoppingLinks {
+    display: inline;
+    margin-left: var(--space-s);
+    ul {
+        list-style-type: none;
+        padding: 0;
+        display: inline-flex;
+        flex-direction: row;
+        gap: var(--space-s);
+    }
+    li {
+        display: inline;
+        font-weight: var(--type-light);
+        font-size: var(--type-small);
+    }
+}

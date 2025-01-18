@@ -31,7 +31,7 @@ class AppRoutes implements Router {
 	}
 
 	public function uriForShoppingPage(params:ShoppingParams):String {
-		return '/shopping';
+		return params.showShoppingLinks ? '/shopping/with-links' : '/shopping';
 	}
 
 	public function uriForShopSelectorPage(params:ShopSelectorParams):String {
@@ -54,8 +54,14 @@ class AppRoutes implements Router {
 				return Some(Page(new WeeklyPlanPage(), {}));
 			case ["shopping", "select-shop"]:
 				return Some(Page(new ShopSelectorPage(), {}));
+			case ["shopping", "with-links"]:
+				return Some(
+					Page(new ShoppingPage(), {showShoppingLinks: true})
+				);
 			case ["shopping"]:
-				return Some(Page(new ShoppingPage(), {}));
+				return Some(
+					Page(new ShoppingPage(), {showShoppingLinks: false})
+				);
 			case ["quick-add"]:
 				return Some(Page(new QuickAddPage(), {input: ""}));
 			case ["quick-add", input]:

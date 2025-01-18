@@ -280,6 +280,9 @@ inline function checked<Action>(value:Bool):HtmlAttribute<Action>
 inline function disabled<Action>(value:Bool):HtmlAttribute<Action>
 	return booleanAttribute("disabled", value);
 
+inline function target<Action>(value:String):HtmlAttribute<Action>
+	return attr("target", value);
+
 /**
 	Handle a form submit event.
 	This will preventDefault() on the submit() event, and call your `actionFromForm` to generate the action.

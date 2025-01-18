@@ -15,7 +15,9 @@ function SiteHeader<Action>(title:String):Html<Action> {
 			ul([], [
 				MenuItem("Meals", appRouter.uriForMealsListPage({})),
 				MenuItem("Weekly Plan", appRouter.uriForWeeklyPlanPage({})),
-				MenuItem("Shopping List", appRouter.uriForShoppingPage({})),
+				MenuItem("Shopping List", appRouter.uriForShoppingPage({
+					showShoppingLinks: false
+				})),
 				MenuItem("Quick Add", appRouter.uriForQuickAdd({
 					input: ""
 				})),

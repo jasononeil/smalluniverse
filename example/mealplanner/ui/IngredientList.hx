@@ -74,7 +74,7 @@ function ShoppingList<Action>(name:String, ingredients:Array<{
 	ticked:Bool,
 	info:String,
 	onTickedChange:Bool->Action,
-}>) {
+}>, showShoppingLinks:Bool) {
 	final rows = ingredients.map(i -> {
 		final info = i.info;
 		final infoSpan:Html<Action> = info != null ? span([
@@ -95,7 +95,8 @@ function ShoppingList<Action>(name:String, ingredients:Array<{
 				className("IngredientList__Checkbox"),
 			]),
 			i.ingredient,
-			infoSpan
+			infoSpan,
+			showShoppingLinks ? ShoppingLinks(i.ingredient) : []
 		]);
 		return ListItem(div([className("IngredientList__FlexRow")], itemLabel));
 	});
@@ -127,4 +128,26 @@ function GenericItemList<Action>(data:{
 			ListView(data.ingredients)
 		])
 	];
+}
+
+function ShoppingLinks(itemName: String) {
+	// Add links to woolworths and coles click and collect
+	return nav([
+		className("ShoppingLinks")
+	], [
+		ul([], [
+			li([], [
+				a([
+					href('https://www.woolworths.com.au/shop/search/products?searchTerm=${itemName}'),
+					target("woolworths")
+				], "Woolworths")
+			]),
+			li([], [
+				a([
+					href('https://www.coles.com.au/search/products?q=${itemName}'),
+					target("coles")
+				], "Coles")
+			])
+		])
+	]);
 }

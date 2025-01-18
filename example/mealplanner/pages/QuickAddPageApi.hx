@@ -12,8 +12,10 @@ using mealplanner.helpers.NullHelper;
 using StringTools;
 
 class QuickAddPageApi implements PageApi<
-	QuickAddAction,
-	QuickAddParams,
+	QuickAddAction
+	,
+	QuickAddParams
+	,
 	QuickAddData
 	> {
 	public var relatedPage = QuickAddPage;
@@ -69,7 +71,10 @@ class QuickAddPageApi implements PageApi<
 							default: [];
 						}
 					})
-				).redirectIfSuccessful(appRouter.uriForShoppingPage({}));
+				)
+						.redirectIfSuccessful(
+						appRouter.uriForShoppingPage({showShoppingLinks: false})
+					);
 		}
 	}
 }

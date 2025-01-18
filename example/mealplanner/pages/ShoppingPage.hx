@@ -13,7 +13,9 @@ import mealplanner.ui.Button;
 
 using tink.CoreApi;
 
-typedef ShoppingParams = {}
+typedef ShoppingParams = {
+	showShoppingLinks:Bool
+}
 
 enum ShoppingAction {
 	RefreshList;
@@ -27,6 +29,7 @@ typedef ShoppingData = {
 	numberOfItemsWithoutShop:Int,
 	numberOfItemsTotal:Int,
 	numberOfItemsUnticked:Int,
+	showShoppingLinks:Bool,
 };
 
 typedef IngredientToBuy = {
@@ -36,8 +39,10 @@ typedef IngredientToBuy = {
 }
 
 class ShoppingPage implements Page<
-	ShoppingAction,
-	ShoppingParams,
+	ShoppingAction
+	,
+	ShoppingParams
+	,
 	ShoppingData
 	> {
 	public var actionEncoder:IJsonEncoder<ShoppingAction> = new JsonEncoder<ShoppingAction>();
@@ -70,7 +75,7 @@ class ShoppingPage implements Page<
 				onTickedChange: ticked -> ticked ? TickItem(
 					i.ingredient
 				) : UntickItem(i.ingredient)
-			}))]
+			}), data.showShoppingLinks)]
 		)];
 		final shoppingListCount = Paragraph(
 			'${data.numberOfItemsUnticked} / ${data.numberOfItemsTotal} items remaining'
@@ -91,10 +96,14 @@ class ShoppingPage implements Page<
 			Link(appRouter.uriForShopSelectorPage({})),
 			'Select Shops for Items'
 		);
+		final showShoppingLinksBtn = Button(Link(appRouter.uriForShoppingPage({
+			showShoppingLinks: true
+		})), 'Click and collect');
 		return [
 			alertItemsWithNoShop,
 			clearBtn,
 			selectShopBtn,
+			showShoppingLinksBtn,
 			shoppingListCount,
 			shopLists
 		];
