@@ -1,6 +1,7 @@
 {
   "name": "smalluniverse",
   "version": "0.0.1",
+  "packageManager": "yarn@1.22.22",
   "description": "A web framework for small universal (client+server) apps",
   "main": "index.js",
   "repository": "https://github.com/jasononeil/smalluniverse",
