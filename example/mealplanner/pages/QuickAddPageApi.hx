@@ -12,10 +12,8 @@ using mealplanner.helpers.NullHelper;
 using StringTools;
 
 class QuickAddPageApi implements PageApi<
-	QuickAddAction
-	,
-	QuickAddParams
-	,
+	QuickAddAction,
+	QuickAddParams,
 	QuickAddData
 	> {
 	public var relatedPage = QuickAddPage;

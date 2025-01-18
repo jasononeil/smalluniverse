@@ -15,8 +15,7 @@ typedef TypeAheadListProps<ItemData, Action> = {
 }
 
 function TypeAheadList<
-	ItemData
-	,
+	ItemData,
 	Action
 	>(props:TypeAheadListProps<ItemData, Action>) {
 	return ListView([div([on("input", (e) -> {
@@ -30,8 +29,7 @@ function TypeAheadList<
 }
 
 function TypeAheadListItems<
-	ItemData
-	,
+	ItemData,
 	Action
 	>(props:TypeAheadListProps<ItemData, Action>) {
 	return props.items.map(

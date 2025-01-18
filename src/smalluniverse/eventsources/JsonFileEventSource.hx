@@ -7,8 +7,7 @@ using tink.CoreApi;
 using Lambda;
 
 class JsonFileEventSource<
-	Event
-	,
+	Event,
 	Model
 	> extends BasicEventSource<Event>
 		implements EventSourceWtihProjection<Event> {

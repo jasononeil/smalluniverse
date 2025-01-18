@@ -23,8 +23,7 @@ typedef PlanForDate = {
 }
 
 class WeeklyPlanEventSource extends JsonFileEventSource<
-	WeeklyPlanEvent
-	,
+	WeeklyPlanEvent,
 	WeeklyPlanModel
 	> {
 	public function new(

@@ -45,8 +45,7 @@ typedef ShoppingListForMeal = {
 }
 
 class ShoppingListEventSource extends JsonFileEventSource<
-	ShoppingListEvent
-	,
+	ShoppingListEvent,
 	ShoppingListModel
 	> {
 	public function new(

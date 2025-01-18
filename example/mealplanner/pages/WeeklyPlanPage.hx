@@ -34,10 +34,8 @@ typedef MealPlanForDate = {
 }
 
 class WeeklyPlanPage implements Page<
-	WeeklyPlanAction
-	,
-	WeeklyPlanParams
-	,
+	WeeklyPlanAction,
+	WeeklyPlanParams,
 	WeeklyPlanData
 	> {
 	public var actionEncoder:IJsonEncoder<WeeklyPlanAction> = new JsonEncoder<WeeklyPlanAction>();

@@ -8,10 +8,8 @@ using tink.CoreApi;
 using mealplanner.helpers.NullHelper;
 
 class ShoppingPageApi implements PageApi<
-	ShoppingAction
-	,
-	ShoppingParams
-	,
+	ShoppingAction,
+	ShoppingParams,
 	ShoppingData
 	> {
 	public var relatedPage = ShoppingPage;

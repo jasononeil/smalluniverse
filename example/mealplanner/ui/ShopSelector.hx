@@ -14,8 +14,7 @@ typedef ShopSelectorProps<Action> = {
 	shops:Array<String>,
 	itemsWithoutShop:Array<{itemName:String, meals:Array<{name:String, id:String}>}>,
 	itemsWithShop:Map<
-		String
-		,
+		String,
 		Array<{itemName:String, meals:Array<{name:String, id:String}>}>
 		>,
 	onNewShop:String->Action,

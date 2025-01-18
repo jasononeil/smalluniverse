@@ -414,10 +414,8 @@ interface Orchestrator {
 		Get the PageApi for the current page.
 	**/
 	public function apiForPage<
-		Action
-		,
-		Params
-		,
+		Action,
+		Params,
 		Data
 		>(page:Page<Action, Params, Data>):PageApi<Action, Params, Data>;
 
@@ -630,8 +628,7 @@ abstract Html<Action>(
 // }
 
 function mapHtml<
-	InnerAction
-	,
+	InnerAction,
 	OuterAction
 	>(
 		html:Html<InnerAction>,
@@ -654,8 +651,7 @@ function mapHtml<
 }
 
 function mapAttr<
-	InnerAction
-	,
+	InnerAction,
 	OuterAction
 	>(
 		attr:HtmlAttribute<InnerAction>,

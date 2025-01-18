@@ -1,0 +1,19 @@
+{
+  "lsp": {
+    "haxe-language-server": {
+      "initialization_options": {
+        "displayArguments": ["--cwd", "example", "example_client.hxml"],
+        "displayServerConfig": {
+          "path": "./node_modules/.bin/haxe"
+        }
+      },
+      "settings": {
+        "haxe": {
+          "buildCompletionCache": true,
+          "displayHost": "127.0.0.1",
+          "displayPort": 6001
+        }
+      }
+    }
+  }
+}

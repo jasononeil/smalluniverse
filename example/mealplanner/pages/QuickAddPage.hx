@@ -29,10 +29,8 @@ typedef Item = {
 }
 
 class QuickAddPage implements Page<
-	QuickAddAction
-	,
-	QuickAddParams
-	,
+	QuickAddAction,
+	QuickAddParams,
 	QuickAddData
 	> {
 	public var actionEncoder:IJsonEncoder<QuickAddAction> = new JsonEncoder<QuickAddAction>();

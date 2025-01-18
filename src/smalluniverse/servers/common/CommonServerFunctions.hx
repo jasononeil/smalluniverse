@@ -165,10 +165,8 @@ private function handleRequestForPage<Action, PageParams, PageData>(props:{
 	Process a POST request body into a PageAction, ask the page to turn it into a Command, and attempt to handle the Command.
 **/
 private function doCommand<
-	Action
-	,
-	PageParams
-	,
+	Action,
+	PageParams,
 	PageData
 	>(
 		reqBody:String,
@@ -191,10 +189,8 @@ private function doCommand<
 	Query the data for a given page, and return a Promise for the response content.
 **/
 private function doQuery<
-	Action
-	,
-	PageParams
-	,
+	Action,
+	PageParams,
 	PageData
 	>(
 		page:Page<Action, PageParams, PageData>,

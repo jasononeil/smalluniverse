@@ -36,10 +36,8 @@ typedef IngredientToBuy = {
 }
 
 class ShoppingPage implements Page<
-	ShoppingAction
-	,
-	ShoppingParams
-	,
+	ShoppingAction,
+	ShoppingParams,
 	ShoppingData
 	> {
 	public var actionEncoder:IJsonEncoder<ShoppingAction> = new JsonEncoder<ShoppingAction>();

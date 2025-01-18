@@ -132,10 +132,8 @@ class SynchronousOrchestrator implements Orchestrator {
 	public function teardown() {}
 
 	public function apiForPage<
-		Action
-		,
-		Params
-		,
+		Action,
+		Params,
 		Data
 		>(page:Page<Action, Params, Data>):PageApi<Action, Params, Data> {
 		final pageClassName = getClassName(page);
