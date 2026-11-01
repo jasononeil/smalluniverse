@@ -17,7 +17,7 @@ RUN yarn workspace mealplanner build
 
 FROM node:26-alpine AS runtime
 
-RUN addgroup -S app && adduser -S app -G app -h /app
+RUN addgroup -S -g 10001 app && adduser -S -u 10001 -G app -h /app app
 USER app
 
 WORKDIR /app
