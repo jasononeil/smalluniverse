@@ -1,5 +1,8 @@
 {
-  "packages": ["nodejs@18"],
+  "packages": [
+    "nodejs@26",
+    "corepack@latest"
+  ],
   "env": {
     "DEVBOX_COREPACK_ENABLED": "true"
   },
